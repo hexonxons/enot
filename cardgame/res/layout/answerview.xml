@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/LRel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top" >
+
+        <TextView
+            android:id="@+id/header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="25dp"
+            android:text="Выберите карту"
+            android:textSize="40sp"/>
+
+        <ImageView
+            android:id="@+id/card2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="100dp"
+            android:clickable="true"
+            android:onClick="OnCardClick"
+            android:src="@drawable/red" />
+
+        <ImageView
+            android:id="@+id/card5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="400dp"
+            android:clickable="true"
+            android:onClick="OnCardClick"
+            android:src="@drawable/red" />
+
+        <ImageView
+            android:id="@+id/card6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/card5"
+            android:layout_toRightOf="@+id/card5"
+            android:layout_marginLeft="45dp"
+            android:clickable="true"
+            android:onClick="OnCardClick"
+            android:src="@drawable/red" />
+
+        <ImageView
+            android:id="@+id/card3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/card2"
+            android:layout_toRightOf="@+id/card2"
+            android:layout_marginLeft="45dp"
+            android:clickable="true"
+            android:onClick="OnCardClick"
+            android:src="@drawable/red" />
+
+        <ImageView
+            android:id="@+id/card4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/card5"
+            android:layout_toLeftOf="@+id/card5"
+            android:layout_marginRight="45dp"
+            android:clickable="true"
+            android:onClick="OnCardClick"
+            android:src="@drawable/red" />
+
+        <ImageView
+            android:id="@+id/card1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/card4"
+            android:layout_alignTop="@+id/card3"
+            android:clickable="true"
+            android:onClick="OnCardClick"
+            android:src="@drawable/red" />
+
+        <Button
+            android:id="@+id/btnrepeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="Повторить"
+            android:width="120dp"
+            android:height="30dp"
+            android:onClick="OnRepeatClick"/>
+
+    </RelativeLayout>
+
+</LinearLayout>
