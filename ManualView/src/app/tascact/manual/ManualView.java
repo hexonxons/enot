@@ -1,3 +1,14 @@
+/*
+ * View класс
+ * 
+ * Класс работы с учебником
+ * 
+ * Copyright 2011 hexonxons 
+ * 
+ * :mailto killgamesh666@gmail.com
+ * 
+ */
+
 package app.tascact.manual;
 
 import android.content.Context;
@@ -16,19 +27,20 @@ public class ManualView extends View
 	private final Paint mPaint = new Paint();
 	private CPage mPage = null;
 	
-	private int mPageRes[][] = {
-			{R.drawable.pg5_1, R.drawable.pg5_2, R.drawable.pg5_3, R.drawable.pg5_4, R.drawable.pg5_footer},
-			{R.drawable.pg12_1, R.drawable.pg12_2, R.drawable.pg12_footer}
-			};
+	private int mPageRes[][] = null;
 	
 	private int mCurrPageNum = 0;
 	private int mAllPagesNum = 0;
 	
-	
 	private long mPrevTouchTime = 0;
-    public ManualView(Context context)
+	
+	public int mTaskNum = -3;
+	
+    public ManualView(Context context, int _PageRes[][])
     {
 		super(context);
+		
+		mPageRes = _PageRes.clone();
 		
 		mAllPagesNum = mPageRes.length;
 		
@@ -64,20 +76,10 @@ public class ManualView extends View
 		
 	    switch (eventAction)
 	    { 
-	    	// action - нажали на экран
-		    case MotionEvent.ACTION_DOWN:
-		    {
-		    	
-		    }
-		    
-		    // action - ведем палец по экрану
-		    case MotionEvent.ACTION_MOVE:
-		    {
-		    }
-		    
 		    // action - убрали палец
 		    case MotionEvent.ACTION_UP:
 		    {
+		    	// обработка касаний по кнопкам перехода
 		    	if(event.getEventTime() - mPrevTouchTime > 250)
 			    {
 		    		mPrevTouchTime = event.getEventTime();
@@ -109,10 +111,14 @@ public class ManualView extends View
 			    		mPage = new CPage(mContext, mPageRes[mCurrPageNum]);
 			    		mPage.setDims(mWidth, mHeight);
 			    	}
+
+			    	mTaskNum = val;
 		    	}
+		    	else
+		    		mTaskNum = -4;
 		    	invalidate();
 		    }
 	    }
-		return true;
+		return false;
 	}
 }

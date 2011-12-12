@@ -18,11 +18,18 @@ public final class R {
         public static final int pg12_footer=0x7f020004;
         public static final int pg5_1=0x7f020005;
         public static final int pg5_2=0x7f020006;
-        public static final int pg5_3=0x7f020007;
-        public static final int pg5_4=0x7f020008;
-        public static final int pg5_footer=0x7f020009;
-        public static final int prev=0x7f02000a;
-        public static final int white=0x7f02000b;
+        public static final int pg5_2_task_1=0x7f020007;
+        public static final int pg5_2_task_2=0x7f020008;
+        public static final int pg5_2_task_3=0x7f020009;
+        public static final int pg5_2_task_4=0x7f02000a;
+        public static final int pg5_2_task_5=0x7f02000b;
+        public static final int pg5_2_task_6=0x7f02000c;
+        public static final int pg5_2_task_header=0x7f02000d;
+        public static final int pg5_3=0x7f02000e;
+        public static final int pg5_4=0x7f02000f;
+        public static final int pg5_footer=0x7f020010;
+        public static final int prev=0x7f020011;
+        public static final int white=0x7f020012;
     }
     public static final class layout {
         public static final int main=0x7f030000;

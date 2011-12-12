@@ -117,11 +117,18 @@ public class CPage
 		mWindowWidth = _width;
 	}
 	
+	public boolean isTaskSet(int taskNum)
+	{
+		return pages[taskNum].task == null;
+	}
+	
 	private void clear()
 	{
 		pages = null;
 		mNextArrow = null;
 		mPrevArrow = null;
 		mWhite = null;
+		mWindowHeight = 0;
+		mWindowWidth = 0;
 	}
 }

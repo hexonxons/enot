@@ -31,6 +31,8 @@ public class CPageImage
 	// Bitmap картинки
 	public Bitmap img;
 	
+	public CTask task = null;
+	
 	CPageImage(Context context, int _imgResId)
 	{
 		imgResId = _imgResId;
