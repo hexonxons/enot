@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
@@ -84,7 +83,6 @@ public class ConnectElemView extends View
 	    		if (radCircle < 65)
 	    		{
 	    			isSetLine = true;
-	    			clearScreen = false;
 	    			mPrevTouchPoint.set(X, Y);
 	    		}
 	    		else
@@ -132,7 +130,6 @@ public class ConnectElemView extends View
 	    			//mCanvas.drawLine((float)865, (float)565, X, Y, mPaint);
 	    			mCanvas.drawCircle(X, Y, 5, mPaint);
 	    			DrawCurveLine(mPrevTouchPoint.x, mPrevTouchPoint.y, X, Y, 10);
-	    			clearScreen = false;
 	    		}
 	    		else
 	    		{
