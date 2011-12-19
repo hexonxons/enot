@@ -29,10 +29,8 @@ public class ManualView extends View
 	
 	private int mPageRes[][] = null;
 	
-	private int mCurrPageNum = 0;
+	public int mCurrPageNum = 0;
 	private int mAllPagesNum = 0;
-	
-	private long mPrevTouchTime = 0;
 	
 	public int mTaskNum = -3;
 	
@@ -54,7 +52,8 @@ public class ManualView extends View
         super.onSizeChanged(w, h, oldw, oldh);
         mWidth = w;
         mHeight = h;
-        mPage.setDims(w, h);
+        mPage = new CPage(mContext, mPageRes[mCurrPageNum]);
+		mPage.setDims(mWidth, mHeight);
     }
     
     // отрисовка страницы
@@ -65,7 +64,7 @@ public class ManualView extends View
 	}
     
     // обработка касаний
-    @Override public boolean onTouchEvent(MotionEvent event)
+    public boolean processEvent(MotionEvent event)
 	{
 		// получаем action
 	    int eventAction = event.getAction(); 
@@ -77,45 +76,38 @@ public class ManualView extends View
 	    switch (eventAction)
 	    { 
 		    // action - убрали палец
-		    case MotionEvent.ACTION_UP:
+		    case MotionEvent.ACTION_DOWN:
 		    {
-		    	// обработка касаний по кнопкам перехода
-		    	if(event.getEventTime() - mPrevTouchTime > 250)
-			    {
-		    		mPrevTouchTime = event.getEventTime();
-			    	int val = mPage.getTouchedImageNum((int)X, (int)Y);
-			    	if(val == -1)
-			    	{
-			    		if(mCurrPageNum < mAllPagesNum - 1)
-			    		{
-			    			++mCurrPageNum;
-			    		}
-			    		else
-			    		{
-			    			mCurrPageNum = 0;
-			    		}
-			    		mPage = new CPage(mContext, mPageRes[mCurrPageNum]);
-			    		mPage.setDims(mWidth, mHeight);
-			    	}
-		    	
-			    	if(val == -2)
-			    	{
-			    		if(mCurrPageNum > 0)
-			    		{
-			    			--mCurrPageNum;
-			    		}
-			    		else
-			    		{
-			    			mCurrPageNum = mAllPagesNum - 1;
-			    		}
-			    		mPage = new CPage(mContext, mPageRes[mCurrPageNum]);
-			    		mPage.setDims(mWidth, mHeight);
-			    	}
-
-			    	mTaskNum = val;
+		    	int val = mPage.getTouchedImageNum((int)X, (int)Y);
+		    	if(val == -1)
+		    	{
+		    		if(mCurrPageNum < mAllPagesNum - 1)
+		    		{
+		    			++mCurrPageNum;
+		    		}
+		    		else
+		    		{
+		    			mCurrPageNum = 0;
+		    		}
+		    		mPage = new CPage(mContext, mPageRes[mCurrPageNum]);
+		    		mPage.setDims(mWidth, mHeight);
 		    	}
-		    	else
-		    		mTaskNum = -4;
+	    	
+		    	if(val == -2)
+		    	{
+		    		if(mCurrPageNum > 0)
+		    		{
+		    			--mCurrPageNum;
+		    		}
+		    		else
+		    		{
+		    			mCurrPageNum = mAllPagesNum - 1;
+		    		}
+		    		mPage = new CPage(mContext, mPageRes[mCurrPageNum]);
+		    		mPage.setDims(mWidth, mHeight);
+		    	}
+
+		    	mTaskNum = val;
 		    	invalidate();
 		    }
 	    }

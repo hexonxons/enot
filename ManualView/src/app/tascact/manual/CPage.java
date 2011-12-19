@@ -73,6 +73,7 @@ public class CPage
 	{
 		int left = 0;
 		int top = 0;
+		int bottom = 0;
 		
 		// каждый элемент рисуем со сдвигом вниз на 5px относительно предыдущего 
 		for(int i = 0; i < pages.length; ++i)
@@ -86,27 +87,28 @@ public class CPage
 			pages[i].left = left;
 			pages[i].top = top;
 			canvas.drawBitmap(pages[i].img, left, top, paint);
+			bottom = top + pages[i].height;
 		}
 		
 		// если осталось свободное место
-		if(top < mWindowHeight)
+		if(bottom < mWindowHeight)
 		{
 			// заполняем все свободное пространство белым фоном
-			// mWindowHeight - top - 10 : высота экрана - top дадут высоту свободного места
+			// mWindowHeight - bottom - 10 : высота экрана - top дадут высоту свободного места
 			// -10 : просто относительное изменение размера. Сверху и снизу остается 5px
 			Bitmap switcher = Bitmap.createScaledBitmap(mWhite.img, mWindowWidth, mWindowHeight - top - 10, true);
-			canvas.drawBitmap(switcher, left, top + 5, paint);
+			canvas.drawBitmap(switcher, left, bottom + 5, paint);
 			
 			// отрисовываем стрелки перехода
 			// mWindowWidth - 40 - 90 : отступ от правой границы экрана на 40 px + 90px - размер самой стрелки
-			// top + (mWindowHeight - top - 10)/2 - 45 : отступ от верхней границы свободного пространства до его середины
-			canvas.drawBitmap(mNextArrow.img, mWindowWidth - 40 - 90, top + (mWindowHeight - top - 10)/2 - 45, paint);
+			// bottom + (mWindowHeight - bottom - 10)/2 - 45 : отступ от верхней границы свободного пространства до его середины
+			canvas.drawBitmap(mNextArrow.img, mWindowWidth - 40 - 90, bottom + (mWindowHeight - bottom - 10)/2 - 45, paint);
 			mNextArrow.left = mWindowWidth - 40 - 90;
-			mNextArrow.top = top + (mWindowHeight - top - 10)/2 - 45;
+			mNextArrow.top = bottom + (mWindowHeight - bottom - 10)/2 - 45;
 			
-			canvas.drawBitmap(mPrevArrow.img, 40, top + (mWindowHeight - top - 10)/2 - 45, paint);
+			canvas.drawBitmap(mPrevArrow.img, 40, bottom + (mWindowHeight - bottom - 10)/2 - 45, paint);
 			mPrevArrow.left = 40;
-			mPrevArrow.top = top + (mWindowHeight - top - 10)/2 - 45;
+			mPrevArrow.top = bottom + (mWindowHeight - bottom - 10)/2 - 45;
 		}
 	}
 	
@@ -115,11 +117,6 @@ public class CPage
 	{
 		mWindowHeight = _height;
 		mWindowWidth = _width;
-	}
-	
-	public boolean isTaskSet(int taskNum)
-	{
-		return pages[taskNum].task == null;
 	}
 	
 	private void clear()
