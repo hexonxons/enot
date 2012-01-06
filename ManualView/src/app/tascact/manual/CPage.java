@@ -12,7 +12,6 @@
 package app.tascact.manual;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
@@ -20,17 +19,10 @@ public class CPage
 {
 	// массив отдельных элементов страницы учебника
 	private CPageImage pages[] = null;
-	// элемент стрелки перехода на следующую страницу
-	private CPageImage mNextArrow = null;
-	// элемент стрелки перехода на предыдущую страницу
-	private CPageImage mPrevArrow = null;
-	// элемент для заливки оставшегося пространства
-	private CPageImage mWhite = null;
 	
 	// ширина и высота экрана
 	private int mWindowWidth;
 	private int mWindowHeight;
-	
 	// конструктор из массива id`шников элементов
 	public CPage(Context context, int _pageRes[])
 	{
@@ -44,10 +36,6 @@ public class CPage
 		{
 			pages[i] = new CPageImage(context, _pageRes[i]);
 		}
-		
-		mNextArrow = new CPageImage(context, R.drawable.next);
-		mPrevArrow = new CPageImage(context, R.drawable.prev);
-		mWhite = new CPageImage(context, R.drawable.white);
 	}
 	
 	// получение номера элемента, внутри которого лежат 2 координаты
@@ -59,13 +47,7 @@ public class CPage
 				return i;
 		}
 		
-		if(mNextArrow.isInto(X, Y))
-			return -1;
-		
-		if(mPrevArrow.isInto(X, Y))
-			return -2;
-		
-		return 0;
+		return -1;
 	}
 	
 	// метод отрисовки страницы
@@ -73,44 +55,22 @@ public class CPage
 	{
 		int left = 0;
 		int top = 0;
-		int bottom = 0;
 		
 		// каждый элемент рисуем со сдвигом вниз на 5px относительно предыдущего 
 		for(int i = 0; i < pages.length; ++i)
 		{
 			if(i != 0)
 			{
-				top += pages[i - 1].height + 5;
+				top += pages[i - 1].height;
 			}
 			
 			// запоминаем абсолютные координаты левого верхнего угла
 			pages[i].left = left;
 			pages[i].top = top;
 			canvas.drawBitmap(pages[i].img, left, top, paint);
-			bottom = top + pages[i].height;
-		}
-		
-		// если осталось свободное место
-		if(bottom < mWindowHeight)
-		{
-			// заполняем все свободное пространство белым фоном
-			// mWindowHeight - bottom - 10 : высота экрана - top дадут высоту свободного места
-			// -10 : просто относительное изменение размера. Сверху и снизу остается 5px
-			Bitmap switcher = Bitmap.createScaledBitmap(mWhite.img, mWindowWidth, mWindowHeight - top - 10, true);
-			canvas.drawBitmap(switcher, left, bottom + 5, paint);
-			
-			// отрисовываем стрелки перехода
-			// mWindowWidth - 40 - 90 : отступ от правой границы экрана на 40 px + 90px - размер самой стрелки
-			// bottom + (mWindowHeight - bottom - 10)/2 - 45 : отступ от верхней границы свободного пространства до его середины
-			canvas.drawBitmap(mNextArrow.img, mWindowWidth - 40 - 90, bottom + (mWindowHeight - bottom - 10)/2 - 45, paint);
-			mNextArrow.left = mWindowWidth - 40 - 90;
-			mNextArrow.top = bottom + (mWindowHeight - bottom - 10)/2 - 45;
-			
-			canvas.drawBitmap(mPrevArrow.img, 40, bottom + (mWindowHeight - bottom - 10)/2 - 45, paint);
-			mPrevArrow.left = 40;
-			mPrevArrow.top = bottom + (mWindowHeight - bottom - 10)/2 - 45;
 		}
 	}
+	
 	
 	// метод установки размеров экрана
 	public void setDims(int _width, int _height)
@@ -122,10 +82,5 @@ public class CPage
 	private void clear()
 	{
 		pages = null;
-		mNextArrow = null;
-		mPrevArrow = null;
-		mWhite = null;
-		mWindowHeight = 0;
-		mWindowWidth = 0;
 	}
 }

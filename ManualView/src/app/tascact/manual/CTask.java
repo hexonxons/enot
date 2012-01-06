@@ -8,20 +8,25 @@ import android.graphics.Point;
 public class CTask
 {
 	private int mTaskResId[] = null;
-	private int mTaskType = 0;
 	
+	public CTaskType mTaskType = null;	
 	public Bitmap mTaskResBitmaps[] = null;
 	public CTaskImage mTaskImages[] = null;
+	public Bitmap mCheckBitmap = null;
+	public CTaskImage mCheck = null;
+	public Bitmap mRestartBitmap = null;
+	public CTaskImage mRestart = null;
 	
 	public Point mSetCoord[];
 	
-	CTask(Context context, int _TaskType, int _TaskResId[])
+	CTask(Context context, CTaskType _TaskType, int _TaskResId[])
 	{
 		mTaskType = _TaskType;
 		mTaskResId = _TaskResId.clone();
 		
 		mTaskResBitmaps = new Bitmap[mTaskResId.length];
 		mTaskImages = new CTaskImage[mTaskResId.length];
+		
 		mSetCoord = new Point[mTaskResId.length];
 		for(int i = 0; i < mTaskResId.length; ++i)
 		{
@@ -35,12 +40,19 @@ public class CTask
 			CTaskImage elem = new CTaskImage(mTaskResBitmaps[i], mTaskResId[i], 0);
 			mTaskImages[i] = elem;
 		}
+		
+		mCheckBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.check);
+		mCheck = new CTaskImage(mCheckBitmap, R.drawable.check, 0);		
+		
+		mRestartBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.restart);
+		mRestart = new CTaskImage(mRestartBitmap, R.drawable.restart, 0);
+		
 	}
 	
 	public Point[] getSetCoord(int width, int height)
 	{		
-		int avgW = width / mSetCoord.length;
-		int avgH = height / mSetCoord.length;
+		//int avgW = width / mSetCoord.length;
+		int avgH = (int)(height*1.5 / mSetCoord.length);
 		
 		for(int i = 0; i < mSetCoord.length; ++i)
 		{	
@@ -79,7 +91,15 @@ public class CTask
 			
 			mTaskImages[i].top = mSetCoord[i].y;
 			mTaskImages[i].left = mSetCoord[i].x;
+			
+			mCheck.top = height - 200;
+			mCheck.left = 150;
+			
+			mRestart.top = height - 200;
+			mRestart.left = width - mRestart.width - 150;
 		}
+		
+		
 		
 		return mSetCoord;
 	}
@@ -93,7 +113,12 @@ public class CTask
 				return mTaskImages[i].resId;
 			}
 		}
+		if (mCheck.isInto(X, Y))
+			return -1;
+		if (mRestart.isInto(X, Y))
+			return -2;
 		
 		return 0;
 	}
+	
 }

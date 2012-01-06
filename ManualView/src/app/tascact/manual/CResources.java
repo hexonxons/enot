@@ -8,9 +8,9 @@ public class CResources
 									{R.drawable.pg4},
 									{R.drawable.pg5_1, R.drawable.pg5_2,  R.drawable.pg5_3, R.drawable.pg5_4, R.drawable.pg5_footer},
 									{R.drawable.pg6},
-									{R.drawable.pg7},
+									{R.drawable.pg7_1, R.drawable.pg7_2, R.drawable.pg7_3, R.drawable.pg7_footer},
 									{R.drawable.pg8},
-									{R.drawable.pg9},
+									{R.drawable.pg9_1, R.drawable.pg9_2, R.drawable.pg9_3, R.drawable.pg9_footer},
 									{R.drawable.pg10},
 									{R.drawable.pg11},
 									{R.drawable.pg12},
@@ -26,10 +26,13 @@ public class CResources
 									  {{0}},
 									  {{0}},
 									  {{0}},
-									  {{0}},
+									  {{R.drawable.pg9_2_task_1, R.drawable.pg9_2_task_2, R.drawable.pg9_2_task_3, R.drawable.pg9_2_task_4, R.drawable.pg9_2_task_5, R.drawable.pg9_2_task_6, R.drawable.pg9_2_task_7, R.drawable.pg9_2_task_8, R.drawable.pg9_2_task_9, R.drawable.pg9_2_task_10}, {0},{0}},
 									  {{0}},
 									  {{0}},
 									  {{0}},
 									  {{0}}
 									  };
+	
+	public int[][] Answers = {{R.drawable.pg5_2_task_1}, {R.drawable.pg5_2_task_2}};
+	
 }
