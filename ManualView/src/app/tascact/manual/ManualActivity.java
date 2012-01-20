@@ -14,6 +14,7 @@ package app.tascact.manual;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,6 +33,8 @@ public class ManualActivity extends Activity
 	// View элемента управления
 	private ControlView mControl = null;
 	
+	public static final String PREFS_NAME = "ManualPrefs";
+	private SharedPreferences mSettings;
 	private int mPageToDisplay = 0;
 	private int mRequestCode = 0;
 	
@@ -59,6 +62,10 @@ public class ManualActivity extends Activity
 		mControl.mPrevButton.setOnTouchListener(mPrevTouchListener);
 		mControl.mContentsButton.setOnTouchListener(mContentsTouchListener);
 		
+		mSettings = getSharedPreferences(PREFS_NAME, 0);
+		mPageToDisplay = mSettings.getInt("page", 0);
+		mManualView.changePage(mPageToDisplay);
+		
 		setContentView(mMainLayout);
 	}
 	
@@ -74,6 +81,9 @@ public class ManualActivity extends Activity
 				if(mPageToDisplay >= res.PageResources.length)
 					mPageToDisplay = res.PageResources.length - 1;
 				
+				SharedPreferences.Editor editor = mSettings.edit();
+				editor.putInt("page", mPageToDisplay);
+				editor.commit();
 				mManualView.changePage(mPageToDisplay);
 				mManualView.invalidate();
 		    }
@@ -93,6 +103,9 @@ public class ManualActivity extends Activity
 				if(mPageToDisplay < 0)
 					mPageToDisplay = 0;
 				
+				SharedPreferences.Editor editor = mSettings.edit();
+				editor.putInt("page", mPageToDisplay);
+				editor.commit();
 				mManualView.changePage(mPageToDisplay);
 		    }
 			return true;
@@ -122,6 +135,9 @@ public class ManualActivity extends Activity
 		if(resultCode == RESULT_OK && requestCode == 0)
 		{
 			mPageToDisplay = data.getIntExtra("page", -1);
+			SharedPreferences.Editor editor = mSettings.edit();
+			editor.putInt("page", mPageToDisplay);
+			editor.commit();
 			mManualView.changePage(mPageToDisplay);
 		}
 	}
@@ -144,4 +160,14 @@ public class ManualActivity extends Activity
 	    }
 		return true;
 	}
+		
+	@Override
+    protected void onStop()
+	{
+		super.onStop();
+      
+		SharedPreferences.Editor editor = mSettings.edit();
+		editor.putInt("page", mPageToDisplay);
+		editor.commit();
+    }
 }
