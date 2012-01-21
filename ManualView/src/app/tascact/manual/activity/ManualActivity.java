@@ -9,7 +9,7 @@
  * 
  */
 
-package app.tascact.manual;
+package app.tascact.manual.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,8 +21,10 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import app.tascact.manual.activity.ContentActivity;
+import app.tascact.manual.CResources;
+import app.tascact.manual.TaskActivity;
 import app.tascact.manual.view.ControlView;
+import app.tascact.manual.view.ManualView;
 
 public class ManualActivity extends Activity
 {

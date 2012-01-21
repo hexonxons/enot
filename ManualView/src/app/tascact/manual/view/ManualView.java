@@ -9,13 +9,14 @@
  * 
  */
 
-package app.tascact.manual;
+package app.tascact.manual.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
+import app.tascact.manual.CPage;
 
 public class ManualView extends View
 {
