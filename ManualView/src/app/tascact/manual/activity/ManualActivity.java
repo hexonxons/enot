@@ -14,6 +14,7 @@ package app.tascact.manual.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,14 +35,11 @@ public class ManualActivity extends Activity
 	private ManualView mManualView = null;
 	// View элемента управления
 	private ManualControlView mControl = null;
-	
-	public static final String PREFS_NAME = "ManualPrefs";
-	private SharedPreferences mSettings;
+	// Номер страницы, которую отображаем
 	private int mPageToDisplay = 0;
-	private int mRequestCode = 0;
-	
-	private CResources res = new CResources();
-	
+	// Ресурсы для построения учебника
+	private CResources mResources = new CResources();
+	// Время предыдущего касания
 	private long mPrevTouchTime = 0;
 	
 	@Override
@@ -51,21 +49,23 @@ public class ManualActivity extends Activity
 		mMainLayout = new LinearLayout(this);
 		mManualView = new ManualView(this, mClickListener);
 		mControl = new ManualControlView(this);
-
-		// ориентируем View вертикально
+		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		// Ориентируем View вертикально
 		mMainLayout.setOrientation(1);
-		
+		// Добавляем View страницы учебника и View управления
 		mMainLayout.addView(mManualView, new LayoutParams(LayoutParams.MATCH_PARENT, 1040));
 		mMainLayout.addView(mControl, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
 		
+		// Задаем обработчики касаний 
 		mControl.mNextButton.setOnTouchListener(mNextTouchListener);
 		mControl.mPrevButton.setOnTouchListener(mPrevTouchListener);
 		mControl.mContentsButton.setOnTouchListener(mContentsTouchListener);
 		
-		mSettings = getSharedPreferences(PREFS_NAME, 0);
-		mPageToDisplay = mSettings.getInt("page", 0);
+		// Загружаем настройки
+		LoadPreferences();
+		// Задаем отображаемую страницу
 		mManualView.SetPage(mPageToDisplay);
-		
+		// Отображаем
 		setContentView(mMainLayout);
 	}
 	
@@ -78,8 +78,8 @@ public class ManualActivity extends Activity
 		    {
 				mPrevTouchTime = event.getEventTime();
 				mPageToDisplay++;
-				if(mPageToDisplay >= res.TotalPages)
-					mPageToDisplay = res.TotalPages - 1;
+				if(mPageToDisplay >= mResources.TotalPages)
+					mPageToDisplay = mResources.TotalPages - 1;
 				
 				SavePreferences();
 				mManualView.SetPage(mPageToDisplay);
@@ -117,8 +117,8 @@ public class ManualActivity extends Activity
 		    {
 				mPrevTouchTime = event.getEventTime();
 				Intent intent = new Intent(v.getContext(), ContentActivity.class);
-				intent.putExtra("PageCount", res.TotalPages);
-				startActivityForResult(intent, mRequestCode);
+				intent.putExtra("PageCount", mResources.TotalPages);
+				startActivityForResult(intent, 0);
 		    }
 			return true;
 		}
@@ -141,7 +141,7 @@ public class ManualActivity extends Activity
    		@Override
    		public void onClick(View v)
    		{
-   			int taskResources[] = res.GetTaskResources(mPageToDisplay, v.getId());
+   			int taskResources[] = mResources.GetTaskResources(mPageToDisplay, v.getId());
    			if(taskResources != null)
    			{
    				Intent intent = new Intent(v.getContext(), TaskActivity.class);
@@ -160,8 +160,15 @@ public class ManualActivity extends Activity
 	
 	private void SavePreferences()
 	{
-		SharedPreferences.Editor editor = mSettings.edit();
+		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
+		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt("page", mPageToDisplay);
 		editor.commit();
+	}
+	
+	private void LoadPreferences()
+	{
+		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
+		mPageToDisplay = settings.getInt("page", 0);
 	}
 }

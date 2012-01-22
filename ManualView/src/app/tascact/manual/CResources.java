@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 public class CResources
 {	
-	public int TotalPages = 13;
+	public int TotalPages = -1;
 	public int[][] Answers = {{R.drawable.pg5_2_task_1}, {R.drawable.pg5_2_task_2}};
 	
 	public String jsonPageResources = "{" +
@@ -142,20 +142,36 @@ public class CResources
 			"                                     ]," +
 			"                    \"TaskResources\": [    " +
 			"                                     ]" +
-			"                }," +
+			"                }" +
 			"            ]" +
 			"}";
 	
+	public CResources()
+	{
+		try
+		{
+			JSONObject resources = new JSONObject(jsonPageResources);
+			TotalPages = resources.getJSONArray("page").length();
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
+		
+	}
 	public int[] GetPageResources(int pageNum)
 	{
 		int reti[] = null;
+		
 		try
 		{
 			JSONObject resources = new JSONObject(jsonPageResources);
 			JSONArray pages = resources.getJSONArray("page");
 			JSONObject page = pages.getJSONObject(pageNum);
 			JSONArray pageResources = page.getJSONArray("PageResources");
+			
 			reti = new int[pageResources.length()];
+			
 			for(int i = 0; i < pageResources.length(); ++i)
 			{
 				reti[i] = pageResources.getInt(i);
@@ -185,6 +201,7 @@ public class CResources
 			JSONObject taskDescription = taskSet.getJSONObject(taskNum);
 			JSONArray taskResources = taskDescription.getJSONArray("TaskResource");
 			reti = new int[taskResources.length()];
+			
 			for(int i = 0; i < taskResources.length(); ++i)
 			{
 				reti[i] = taskResources.getInt(i);
