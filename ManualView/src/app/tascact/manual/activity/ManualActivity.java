@@ -11,22 +11,17 @@
 
 package app.tascact.manual.activity;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.CResources;
-import app.tascact.manual.R;
 import app.tascact.manual.TaskActivity;
 import app.tascact.manual.view.ManualControlView;
 import app.tascact.manual.view.ManualView;
@@ -46,7 +41,6 @@ public class ManualActivity extends Activity
 	private int mRequestCode = 0;
 	
 	private CResources res = new CResources();
-	private Context mContext = null;
 	
 	private long mPrevTouchTime = 0;
 	
@@ -54,19 +48,10 @@ public class ManualActivity extends Activity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		mContext = this;
 		mMainLayout = new LinearLayout(this);
-		mManualView = new ManualView(this, res.PageResources);
+		mManualView = new ManualView(this, mClickListener);
 		mControl = new ManualControlView(this);
-		int[] pageres = null;
-		try
-		{
-			pageres = CResources.GetPageResources(0);
-		}
-		catch (JSONException e)
-		{
-			e.printStackTrace();
-		}
+
 		// ориентируем View вертикально
 		mMainLayout.setOrientation(1);
 		
@@ -79,7 +64,7 @@ public class ManualActivity extends Activity
 		
 		mSettings = getSharedPreferences(PREFS_NAME, 0);
 		mPageToDisplay = mSettings.getInt("page", 0);
-		mManualView.changePage(mPageToDisplay);
+		mManualView.SetPage(mPageToDisplay);
 		
 		setContentView(mMainLayout);
 	}
@@ -93,13 +78,11 @@ public class ManualActivity extends Activity
 		    {
 				mPrevTouchTime = event.getEventTime();
 				mPageToDisplay++;
-				if(mPageToDisplay >= res.PageResources.length)
-					mPageToDisplay = res.PageResources.length - 1;
+				if(mPageToDisplay >= res.TotalPages)
+					mPageToDisplay = res.TotalPages - 1;
 				
-				SharedPreferences.Editor editor = mSettings.edit();
-				editor.putInt("page", mPageToDisplay);
-				editor.commit();
-				mManualView.changePage(mPageToDisplay);
+				SavePreferences();
+				mManualView.SetPage(mPageToDisplay);
 				mManualView.invalidate();
 		    }
 			return true;
@@ -118,10 +101,8 @@ public class ManualActivity extends Activity
 				if(mPageToDisplay < 0)
 					mPageToDisplay = 0;
 				
-				SharedPreferences.Editor editor = mSettings.edit();
-				editor.putInt("page", mPageToDisplay);
-				editor.commit();
-				mManualView.changePage(mPageToDisplay);
+				SavePreferences();
+				mManualView.SetPage(mPageToDisplay);
 		    }
 			return true;
 		}
@@ -135,8 +116,8 @@ public class ManualActivity extends Activity
 			if(event.getEventTime() - mPrevTouchTime > 250)
 		    {
 				mPrevTouchTime = event.getEventTime();
-				Intent intent = new Intent(mContext, ContentActivity.class);
-				intent.putExtra("PageCount", res.PageResources.length);
+				Intent intent = new Intent(v.getContext(), ContentActivity.class);
+				intent.putExtra("PageCount", res.TotalPages);
 				startActivityForResult(intent, mRequestCode);
 		    }
 			return true;
@@ -150,39 +131,37 @@ public class ManualActivity extends Activity
 		if(resultCode == RESULT_OK && requestCode == 0)
 		{
 			mPageToDisplay = data.getIntExtra("page", -1);
-			SharedPreferences.Editor editor = mSettings.edit();
-			editor.putInt("page", mPageToDisplay);
-			editor.commit();
-			mManualView.changePage(mPageToDisplay);
+			SavePreferences();
+			mManualView.SetPage(mPageToDisplay);
 		}
 	}
 	
-	
-	@Override
-	public boolean onTouchEvent(MotionEvent event)
-	{
-		if(event.getEventTime() - mPrevTouchTime > 250)
-	    {
-			mPrevTouchTime = event.getEventTime();
-			
-			mManualView.processEvent(event);
-			if(mManualView.mTaskNum >= 0 && res.TaskResources[mManualView.mCurrPageNum][mManualView.mTaskNum][0] != 0)
-			{
-				Intent intent = new Intent(this, TaskActivity.class);
-				intent.putExtra("task", res.TaskResources[mManualView.mCurrPageNum][mManualView.mTaskNum]);
-				startActivity(intent);
-			}
-	    }
-		return true;
-	}
-		
+	private OnClickListener mClickListener = new OnClickListener()
+   	{
+   		@Override
+   		public void onClick(View v)
+   		{
+   			int taskResources[] = res.GetTaskResources(mPageToDisplay, v.getId());
+   			if(taskResources != null)
+   			{
+   				Intent intent = new Intent(v.getContext(), TaskActivity.class);
+	   			intent.putExtra("task", taskResources);
+	   			startActivity(intent);
+   			}
+   		}
+   	};
+
 	@Override
     protected void onStop()
 	{
 		super.onStop();
-      
+		SavePreferences();
+    }
+	
+	private void SavePreferences()
+	{
 		SharedPreferences.Editor editor = mSettings.edit();
 		editor.putInt("page", mPageToDisplay);
 		editor.commit();
-    }
+	}
 }

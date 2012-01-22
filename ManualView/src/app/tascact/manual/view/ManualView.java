@@ -11,85 +11,46 @@
 
 package app.tascact.manual.view;
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.view.MotionEvent;
-import android.view.View;
-import app.tascact.manual.CPage;
 
-public class ManualView extends View
+import android.content.Context;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import app.tascact.manual.CResources;
+
+public class ManualView extends LinearLayout
 {
-	private Context mContext = null;
-	// размеры экрана
-	private int mWidth = 0;
-	private int mHeight = 0;
-	private final Paint mPaint = new Paint();
-	private CPage mPage = null;
+	private CResources mResources = new CResources();
+	private int mPageRes[] = null;
+	private OnClickListener mListener = null;
 	
-	private int mPageRes[][] = null;
-	
-	public int mCurrPageNum = 0;
-	
-	public int mTaskNum = -3;
-	
-    public ManualView(Context context, int _PageRes[][])
+    public ManualView(Context context, OnClickListener listener)
     {
-		super(context);
+		super(context);		
+		// ориентируем View вертикально
+		this.setOrientation(1);
 		
-		mPageRes = _PageRes.clone();
-		
-		mContext = context;
-		mPage = new CPage(mContext, mPageRes[0]);
+		mListener = listener;
 	}
     
     // получение размеров экрана
     @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
         super.onSizeChanged(w, h, oldw, oldh);
-        mWidth = w;
-        mHeight = h;
-        mPage = new CPage(mContext, mPageRes[mCurrPageNum]);
-		mPage.setDims(mWidth, mHeight);
     }
     
-    // отрисовка страницы
-    @Override protected void onDraw(Canvas canvas) 
-	{
-		//canvas.drawBitmap(mBitmap, 0, 0, mPaint);
-    	mPage = new CPage(mContext, mPageRes[mCurrPageNum]);
-		mPage.drawPage(canvas, mPaint);
-	}
-    
-    public void changePage(int pageNum)
+    public void SetPage(int pageNum)
     {
-    	mCurrPageNum = pageNum;
-		mPage = new CPage(mContext, mPageRes[pageNum]);
-		mPage.setDims(mWidth, mHeight);
+    	mPageRes = mResources.GetPageResources(pageNum);
+    	this.removeAllViews();
+    	
+		for(int i = 0; i < mPageRes.length; ++i)
+		{
+			ImageView pageElem = new ImageView(this.getContext());
+			pageElem.setId(i);
+			pageElem.setBackgroundResource(mPageRes[i]);
+			pageElem.setOnClickListener(mListener);
+			this.addView(pageElem);
+		}
 		invalidate();
     }
-    
-    // обработка касаний
-    public boolean processEvent(MotionEvent event)
-	{
-		// получаем action
-	    int eventAction = event.getAction(); 
-
-	    // получаем координаты прикасания
-	    float X = event.getX(); 
-	    float Y = event.getY(); 
-
-	    switch (eventAction)
-	    { 
-		    // action - убрали палец
-		    case MotionEvent.ACTION_DOWN:
-		    {
-		    	int val = mPage.getTouchedImageNum((int)X, (int)Y);
-
-		    	mTaskNum = val;
-		    	invalidate();
-		    }
-	    }
-		return false;
-	}
 }
