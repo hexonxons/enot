@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import app.tascact.manual.R;
 
-public class ControlView extends RelativeLayout
+public class ManualControlView extends RelativeLayout
 {
 	public RelativeLayout mControlLayout = null;
 	// Кнопка "Вперед"
@@ -27,7 +27,7 @@ public class ControlView extends RelativeLayout
 	// Кнопка оглавления
 	public ImageView mContentsButton = null;
 	
-    public ControlView(Context context)
+    public ManualControlView(Context context)
     {
 		super(context);
 
@@ -81,7 +81,6 @@ public class ControlView extends RelativeLayout
     // получение размеров экрана
     @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
-        super.onSizeChanged(w, h, oldw, oldh);
-        
+        super.onSizeChanged(w, h, oldw, oldh);        
     }
 }

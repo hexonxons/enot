@@ -11,6 +11,10 @@
 
 package app.tascact.manual.activity;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -22,8 +26,9 @@ import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.CResources;
+import app.tascact.manual.R;
 import app.tascact.manual.TaskActivity;
-import app.tascact.manual.view.ControlView;
+import app.tascact.manual.view.ManualControlView;
 import app.tascact.manual.view.ManualView;
 
 public class ManualActivity extends Activity
@@ -33,7 +38,7 @@ public class ManualActivity extends Activity
 	// View страниц учебника
 	private ManualView mManualView = null;
 	// View элемента управления
-	private ControlView mControl = null;
+	private ManualControlView mControl = null;
 	
 	public static final String PREFS_NAME = "ManualPrefs";
 	private SharedPreferences mSettings;
@@ -52,8 +57,16 @@ public class ManualActivity extends Activity
 		mContext = this;
 		mMainLayout = new LinearLayout(this);
 		mManualView = new ManualView(this, res.PageResources);
-		mControl = new ControlView(this);
-		
+		mControl = new ManualControlView(this);
+		int[] pageres = null;
+		try
+		{
+			pageres = CResources.GetPageResources(0);
+		}
+		catch (JSONException e)
+		{
+			e.printStackTrace();
+		}
 		// ориентируем View вертикально
 		mMainLayout.setOrientation(1);
 		
