@@ -23,7 +23,6 @@ import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.CResources;
-import app.tascact.manual.TaskActivity;
 import app.tascact.manual.view.ManualControlView;
 import app.tascact.manual.view.ManualView;
 
@@ -49,6 +48,7 @@ public class ManualActivity extends Activity
 		mMainLayout = new LinearLayout(this);
 		mManualView = new ManualView(this, mClickListener);
 		mControl = new ManualControlView(this);
+		// Лочим ориентацию экранаs
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		// Ориентируем View вертикально
 		mMainLayout.setOrientation(1);
@@ -141,11 +141,11 @@ public class ManualActivity extends Activity
    		@Override
    		public void onClick(View v)
    		{
-   			int taskResources[] = mResources.GetTaskResources(mPageToDisplay, v.getId());
-   			if(taskResources != null)
+   			if(mResources.GetTaskResources(mPageToDisplay, v.getId()) != null )
    			{
    				Intent intent = new Intent(v.getContext(), TaskActivity.class);
-	   			intent.putExtra("task", taskResources);
+	   			intent.putExtra("PageNumber", mPageToDisplay);
+	   			intent.putExtra("TaskNumber", v.getId());
 	   			startActivity(intent);
    			}
    		}
