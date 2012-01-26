@@ -141,15 +141,18 @@ public class ConnectElementsTaskView extends TaskView
 	    			mCanvas.drawCircle(X, Y, 5, mPaint);
 	    			DrawCurveLine(mPrevTouchPoint.x, mPrevTouchPoint.y, X, Y, 10);
 	    			
-	    			for(int i = 0; i < mTaskAnswers.length; ++i)
+	    			if(mAnswer)
 	    			{
-	    				if(mAnswers[i].setAnswer(mTouchedImageId, mTask.getTouchedImgId((int)X, (int)Y)))
-	    				{
-	    					mAnswer = true;
-	    					break;
-	    				}
-	    				mAnswer = false;
-	    			}		
+		    			for(int i = 0; i < mTaskAnswers.length; ++i)
+		    			{
+		    				if(mAnswers[i].setAnswer(mTouchedImageId, mTask.getTouchedImgId((int)X, (int)Y)))
+		    				{
+		    					mAnswer = true;
+		    					break;
+		    				}
+		    				mAnswer = false;
+		    			}
+	    			}
 	    		}
 	    		else
 	    		{
@@ -169,6 +172,12 @@ public class ConnectElementsTaskView extends TaskView
     {
     	mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
 		mCanvas = new Canvas(mBitmap);
+		mAnswer = true;
+		for(int i = 0; i < mTaskAnswers.length; ++i)
+		{
+			mAnswers[i] = new Answer(mTaskAnswers[i][0], mTaskAnswers[i][1]);
+		}
+		
 		invalidate();
     }
     
