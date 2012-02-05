@@ -1,7 +1,7 @@
 /*
- * ContentView РєР»Р°СЃСЃ
+ * ContentView класс
  * 
- * View РѕРіР»Р°РІР»РµРЅРёСЏ
+ * View оглавления
  * 
  * Copyright 2012 hexonxons
  * 
@@ -13,123 +13,114 @@ package app.tascact.manual.view;
 
 import android.content.Context;
 import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.MotionEvent;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Scroller;
 
-public class ContentView extends ScrollView
-{
+public class ContentView extends ScrollView {
 	private GestureDetector mGestureDetector = null;
 	private Scroller mScroller;
 	private int mHeight = 0;
 	private LinearLayout mMainTable = null;
-	
-    public ContentView(Context context)
-    {
+
+	public ContentView(Context context) {
 		super(context);
-		
-		// РћР±СЂР°Р±РѕС‚С‡РёРє Р¶РµСЃС‚РѕРІ
+
+		// Обработчик жестов
 		mGestureDetector = new GestureDetector(context, new GestureListener());
 		mScroller = new Scroller(context);
-		//this.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		// this.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+		// LayoutParams.MATCH_PARENT));
 		mMainTable = new LinearLayout(context);
 		mMainTable.setOrientation(1);
 		this.addView(mMainTable);
-		// РџРѕРєР°Р·С‹РІР°РµРј СЃРєСЂРѕР»Р»Р±Р°СЂС‹
-        setVerticalScrollBarEnabled(true);
+		// Показываем скроллбары
+		setVerticalScrollBarEnabled(true);
 	}
-    
-    // РїРѕР»СѓС‡РµРЅРёРµ СЂР°Р·РјРµСЂРѕРІ СЌРєСЂР°РЅР°
-    @Override 
-    protected void onSizeChanged(int w, int h, int oldw, int oldh)
-	{
-        super.onSizeChanged(w, h, oldw, oldh);
-    }
-    
-    @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        // РћС‚РјРµРЅР° СЃРєСЂРѕР»Р»Р°/С„Р»РёРЅС‚Р° РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° СЌРєСЂР°РЅ
-        if (event.getAction() == MotionEvent.ACTION_DOWN)
-        {
-            if (!mScroller.isFinished())
-            	mScroller.abortAnimation();
-        }
-        // РѕР±СЂР°Р±РѕС‚РєР° Р¶РµСЃС‚Р°
-        if (mGestureDetector.onTouchEvent(event))
-        	return true;
-        
-        return true;
-    }
+
+	// получение размеров экрана
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+	}
 
 	@Override
-	protected int computeVerticalScrollRange()
-	{
-		// Р·Р°РґР°РµРј СЂР°Р·РјРµСЂ РІСЃРµРіРѕ View
+	public boolean onTouchEvent(MotionEvent event) {
+		// Отмена скролла/флинта при нажатии на
+		// экран
+		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			if (!mScroller.isFinished())
+				mScroller.abortAnimation();
+		}
+		// обработка жеста
+		if (mGestureDetector.onTouchEvent(event))
+			return true;
+
+		return true;
+	}
+
+	@Override
+	protected int computeVerticalScrollRange() {
+		// задаем размер всего View
 		mHeight = mMainTable.getBottom() - mMainTable.getTop();
 		return mHeight;
 	}
-	
-	public void addContextElem(android.view.View child)
-	{
-		// РґРѕР±Р°РІР»СЏРµРј СЌР»РµРјРµРЅС‚С‹ РѕРіР»Р°РІР»РµРЅРёСЏ
+
+	public void addContextElem(android.view.View child) {
+		// добавляем элементы оглавления
 		mMainTable.addView(child);
 	};
-	
-    private class GestureListener extends SimpleOnGestureListener
-    {
-    	// РћР±СЂР°Р±РѕС‚С‡РёРє СЃРєСЂРѕР»Р»Р°
-    	@Override
-        public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX, float distanceY)
-        {
-    		int newScrollY = getScrollY();
-    		
-            if (getScrollY() < 0)
-            {
-            	newScrollY = 0;
-            	distanceY = 0;
-            }
-            else 
-            	if (getScrollY() > mHeight - getHeight())
-            		newScrollY = mHeight - getHeight();
 
-            // СЂР°СЃСЃС‚РѕСЏРЅРёРµ, РЅР° РєРѕС‚РѕСЂРѕРµ РїСЂРѕРєСЂСѓС‡РёРІР°РµРј
-            int offset = newScrollY + (int)distanceY >= mHeight - getHeight() ? 0 : (int)distanceY;
-            // Р·Р°РїСѓСЃРє РїСЂРѕРєСЂСѓС‚РєРё
-        	mScroller.startScroll(0, getScrollY(), 0, offset, 60);
-        	// РџРѕРєР°Р·С‹РІР°РµРј СЃРєСЂРѕР»Р»Р±Р°СЂС‹
-        	awakenScrollBars(mScroller.getDuration());
-            	
-            //scrollBy(0, (int)distanceY);
-            return true;
-        }
-    	
-    	@Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
-        {
-            mScroller.fling(0, getScrollY(), 0, -(int)velocityY, 0, 0, 0, mHeight - getHeight());
-            awakenScrollBars(mScroller.getDuration());
-            return true;
-        }
-    }
-    
-    @Override
-    public void computeScroll()
-    {
-        if (mScroller.computeScrollOffset())
-        {
-            int oldY = getScrollY();
-            int y = mScroller.getCurrY();
-            scrollTo(0, y);
-            
-            if (oldY != getScrollY())
-            {
-                onScrollChanged(0, getScrollY(), 0, oldY);
-            }
+	private class GestureListener extends SimpleOnGestureListener {
+		// Обработчик скролла
+		@Override
+		public boolean onScroll(MotionEvent event1, MotionEvent event2,
+				float distanceX, float distanceY) {
+			int newScrollY = getScrollY();
 
-            postInvalidate();
-        }
-    }
+			if (getScrollY() < 0) {
+				newScrollY = 0;
+				distanceY = 0;
+			} else if (getScrollY() > mHeight - getHeight())
+				newScrollY = mHeight - getHeight();
+
+			// расстояние, на которое
+			// прокручиваем
+			int offset = newScrollY + (int) distanceY >= mHeight - getHeight() ? 0
+					: (int) distanceY;
+			// запуск прокрутки
+			mScroller.startScroll(0, getScrollY(), 0, offset, 60);
+			// Показываем скроллбары
+			awakenScrollBars(mScroller.getDuration());
+
+			// scrollBy(0, (int)distanceY);
+			return true;
+		}
+
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			mScroller.fling(0, getScrollY(), 0, -(int) velocityY, 0, 0, 0,
+					mHeight - getHeight());
+			awakenScrollBars(mScroller.getDuration());
+			return true;
+		}
+	}
+
+	@Override
+	public void computeScroll() {
+		if (mScroller.computeScrollOffset()) {
+			int oldY = getScrollY();
+			int y = mScroller.getCurrY();
+			scrollTo(0, y);
+
+			if (oldY != getScrollY()) {
+				onScrollChanged(0, getScrollY(), 0, oldY);
+			}
+
+			postInvalidate();
+		}
+	}
 }

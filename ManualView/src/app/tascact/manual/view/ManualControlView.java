@@ -1,7 +1,7 @@
 /*
- * ControlView РєР»Р°СЃСЃ
+ * ControlView класс
  * 
- * View СѓРїСЂР°РІР»СЏСЋС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р° РґР»СЏ СЃС‚СЂР°РЅРёС†
+ * View управляющего элемента для страниц
  * 
  * Copyright 2012 hexonxons
  * 
@@ -17,70 +17,75 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import app.tascact.manual.R;
 
-public class ManualControlView extends RelativeLayout
-{
+public class ManualControlView extends RelativeLayout {
 	public RelativeLayout mControlLayout = null;
-	// РљРЅРѕРїРєР° "Р’РїРµСЂРµРґ"
+	// Кнопка "Вперед"
 	public ImageView mNextButton = null;
-	// РљРЅРѕРїРєР° "РќР°Р·Р°Рґ"
+	// Кнопка "Назад"
 	public ImageView mPrevButton = null;
-	// РљРЅРѕРїРєР° РѕРіР»Р°РІР»РµРЅРёСЏ
+	// Кнопка оглавления
 	public ImageView mContentsButton = null;
-	
-    public ManualControlView(Context context)
-    {
+
+	public ManualControlView(Context context) {
 		super(context);
 
 		LayoutParams mParams = null;
-		
-		// РЎРѕР·РґР°РµРј RelativeLayout, РІ РєРѕС‚РѕСЂРѕРј РЅР°С…РѕРґСЏС‚СЃСЏ РІСЃРµ РєРЅРѕРїРєРё СѓРїСЂР°РІР»РµРЅРёСЏ
+
+		// Создаем RelativeLayout, в котором находятся
+		// все кнопки управления
 		mControlLayout = new RelativeLayout(context);
 		mControlLayout.setBackgroundColor(Color.WHITE);
-		mControlLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		
-		// РЎРѕР·РґР°РµРј РєРЅРѕРїРєСѓ РїРµСЂРµС…РѕРґР° РЅР° РїСЂРµРґС‹РґСѓС‰СѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
+		mControlLayout.setLayoutParams(new LayoutParams(
+				android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+
+		// Создаем кнопку перехода на
+		// предыдущую страницу
 		mPrevButton = new ImageView(context);
 		mPrevButton.setImageResource(R.drawable.prev);
 		mPrevButton.setId(0xFF12AA);
-		
-		// РЎРѕР·РґР°РµРј РєРЅРѕРїРєСѓ РїРµСЂРµС…РѕРґР° Рє РѕРіР»Р°РІР»РµРЅРёСЋ
+
+		// Создаем кнопку перехода к оглавлению
 		mContentsButton = new ImageView(context);
 		mContentsButton.setImageResource(R.drawable.contents);
 		mContentsButton.setId(0xFF12A2);
-		
-		// РЎРѕР·РґР°РµРј РєРЅРѕРїРєСѓ РїРµСЂРµС…РѕРґР° РЅР° СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
+
+		// Создаем кнопку перехода на следующую
+		// страницу
 		mNextButton = new ImageView(context);
 		mNextButton.setImageResource(R.drawable.next);
 		mNextButton.setId(0xFF12A8);
-		
-		// РЎРѕР±СЃС‚РІРµРЅРЅРѕ, СЂРёСЃСѓРµРј
-		mParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+		// Собственно, рисуем
+		mParams = new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+				android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		mParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
 		mParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
 		mParams.setMargins(10, 0, 0, 0);
 		mPrevButton.setLayoutParams(mParams);
 		mControlLayout.addView(mPrevButton);
-		
-		mParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+		mParams = new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+				android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		mParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
 		mParams.addRule(RelativeLayout.LEFT_OF, mNextButton.getId());
 		mParams.setMargins(0, 0, 120, 0);
 		mContentsButton.setLayoutParams(mParams);
 		mControlLayout.addView(mContentsButton);
-		
-		mParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+		mParams = new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+				android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		mParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
 		mParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 		mParams.setMargins(0, 0, 10, 0);
 		mNextButton.setLayoutParams(mParams);
 		mControlLayout.addView(mNextButton);
-		
+
 		this.addView(mControlLayout);
 	}
-    
-    // РїРѕР»СѓС‡РµРЅРёРµ СЂР°Р·РјРµСЂРѕРІ СЌРєСЂР°РЅР°
-    @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
-	{
-        super.onSizeChanged(w, h, oldw, oldh);        
-    }
+
+	// получение размеров экрана
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+	}
 }

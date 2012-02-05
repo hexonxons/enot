@@ -5,36 +5,32 @@ import android.graphics.Canvas;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
+public class TaskView extends RelativeLayout {
 
-public class TaskView extends RelativeLayout
-{
-	
-    public TaskView(Context context, int PageNumber, int TaskNumber)
-    {
+	public TaskView(Context context, int PageNumber, int TaskNumber) {
 		super(context);
+
 	}
-    
-    // РїРѕР»СѓС‡РµРЅРёРµ СЂР°Р·РјРµСЂРѕРІ СЌРєСЂР°РЅР°
-    @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
-	{
-        super.onSizeChanged(w, h, oldw, oldh);
-    }
-    
-    // РѕС‚СЂРёСЃРѕРІРєР° СЃС‚СЂР°РЅРёС†С‹
-    @Override protected void onDraw(Canvas canvas) 
-	{	
+
+	// получение размеров экрана
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
 	}
-    
-    @Override public boolean onTouchEvent(MotionEvent event)
-	{
-	    return true;
+
+	// отрисовка страницы
+	@Override
+	protected void onDraw(Canvas canvas) {
 	}
-    
-    public void RestartTask()
-    {
-    }
-    
-    public void CheckTask()
-    {
-    }
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		return true;
+	}
+
+	public void RestartTask() {
+	}
+
+	public void CheckTask() {
+	}
 }

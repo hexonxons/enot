@@ -1,0 +1,12 @@
+
+    <resources>
+        <color name="table_background">#ffe6f0ff</color>
+        <color name="table_highlight">#ffffffff</color>
+        <color name="table_light">#64c6d4ef</color>
+        <color name="table_dark">#6456648f</color>
+        <color name="table_foreground">#ff000000</color>
+        <color name="table_selected">#64FDFC74</color>
+        <color name="table_edit">#1A4876</color>
+        <color name="table_correct">#646DAE81</color>
+        <color name="table_incorrect">#64FD5E53</color>
+    </resources>

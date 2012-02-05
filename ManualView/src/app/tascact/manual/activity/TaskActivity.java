@@ -8,17 +8,18 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsTaskView;
 import app.tascact.manual.view.TaskControlView;
 import app.tascact.manual.view.TaskView;
 
 public class TaskActivity extends Activity
 {
-	// View СЂР°СЃРєР»Р°РґРєРё СЌР»РµРјРµРЅС‚РѕРІ
+	// View раскладки элементов
 	private LinearLayout mMainLayout = null;
-	// View СЃС‚СЂР°РЅРёС† СѓС‡РµР±РЅРёРєР°
+	// View страниц учебника
 	private TaskView mTaskView = null;
-	// View СЌР»РµРјРµРЅС‚Р° СѓРїСЂР°РІР»РµРЅРёСЏ
+	// View элемента управления
 	private TaskControlView mTaskControl = null;
 
     @Override
@@ -30,22 +31,41 @@ public class TaskActivity extends Activity
         if(extras != null)
 		{        	
 	    	mMainLayout = new LinearLayout(this);
-	    	mTaskView = new ConnectElementsTaskView(this, extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
-	    	mTaskControl = new TaskControlView(this);
 	    	
-	    	// Р—Р°РґР°РµРј РѕР±СЂР°Р±РѕС‚С‡РёРєРё РєР°СЃР°РЅРёР№ 
+	    	//mTaskView = new ConnectElementsTaskView(this, extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+	    	switch (extras.getInt("TaskType"))
+	    	{
+	    	  case 1:
+	    		  mTaskView = new ConnectElementsTaskView(this, extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+	    		  break;
+	    	  case 2:
+	    		  mTaskView = new CompleteTableTaskView(this, extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+	    		  break;
+	    	  default:
+	    		  break;
+	    	}
+	    	//mTaskView = new CompleteTableTaskView(this, 0, 1);
+	    	
+	    	mTaskControl = new TaskControlView(this);
+
+	    	// Задаем обработчики касаний 
 	    	mTaskControl.mCheckButton.setOnTouchListener(mCheckTouchListener);
 	    	mTaskControl.mRestartButton.setOnTouchListener(mRestartTouchListener);
 
-	    	// РћСЂРёРµРЅС‚РёСЂСѓРµРј View РІРµСЂС‚РёРєР°Р»СЊРЅРѕ
+	    	// Ориентируем View вертикально
 			mMainLayout.setOrientation(1);
-			// Р›РѕС‡РёРј РѕСЂРёРµРЅС‚Р°С†РёСЋ СЌРєСЂР°РЅР°s
+			// Лочим ориентацию экранаs
 			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-			
-	    	mMainLayout.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, 1040));
+    	
+	    		mMainLayout.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, 1040));
+	    	
+	    	
 			mMainLayout.addView(mTaskControl, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
 			
 			setContentView(mMainLayout);
+			
+			
+			
 		}
         else
         	finish();
@@ -53,17 +73,17 @@ public class TaskActivity extends Activity
     
     private OnTouchListener mCheckTouchListener = new OnTouchListener()
 	{
-		@Override
+		//@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			mTaskView.CheckTask();
 			return true;
 		}
 	};
-	
+
 	private OnTouchListener mRestartTouchListener = new OnTouchListener()
 	{
-		@Override
+		//@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			mTaskView.RestartTask();

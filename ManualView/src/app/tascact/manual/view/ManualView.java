@@ -1,7 +1,7 @@
 /*
- * ManualView РєР»Р°СЃСЃ
+ * ManualView класс
  * 
- * РљР»Р°СЃСЃ СЂР°Р±РѕС‚С‹ СЃ СѓС‡РµР±РЅРёРєРѕРј
+ * Класс работы с учебником
  * 
  * Copyright 2012 hexonxons 
  * 
@@ -11,46 +11,41 @@
 
 package app.tascact.manual.view;
 
-
 import android.content.Context;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import app.tascact.manual.CResources;
 
-public class ManualView extends LinearLayout
-{
-	// Р РµСЃСѓСЂСЃС‹ РґР»СЏ РїРѕСЃС‚СЂРѕРµРЅРёСЏ СѓС‡РµР±РЅРёРєР°
+public class ManualView extends LinearLayout {
+	// Ресурсы для построения учебника
 	private CResources mResources = new CResources();
-	// РњР°СЃСЃРёРІ СЂРµСЃСѓСЂСЃРѕРІ СЃС‚СЂР°РЅРёС†С‹ СѓС‡РµР±РЅРёРєР°
+	// Массив ресурсов страницы учебника
 	private int mPageRes[] = null;
-	// РћР±СЂР°Р±РѕС‚С‡РёРє РєР»РёРєР° РїРѕ Р·Р°РґР°С‡Рµ
+	// Обработчик клика по задаче
 	private OnClickListener mListener = null;
-	
-    public ManualView(Context context, OnClickListener listener)
-    {
-		super(context);		
-		// РѕСЂРёРµРЅС‚РёСЂСѓРµРј View РІРµСЂС‚РёРєР°Р»СЊРЅРѕ
+
+	public ManualView(Context context, OnClickListener listener) {
+		super(context);
+		// ориентируем View вертикально
 		this.setOrientation(1);
-		
+
 		mListener = listener;
 	}
-    
-    // РїРѕР»СѓС‡РµРЅРёРµ СЂР°Р·РјРµСЂРѕРІ СЌРєСЂР°РЅР°
-    @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
-	{
-        super.onSizeChanged(w, h, oldw, oldh);
-    }
-    
-    // Р—Р°РґР°РЅРёРµ РѕС‚РѕР±СЂР°Р¶Р°РµРјРѕР№ СЃС‚СЂР°РЅРёС†С‹
-    public void SetPage(int pageNum)
-    {
-    	// РџРѕР»СѓС‡Р°РµРј СЂРµСЃСѓСЂСЃС‹ РЅРѕРІРѕР№ СЃС‚СЂР°РЅРёС†С‹
-    	mPageRes = mResources.GetPageResources(pageNum);
-    	// РћС‡РёС‰Р°РµРј РІРµСЃСЊ View
-    	this.removeAllViews();
-    	
-		for(int i = 0; i < mPageRes.length; ++i)
-		{
+
+	// получение размеров экрана
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+	}
+
+	// Задание отображаемой страницы
+	public void SetPage(int pageNum) {
+		// Получаем ресурсы новой страницы
+		mPageRes = mResources.GetPageResources(pageNum);
+		// Очищаем весь View
+		this.removeAllViews();
+
+		for (int i = 0; i < mPageRes.length; ++i) {
 			ImageView pageElem = new ImageView(this.getContext());
 			pageElem.setId(i);
 			pageElem.setBackgroundResource(mPageRes[i]);
@@ -58,5 +53,5 @@ public class ManualView extends LinearLayout
 			this.addView(pageElem);
 		}
 		invalidate();
-    }
+	}
 }

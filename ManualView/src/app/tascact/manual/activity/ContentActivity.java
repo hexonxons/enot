@@ -1,7 +1,7 @@
 /*
- * ContentActivity РєР»Р°СЃСЃ
+ * ContentActivity класс
  * 
- * Р—Р°РїСѓСЃРє РїСЂРѕС†РµСЃСЃР° РѕРіР»Р°РІР»РµРЅРёСЏ
+ * Запуск процесса оглавления
  * 
  * Copyright 2012 hexonxons
  * 
@@ -19,9 +19,9 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.R;
 import app.tascact.manual.view.ContentView;
 
@@ -29,14 +29,14 @@ public class ContentActivity extends Activity
 {
 	ContentView mMainView = null;
 	private int mPageCount = 0;
-	private final String title = "РЎС‚СЂР°РЅРёС†Р° ";
-	
+	private final String title = "Страница ";
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         
-        // РїРѕР»СѓС‡Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚СЂР°РЅРёС†
+        // получаем количество страниц
         Bundle extras = getIntent().getExtras();
         mPageCount = extras.getInt("PageCount");
         mMainView = new ContentView(this);
@@ -45,46 +45,46 @@ public class ContentActivity extends Activity
         
         for(int i = 0; i < mPageCount; ++i)
 		{
-        	// РЅРѕРІР°СЏ СЃС‚СЂРѕРєР° РѕРіР»Р°РІР»РµРЅРёСЏ
+        	// новая строка оглавления
 			RelativeLayout newRow = new RelativeLayout(this);
-			// РІС‹СЃРѕС‚РѕР№ 130 px
+			// высотой 130 px
 			newRow.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 130));
-			// С„РѕРЅ СЃС‚СЂРѕРєРё
+			// фон строки
 			if(i % 2 == 0)
 				newRow.setBackgroundColor(Color.rgb(214, 214, 169));
 			else
 				newRow.setBackgroundColor(Color.rgb(224, 224, 168));
-			
-			// С‚РµРєСЃС‚ Рё РєР°СЂС‚РёРЅРєР°
+
+			// текст и картинка
 			TextView text = new TextView(this);
 			ImageView img = new ImageView(this);
-			
-			// СЂР°СЃРїРѕР»РѕР¶РµРЅРёРµ С‚РµРєСЃС‚Р° - РїРѕ С†РµРЅС‚СЂСѓ
+
+			// расположение текста - по центру
 			mParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			mParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-			// Р·Р°РґР°РЅРёРµ СЂР°Р·РјРµСЂР° Р±СѓРєРІС‹, С†РІРµС‚Р° С‚РµРєСЃС‚Р° Рё СЃР°РјРѕРіРѕ С‚РµРєСЃС‚Р°
+			// задание размера буквы, цвета текста и самого текста
 			text.setTextSize(TypedValue.COMPLEX_UNIT_PX , 60);
 			text.setTextColor(Color.BLACK);
 			text.setText(title + Integer.toString(i + 1));	
-			// РІСЃС‚Р°РІР»СЏРµРј С‚РµРєСЃС‚
+			// вставляем текст
 			newRow.addView(text, mParams);
-			
-			// СЂР°СЃРїРѕР»РѕР¶РµРЅРёРµ РєР°СЂС‚РёРЅРєРё - СЃРїСЂР°РІР°
+
+			// расположение картинки - справа
 			mParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			mParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 			mParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-			// СЃРґРІРёРі РѕС‚ РїСЂР°РІРѕР№ РіСЂР°РЅРёС†С‹
+			// сдвиг от правой границы
 			mParams.setMargins(0, 0, 10, 0);
-			// РґР°РµРј id-С€РЅРёРє - РЅРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹
+			// даем id-шник - номер страницы
 			img.setId(i);
-			// РѕР±СЂР°Р±РѕС‚РєР° РєР»РёРєР° РїРѕ РєР°СЂС‚РёРЅРєРµ
+			// обработка клика по картинке
 			img.setOnClickListener(mClickListener);
-			// СЃРѕР±СЃС‚РІРµРЅРЅРѕ, СЃР°РјР° РєР°СЂС‚РёРЅРєР°
+			// собственно, сама картинка
 			img.setImageResource(R.drawable.contents);
-			// РІСЃС‚Р°РІР»СЏРµРј РєР°СЂС‚РёРЅРєСѓ
+			// вставляем картинку
 			newRow.addView(img, mParams);
-			
-			// РІСЃС‚Р°РІР»СЏРµРј СЃС‚СЂРѕС‡РєСѓ РѕРіР»Р°РІР»РµРЅРёСЏ
+
+			// вставляем строчку оглавления
 			mMainView.addContextElem(newRow);
 		}
         setContentView(mMainView);
@@ -92,7 +92,7 @@ public class ContentActivity extends Activity
     
     private OnClickListener mClickListener = new OnClickListener()
    	{
-   		@Override
+   		//@Override
    		public void onClick(View v)
    		{
    			Intent intent = getIntent();

@@ -1,7 +1,7 @@
 /*
- * ManualActivity ÐºÐ»Ð°ÑÑ
+ * ManualActivity êëàññ
  * 
- * Ð—Ð°Ð¿ÑƒÑÐº Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐ° ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ°
+ * Çàïóñê ïðîöåññà ó÷åáíèêà
  * 
  * Copyright 2012 hexonxons
  * 
@@ -28,19 +28,19 @@ import app.tascact.manual.view.ManualView;
 
 public class ManualActivity extends Activity
 {
-	// View Ñ€Ð°ÑÐºÐ»Ð°Ð´ÐºÐ¸ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ð²
+	// View ðàñêëàäêè ýëåìåíòîâ
 	private LinearLayout mMainLayout = null;
-	// View ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ† ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ°
+	// View ñòðàíèö ó÷åáíèêà
 	private ManualView mManualView = null;
-	// View ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð° ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ
+	// View ýëåìåíòà óïðàâëåíèÿ
 	private ManualControlView mControl = null;
-	// ÐÐ¾Ð¼ÐµÑ€ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹, ÐºÐ¾Ñ‚Ð¾Ñ€ÑƒÑŽ Ð¾Ñ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼
+	// Íîìåð ñòðàíèöû, êîòîðóþ îòîáðàæàåì
 	private int mPageToDisplay = 0;
-	// Ð ÐµÑÑƒÑ€ÑÑ‹ Ð´Ð»Ñ Ð¿Ð¾ÑÑ‚Ñ€Ð¾ÐµÐ½Ð¸Ñ ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ°
+	// Ðåñóðñû äëÿ ïîñòðîåíèÿ ó÷åáíèêà
 	private CResources mResources = new CResources();
-	// Ð’Ñ€ÐµÐ¼Ñ Ð¿Ñ€ÐµÐ´Ñ‹Ð´ÑƒÑ‰ÐµÐ³Ð¾ ÐºÐ°ÑÐ°Ð½Ð¸Ñ
+	// Âðåìÿ ïðåäûäóùåãî êàñàíèÿ
 	private long mPrevTouchTime = 0;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -48,30 +48,30 @@ public class ManualActivity extends Activity
 		mMainLayout = new LinearLayout(this);
 		mManualView = new ManualView(this, mClickListener);
 		mControl = new ManualControlView(this);
-		// Ð›Ð¾Ñ‡Ð¸Ð¼ Ð¾Ñ€Ð¸ÐµÐ½Ñ‚Ð°Ñ†Ð¸ÑŽ ÑÐºÑ€Ð°Ð½Ð°s
+		// Ëî÷èì îðèåíòàöèþ ýêðàíàs
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		// ÐžÑ€Ð¸ÐµÐ½Ñ‚Ð¸Ñ€ÑƒÐµÐ¼ View Ð²ÐµÑ€Ñ‚Ð¸ÐºÐ°Ð»ÑŒÐ½Ð¾
+		// Îðèåíòèðóåì View âåðòèêàëüíî
 		mMainLayout.setOrientation(1);
-		// Ð”Ð¾Ð±Ð°Ð²Ð»ÑÐµÐ¼ View ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ° Ð¸ View ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ
+		// Äîáàâëÿåì View ñòðàíèöû ó÷åáíèêà è View óïðàâëåíèÿ
 		mMainLayout.addView(mManualView, new LayoutParams(LayoutParams.MATCH_PARENT, 1040));
 		mMainLayout.addView(mControl, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
-		
-		// Ð—Ð°Ð´Ð°ÐµÐ¼ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸ÐºÐ¸ ÐºÐ°ÑÐ°Ð½Ð¸Ð¹ 
+
+		// Çàäàåì îáðàáîò÷èêè êàñàíèé 
 		mControl.mNextButton.setOnTouchListener(mNextTouchListener);
 		mControl.mPrevButton.setOnTouchListener(mPrevTouchListener);
 		mControl.mContentsButton.setOnTouchListener(mContentsTouchListener);
-		
-		// Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸
+
+		// Çàãðóæàåì íàñòðîéêè
 		LoadPreferences();
-		// Ð—Ð°Ð´Ð°ÐµÐ¼ Ð¾Ñ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼ÑƒÑŽ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ
+		// Çàäàåì îòîáðàæàåìóþ ñòðàíèöó
 		mManualView.SetPage(mPageToDisplay);
-		// ÐžÑ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼
+		// Îòîáðàæàåì
 		setContentView(mMainLayout);
 	}
-	
+
 	private OnTouchListener mNextTouchListener = new OnTouchListener()
 	{
-		@Override
+		//@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			if(event.getEventTime() - mPrevTouchTime > 250)
@@ -80,7 +80,7 @@ public class ManualActivity extends Activity
 				mPageToDisplay++;
 				if(mPageToDisplay >= mResources.TotalPages)
 					mPageToDisplay = mResources.TotalPages - 1;
-				
+
 				SavePreferences();
 				mManualView.SetPage(mPageToDisplay);
 				mManualView.invalidate();
@@ -88,10 +88,10 @@ public class ManualActivity extends Activity
 			return true;
 		}
 	};
-	
+
 	private OnTouchListener mPrevTouchListener = new OnTouchListener()
 	{
-		@Override
+		//@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			if(event.getEventTime() - mPrevTouchTime > 250)
@@ -100,17 +100,17 @@ public class ManualActivity extends Activity
 				mPageToDisplay--;
 				if(mPageToDisplay < 0)
 					mPageToDisplay = 0;
-				
+
 				SavePreferences();
 				mManualView.SetPage(mPageToDisplay);
 		    }
 			return true;
 		}
 	};
-	
+
 	private OnTouchListener mContentsTouchListener = new OnTouchListener()
 	{
-		@Override
+		//@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			if(event.getEventTime() - mPrevTouchTime > 250)
@@ -123,8 +123,8 @@ public class ManualActivity extends Activity
 			return true;
 		}
 	};
-	
-	@Override
+
+	//@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
@@ -135,10 +135,10 @@ public class ManualActivity extends Activity
 			mManualView.SetPage(mPageToDisplay);
 		}
 	}
-	
+
 	private OnClickListener mClickListener = new OnClickListener()
    	{
-   		@Override
+   		//@Override
    		public void onClick(View v)
    		{
    			if(mResources.GetTaskResources(mPageToDisplay, v.getId()) != null )
@@ -146,6 +146,7 @@ public class ManualActivity extends Activity
    				Intent intent = new Intent(v.getContext(), TaskActivity.class);
 	   			intent.putExtra("PageNumber", mPageToDisplay);
 	   			intent.putExtra("TaskNumber", v.getId());
+	   			intent.putExtra("TaskType", mResources.GetTaskType(mPageToDisplay, v.getId()));
 	   			startActivity(intent);
    			}
    		}
@@ -157,7 +158,7 @@ public class ManualActivity extends Activity
 		super.onStop();
 		SavePreferences();
     }
-	
+
 	private void SavePreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
@@ -165,7 +166,7 @@ public class ManualActivity extends Activity
 		editor.putInt("page", mPageToDisplay);
 		editor.commit();
 	}
-	
+
 	private void LoadPreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
