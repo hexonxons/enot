@@ -31,12 +31,13 @@ public class ConnectElementsTaskView extends TaskView
 	private Answer[] mAnswers = null;
 	private boolean mAnswer = true;
 	private boolean isSetLine = false;
-	private final CResources mResources = new CResources();
+	private CResources mResources = null;
 	private int mTouchedImageId = 0;
 	
-    public ConnectElementsTaskView(Context context, int PageNumber, int TaskNumber)
+    public ConnectElementsTaskView(Context context, int ManualNumber, int PageNumber, int TaskNumber)
     {
 		super(context, PageNumber, TaskNumber);
+		mResources = new CResources(context, ManualNumber);
 		mPrevTouchPoint = new PointF();
 		mAlertDialog = new AlertDialog.Builder(context).create();
 		mTaskResources = mResources.GetTaskResources(PageNumber, TaskNumber);

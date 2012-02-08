@@ -37,16 +37,23 @@ public class ManualActivity extends Activity
 	// Номер страницы, которую отображаем
 	private int mPageToDisplay = 0;
 	// Ресурсы для построения учебника
-	private CResources mResources = new CResources();
+	private CResources mResources = null;
 	// Время предыдущего касания
 	private long mPrevTouchTime = 0;
+	// Номер отображаемого учебника
+	private int mManualNumber = 0;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		
+		Bundle extras = getIntent().getExtras();
+		mManualNumber = extras.getInt("manualId");
+	        
+		mResources = new CResources(this, mManualNumber);
 		mMainLayout = new LinearLayout(this);
-		mManualView = new ManualView(this, mClickListener);
+		mManualView = new ManualView(this, mClickListener, mManualNumber);
 		mControl = new ManualControlView(this);
 		// Лочим ориентацию экранаs
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -110,7 +117,7 @@ public class ManualActivity extends Activity
 	
 	private OnTouchListener mContentsTouchListener = new OnTouchListener()
 	{
-		@Override
+		//@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			if(event.getEventTime() - mPrevTouchTime > 250)
@@ -144,6 +151,7 @@ public class ManualActivity extends Activity
    			if(mResources.GetTaskResources(mPageToDisplay, v.getId()) != null )
    			{
    				Intent intent = new Intent(v.getContext(), TaskActivity.class);
+   				intent.putExtra("ManualNumber", mManualNumber);
 	   			intent.putExtra("PageNumber", mPageToDisplay);
 	   			intent.putExtra("TaskNumber", v.getId());
 	   			startActivity(intent);
@@ -162,13 +170,20 @@ public class ManualActivity extends Activity
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putInt("page", mPageToDisplay);
+		if(mManualNumber == 1)
+			editor.putInt("page1", mPageToDisplay);
+		if(mManualNumber == 2)
+			editor.putInt("page2", mPageToDisplay);
 		editor.commit();
 	}
 	
 	private void LoadPreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		mPageToDisplay = settings.getInt("page", 0);
+		if(mManualNumber == 1)
+			mPageToDisplay = settings.getInt("page1", 0);;
+		if(mManualNumber == 2)
+			mPageToDisplay = settings.getInt("page2", 0);
+		
 	}
 }

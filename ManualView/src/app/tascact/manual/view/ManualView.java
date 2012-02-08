@@ -20,15 +20,16 @@ import app.tascact.manual.CResources;
 public class ManualView extends LinearLayout
 {
 	// Ресурсы для построения учебника
-	private CResources mResources = new CResources();
+	private CResources mResources = null;
 	// Массив ресурсов страницы учебника
 	private int mPageRes[] = null;
 	// Обработчик клика по задаче
 	private OnClickListener mListener = null;
 	
-    public ManualView(Context context, OnClickListener listener)
+    public ManualView(Context context, OnClickListener listener, int PageNumber)
     {
 		super(context);		
+		mResources = new CResources(context, PageNumber);
 		// ориентируем View вертикально
 		this.setOrientation(1);
 		

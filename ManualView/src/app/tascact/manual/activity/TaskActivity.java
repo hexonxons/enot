@@ -30,7 +30,7 @@ public class TaskActivity extends Activity
         if(extras != null)
 		{        	
 	    	mMainLayout = new LinearLayout(this);
-	    	mTaskView = new ConnectElementsTaskView(this, extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+	    	mTaskView = new ConnectElementsTaskView(this, extras.getInt("ManualNumber"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
 	    	mTaskControl = new TaskControlView(this);
 	    	
 	    	// Задаем обработчики касаний 
