@@ -7,18 +7,16 @@ import android.widget.RelativeLayout;
 
 public class TaskView extends RelativeLayout {
 
-	public TaskView(Context context, int PageNumber, int TaskNumber) {
+	public TaskView(Context context, int ManualNumber, int PageNumber, int TaskNumber) {
 		super(context);
 
 	}
 
-	// получение размеров экрана
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
 
-	// отрисовка страницы
 	@Override
 	protected void onDraw(Canvas canvas) {
 	}

@@ -1,7 +1,7 @@
 /*
- * ContentActivity класс
+ * ContentActivity пїЅпїЅпїЅпїЅпїЅ
  * 
- * Запуск процесса оглавления
+ * пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
  * 
  * Copyright 2012 hexonxons
  * 
@@ -29,14 +29,14 @@ public class ContentActivity extends Activity
 {
 	ContentView mMainView = null;
 	private int mPageCount = 0;
-	private final String title = "Страница ";
+	private final String title = "РЎС‚СЂР°РЅРёС†Р° ";
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         
-        // получаем количество страниц
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Bundle extras = getIntent().getExtras();
         mPageCount = extras.getInt("PageCount");
         mMainView = new ContentView(this);
@@ -45,46 +45,46 @@ public class ContentActivity extends Activity
         
         for(int i = 0; i < mPageCount; ++i)
 		{
-        	// новая строка оглавления
+        	// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			RelativeLayout newRow = new RelativeLayout(this);
-			// высотой 130 px
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 130 px
 			newRow.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 130));
-			// фон строки
+			// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			if(i % 2 == 0)
 				newRow.setBackgroundColor(Color.rgb(214, 214, 169));
 			else
 				newRow.setBackgroundColor(Color.rgb(224, 224, 168));
 
-			// текст и картинка
+			// пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			TextView text = new TextView(this);
 			ImageView img = new ImageView(this);
 
-			// расположение текста - по центру
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			mParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			mParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-			// задание размера буквы, цвета текста и самого текста
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 			text.setTextSize(TypedValue.COMPLEX_UNIT_PX , 60);
 			text.setTextColor(Color.BLACK);
 			text.setText(title + Integer.toString(i + 1));	
-			// вставляем текст
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			newRow.addView(text, mParams);
 
-			// расположение картинки - справа
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅ
 			mParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			mParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 			mParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-			// сдвиг от правой границы
+			// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			mParams.setMargins(0, 0, 10, 0);
-			// даем id-шник - номер страницы
+			// пїЅпїЅпїЅпїЅ id-пїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			img.setId(i);
-			// обработка клика по картинке
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			img.setOnClickListener(mClickListener);
-			// собственно, сама картинка
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			img.setImageResource(R.drawable.contents);
-			// вставляем картинку
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			newRow.addView(img, mParams);
 
-			// вставляем строчку оглавления
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			mMainView.addContextElem(newRow);
 		}
         setContentView(mMainView);

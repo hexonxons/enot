@@ -1,7 +1,7 @@
 /*
- * ManualActivity êëàññ
+ * ManualActivity ÐºÐ»Ð°ÑÑ
  * 
- * Çàïóñê ïðîöåññà ó÷åáíèêà
+ * Ð—Ð°Ð¿ÑƒÑÐº Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐ° ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ°
  * 
  * Copyright 2012 hexonxons
  * 
@@ -28,50 +28,57 @@ import app.tascact.manual.view.ManualView;
 
 public class ManualActivity extends Activity
 {
-	// View ðàñêëàäêè ýëåìåíòîâ
+	// View Ñ€Ð°ÑÐºÐ»Ð°Ð´ÐºÐ¸ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ð²
 	private LinearLayout mMainLayout = null;
-	// View ñòðàíèö ó÷åáíèêà
+	// View ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ† ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ°
 	private ManualView mManualView = null;
-	// View ýëåìåíòà óïðàâëåíèÿ
+	// View ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð° ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ
 	private ManualControlView mControl = null;
-	// Íîìåð ñòðàíèöû, êîòîðóþ îòîáðàæàåì
+	// ÐÐ¾Ð¼ÐµÑ€ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹, ÐºÐ¾Ñ‚Ð¾Ñ€ÑƒÑŽ Ð¾Ñ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼
 	private int mPageToDisplay = 0;
-	// Ðåñóðñû äëÿ ïîñòðîåíèÿ ó÷åáíèêà
-	private CResources mResources = new CResources();
-	// Âðåìÿ ïðåäûäóùåãî êàñàíèÿ
+	// Ð ÐµÑÑƒÑ€ÑÑ‹ Ð´Ð»Ñ Ð¿Ð¾ÑÑ‚Ñ€Ð¾ÐµÐ½Ð¸Ñ ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ°
+	private CResources mResources = null;
+	// Ð’Ñ€ÐµÐ¼Ñ Ð¿Ñ€ÐµÐ´Ñ‹Ð´ÑƒÑ‰ÐµÐ³Ð¾ ÐºÐ°ÑÐ°Ð½Ð¸Ñ
 	private long mPrevTouchTime = 0;
-
+	// ÐÐ¾Ð¼ÐµÑ€ Ð¾Ñ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼Ð¾Ð³Ð¾ ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ°
+	private int mManualNumber = 0;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		
+		Bundle extras = getIntent().getExtras();
+		mManualNumber = extras.getInt("manualId");
+	        
+		mResources = new CResources(mManualNumber);
 		mMainLayout = new LinearLayout(this);
-		mManualView = new ManualView(this, mClickListener);
+		mManualView = new ManualView(this, mClickListener, mManualNumber);
 		mControl = new ManualControlView(this);
-		// Ëî÷èì îðèåíòàöèþ ýêðàíàs
+		// Ð›Ð¾Ñ‡Ð¸Ð¼ Ð¾Ñ€Ð¸ÐµÐ½Ñ‚Ð°Ñ†Ð¸ÑŽ ÑÐºÑ€Ð°Ð½Ð°s
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		// Îðèåíòèðóåì View âåðòèêàëüíî
+		// ÐžÑ€Ð¸ÐµÐ½Ñ‚Ð¸Ñ€ÑƒÐµÐ¼ View Ð²ÐµÑ€Ñ‚Ð¸ÐºÐ°Ð»ÑŒÐ½Ð¾
 		mMainLayout.setOrientation(1);
-		// Äîáàâëÿåì View ñòðàíèöû ó÷åáíèêà è View óïðàâëåíèÿ
+		// Ð”Ð¾Ð±Ð°Ð²Ð»ÑÐµÐ¼ View ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ ÑƒÑ‡ÐµÐ±Ð½Ð¸ÐºÐ° Ð¸ View ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ
 		mMainLayout.addView(mManualView, new LayoutParams(LayoutParams.MATCH_PARENT, 1040));
 		mMainLayout.addView(mControl, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
-
-		// Çàäàåì îáðàáîò÷èêè êàñàíèé 
+		
+		// Ð—Ð°Ð´Ð°ÐµÐ¼ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸ÐºÐ¸ ÐºÐ°ÑÐ°Ð½Ð¸Ð¹ 
 		mControl.mNextButton.setOnTouchListener(mNextTouchListener);
 		mControl.mPrevButton.setOnTouchListener(mPrevTouchListener);
 		mControl.mContentsButton.setOnTouchListener(mContentsTouchListener);
-
-		// Çàãðóæàåì íàñòðîéêè
+		
+		// Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸
 		LoadPreferences();
-		// Çàäàåì îòîáðàæàåìóþ ñòðàíèöó
+		// Ð—Ð°Ð´Ð°ÐµÐ¼ Ð¾Ñ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼ÑƒÑŽ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ
 		mManualView.SetPage(mPageToDisplay);
-		// Îòîáðàæàåì
+		// ÐžÑ‚Ð¾Ð±Ñ€Ð°Ð¶Ð°ÐµÐ¼
 		setContentView(mMainLayout);
 	}
-
+	
 	private OnTouchListener mNextTouchListener = new OnTouchListener()
 	{
-		//@Override
+		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			if(event.getEventTime() - mPrevTouchTime > 250)
@@ -80,7 +87,7 @@ public class ManualActivity extends Activity
 				mPageToDisplay++;
 				if(mPageToDisplay >= mResources.TotalPages)
 					mPageToDisplay = mResources.TotalPages - 1;
-
+				
 				SavePreferences();
 				mManualView.SetPage(mPageToDisplay);
 				mManualView.invalidate();
@@ -88,10 +95,10 @@ public class ManualActivity extends Activity
 			return true;
 		}
 	};
-
+	
 	private OnTouchListener mPrevTouchListener = new OnTouchListener()
 	{
-		//@Override
+		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			if(event.getEventTime() - mPrevTouchTime > 250)
@@ -100,17 +107,17 @@ public class ManualActivity extends Activity
 				mPageToDisplay--;
 				if(mPageToDisplay < 0)
 					mPageToDisplay = 0;
-
+				
 				SavePreferences();
 				mManualView.SetPage(mPageToDisplay);
 		    }
 			return true;
 		}
 	};
-
+	
 	private OnTouchListener mContentsTouchListener = new OnTouchListener()
 	{
-		//@Override
+		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
 			if(event.getEventTime() - mPrevTouchTime > 250)
@@ -123,8 +130,8 @@ public class ManualActivity extends Activity
 			return true;
 		}
 	};
-
-	//@Override
+	
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
@@ -135,15 +142,16 @@ public class ManualActivity extends Activity
 			mManualView.SetPage(mPageToDisplay);
 		}
 	}
-
+	
 	private OnClickListener mClickListener = new OnClickListener()
    	{
-   		//@Override
+   		@Override
    		public void onClick(View v)
    		{
-   			if(mResources.GetTaskResources(mPageToDisplay, v.getId()) != null )
+   			if(mResources.isTaskSet(mPageToDisplay, v.getId()))
    			{
    				Intent intent = new Intent(v.getContext(), TaskActivity.class);
+   				intent.putExtra("ManualNumber", mManualNumber);
 	   			intent.putExtra("PageNumber", mPageToDisplay);
 	   			intent.putExtra("TaskNumber", v.getId());
 	   			intent.putExtra("TaskType", mResources.GetTaskType(mPageToDisplay, v.getId()));
@@ -158,18 +166,29 @@ public class ManualActivity extends Activity
 		super.onStop();
 		SavePreferences();
     }
-
+	
 	private void SavePreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putInt("page", mPageToDisplay);
+		if(mManualNumber == 1)
+			editor.putInt("page1", mPageToDisplay);
+		if(mManualNumber == 2)
+			editor.putInt("page2", mPageToDisplay);
+		if(mManualNumber == 3)
+			editor.putInt("page3", mPageToDisplay);
 		editor.commit();
 	}
-
+	
 	private void LoadPreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		mPageToDisplay = settings.getInt("page", 0);
+		if(mManualNumber == 1)
+			mPageToDisplay = settings.getInt("page1", 0);;
+		if(mManualNumber == 2)
+			mPageToDisplay = settings.getInt("page2", 0);
+		if(mManualNumber == 3)
+			mPageToDisplay = settings.getInt("page3", 0);
+		
 	}
 }

@@ -7,14 +7,13 @@ import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.view.MotionEvent;
 import app.tascact.manual.R;
 import app.tascact.manual.view.TaskView;
 
-public class CompleteTableTaskView extends TaskView /*implements OnTouchListener*/{
+public class CompleteTableTaskView extends TaskView{
 	
-	//Параметры таблицы
+	// РџР°СЂР°РјРµС‚СЂС‹ С‚Р°Р±Р»РёС†С‹
 	private int mTableHeight = 0;
 	private int mTableWidth = 0;
 	private int mColumnWidth = 0;
@@ -23,13 +22,13 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 	private int mRowHeight = 0;
 	private int mColNum = 0;
 	
-	//Выделенный прямоугольник
+	//Р’С‹РґРµР»РµРЅРЅС‹Р№ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє
 	private int selectedX;
 	private int selectedY;
 	private Rect selRect = new Rect();
 	Rect[] toInvAfterCheck;
 	
-	//Клавиатура
+	//РљР»Р°РІРёР°С‚СѓСЂР°
 	private Rect[] mKeypad = null;
 	private int selectedKey = 0;
 	private int KEYPAD_COUNT = 0;
@@ -40,18 +39,18 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 	
 	private boolean EDIT_MODE = true;
 		
-	//Условие задачи
-	private String[][] InitialResources = {{"7", "2", ""}, {"", "6", "9"}, {"5", "", "10"}, {"", "0", "10"}, {"2", "3", ""}, {"Слагаемое", "Слагаемое", "Сумма"}};
+	//РЈСЃР»РѕРІРёРµ Р·Р°РґР°С‡Рё
+	private String[][] InitialResources = {{"7", "2", ""}, {"", "6", "9"}, {"5", "", "10"}, {"", "0", "10"}, {"2", "3", ""}, {"РЎР»Р°РіР°РµРјРѕРµ", "РЎР»Р°РіР°РµРјРѕРµ", "РЎСѓРјРјР°"}};
 	private String[] InitialKeypadResources = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
 	private String[] Answers = {"9", "3", "5", "10", "5"};
 	
 	
-	public CompleteTableTaskView(Context context, int PageNumber, int TaskNumber) {
-		super(context, PageNumber, TaskNumber);
+	public CompleteTableTaskView(Context context, int ManualNumber, int PageNumber, int TaskNumber) {
+		super(context, ManualNumber, PageNumber, TaskNumber);
 		
 		this.setBackgroundColor(Color.WHITE);
 		
-		//Заполнение начальными данными
+		//Р—Р°РїРѕР»РЅРµРЅРёРµ РЅР°С‡Р°Р»СЊРЅС‹РјРё РґР°РЅРЅС‹РјРё
 		mColNum = InitialResources.length - 1;
 		mFilledCells = new String[mColNum][3];
 		canBeEdited = new boolean[mColNum][3];
@@ -105,13 +104,12 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
-		//mCanvas = canvas;
-		//Рисуем фон
+		//Р РёСЃСѓРµРј С„РѕРЅ
 		Paint background = new Paint();
 		background.setColor(getResources().getColor(R.color.table_background));
 		canvas.drawRect(mTableMargin, 0, mTableWidth + mTableMargin, mTableHeight, background);
 				
-		//Рисуем линии - границы строк и столбцов
+		//Р РёСЃСѓРµРј Р»РёРЅРёРё - РіСЂР°РЅРёС†С‹ СЃС‚СЂРѕРє Рё СЃС‚РѕР»Р±С†РѕРІ
 		Paint dark = new Paint();
 		dark.setColor(getResources().getColor(R.color.table_dark));
 		Paint highlight = new Paint();
@@ -142,17 +140,16 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 		}
 		
 		
-		//Рисуем текст внутри ячеек
+		//Р РёСЃСѓРµРј С‚РµРєСЃС‚ РІРЅСѓС‚СЂРё СЏС‡РµРµРє
 		Paint foreground = new Paint(Paint.ANTI_ALIAS_FLAG);
 		foreground.setColor(getResources().getColor(R.color.table_foreground));
 		foreground.setStyle(Style.FILL);
 		foreground.setTextSize((float)(mRowHeight*0.75));
-		//foreground.setTextScaleX(mColumnWidth/mRowHeight);
 		foreground.setTextAlign(Paint.Align.CENTER);
 		
 		FontMetrics fm = foreground.getFontMetrics();
 		
-		//Рисование числа
+		//Р РёСЃРѕРІР°РЅРёРµ С‡РёСЃР»Р°
 		float x = mColumnWidth/2;
 		float y = mRowHeight/2 - (fm.ascent + fm.descent)/2;
 		for (int i = 0; i < mColNum; i++)
@@ -166,7 +163,7 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 					canvas.drawText(mFilledCells[i][j], mTableMargin + mLegendWidth + i*mColumnWidth + x, 
 							j*mRowHeight + y, foreground);
 				}
-				else /*if (mFilledCells[i][j] != "" && canBeEdited[i][j] == false)*/
+				else
 				{
 					foreground.setColor(getResources().getColor(R.color.table_foreground));
 					canvas.drawText(mFilledCells[i][j], mTableMargin + mLegendWidth + i*mColumnWidth + x, 
@@ -187,13 +184,13 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 		}
 		
 		
-		//Рисование выделения
+		//Р РёСЃРѕРІР°РЅРёРµ РІС‹РґРµР»РµРЅРёСЏ	
 		Paint selected = new Paint();
 		selected.setColor(getResources().getColor(R.color.table_selected));
 		if (EDIT_MODE)
 			canvas.drawRect(selRect, selected);
 		
-		//Рисование клавиатуры
+		//Р РёСЃРѕРІР°РЅРёРµ РєР»Р°РІРёР°С‚СѓСЂС‹
 		foreground.setTextSize((float)(mRowHeight*0.75));
 		mKeypad = new Rect[KEYPAD_COUNT + 2];
 		int keyWidth = (int) ((getWidth() - 2*mTableMargin - (KEYPAD_COUNT - 1)*20)/KEYPAD_COUNT);
@@ -215,7 +212,7 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 		int keyY = (int) (2*getHeight()/3);
 		Rect r = new Rect(keyX, keyY, (int)(keyX + mLegendWidth), (int)(keyY + mRowHeight));
 		canvas.drawRect(r, background);
-		canvas.drawText("Ввод", keyX + x, 
+		canvas.drawText("Р’РІРѕРґ", keyX + x, 
 				keyY + y, foreground);
 		mKeypad[KEYPAD_COUNT] = r;
 		
@@ -223,11 +220,11 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 		keyY = (int) (2*getHeight()/3);
 		r = new Rect(keyX, keyY, (int)(keyX + mLegendWidth), (int)(keyY + mRowHeight));
 		canvas.drawRect(r, background);
-		canvas.drawText("Стереть", keyX + x, 
+		canvas.drawText("РЎС‚РµСЂРµС‚СЊ", keyX + x, 
 				keyY + y, foreground);
 		mKeypad[KEYPAD_COUNT + 1] = r;	
 		
-		//Выделение правильных и неправильных клеток после проверки
+		//Р’С‹РґРµР»РµРЅРёРµ РїСЂР°РІРёР»СЊРЅС‹С… Рё РЅРµРїСЂР°РІРёР»СЊРЅС‹С… РєР»РµС‚РѕРє РїРѕСЃР»Рµ РїСЂРѕРІРµСЂРєРё
 		
 		for (int i = 0; i < mColNum; i++)	
 		{
@@ -269,7 +266,7 @@ public class CompleteTableTaskView extends TaskView /*implements OnTouchListener
 		}
 		else 
 		{
-			//Нажали на символ на клавиатуре		
+			//РќР°Р¶Р°Р»Рё РЅР° СЃРёРјРІРѕР» РЅР° РєР»Р°РІРёР°С‚СѓСЂРµ		
 			for (int i = 0; i < KEYPAD_COUNT; i++)
 				if (mKeypad[i].contains((int)X, (int)Y))
 				{
