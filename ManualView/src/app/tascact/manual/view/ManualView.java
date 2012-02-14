@@ -13,6 +13,7 @@ package app.tascact.manual.view;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import app.tascact.manual.CResources;
@@ -24,16 +25,19 @@ public class ManualView extends LinearLayout
 	// Массив ресурсов страницы учебника
 	private int mPageRes[] = null;
 	// Обработчик клика по задаче
-	private OnClickListener mListener = null;
+	private OnTouchListener mTouchListener = null;
+	private OnClickListener mClickListener = null;
 	
-    public ManualView(Context context, OnClickListener listener, int PageNumber)
+    public ManualView(Context context, OnTouchListener touchListener, OnClickListener clickListener, int pageNumber)
     {
 		super(context);		
-		mResources = new CResources(PageNumber);
+		mResources = new CResources(pageNumber);
 		// ориентируем View вертикально
 		this.setOrientation(1);
+		this.setBackgroundColor(Color.WHITE);
 		
-		mListener = listener;
+		mClickListener = clickListener;
+		mTouchListener = touchListener;
 	}
     
     // получение размеров экрана
@@ -55,7 +59,8 @@ public class ManualView extends LinearLayout
 			ImageView pageElem = new ImageView(this.getContext());
 			pageElem.setId(i);
 			pageElem.setBackgroundResource(mPageRes[i]);
-			pageElem.setOnClickListener(mListener);
+			pageElem.setOnClickListener(mClickListener);
+			pageElem.setOnTouchListener(mTouchListener);
 			this.addView(pageElem);
 		}
 		invalidate();

@@ -1,7 +1,7 @@
 /*
- * ContentView класс
+ * ContentView пїЅпїЅпїЅпїЅпїЅ
  * 
- * View оглавления
+ * View пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
  * 
  * Copyright 2012 hexonxons
  * 
@@ -28,7 +28,7 @@ public class ContentView extends ScrollView {
 	public ContentView(Context context) {
 		super(context);
 
-		// Обработчик жестов
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 		mGestureDetector = new GestureDetector(context, new GestureListener());
 		mScroller = new Scroller(context);
 		// this.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
@@ -36,11 +36,11 @@ public class ContentView extends ScrollView {
 		mMainTable = new LinearLayout(context);
 		mMainTable.setOrientation(1);
 		this.addView(mMainTable);
-		// Показываем скроллбары
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		setVerticalScrollBarEnabled(true);
 	}
 
-	// получение размеров экрана
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
@@ -48,13 +48,13 @@ public class ContentView extends ScrollView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		// Отмена скролла/флинта при нажатии на
-		// экран
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
+		// пїЅпїЅпїЅпїЅпїЅ
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			if (!mScroller.isFinished())
 				mScroller.abortAnimation();
 		}
-		// обработка жеста
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		if (mGestureDetector.onTouchEvent(event))
 			return true;
 
@@ -63,18 +63,18 @@ public class ContentView extends ScrollView {
 
 	@Override
 	protected int computeVerticalScrollRange() {
-		// задаем размер всего View
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ View
 		mHeight = mMainTable.getBottom() - mMainTable.getTop();
 		return mHeight;
 	}
 
 	public void addContextElem(android.view.View child) {
-		// добавляем элементы оглавления
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		mMainTable.addView(child);
 	};
 
 	private class GestureListener extends SimpleOnGestureListener {
-		// Обработчик скролла
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		@Override
 		public boolean onScroll(MotionEvent event1, MotionEvent event2,
 				float distanceX, float distanceY) {
@@ -86,13 +86,13 @@ public class ContentView extends ScrollView {
 			} else if (getScrollY() > mHeight - getHeight())
 				newScrollY = mHeight - getHeight();
 
-			// расстояние, на которое
-			// прокручиваем
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			int offset = newScrollY + (int) distanceY >= mHeight - getHeight() ? 0
 					: (int) distanceY;
-			// запуск прокрутки
+			// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			mScroller.startScroll(0, getScrollY(), 0, offset, 60);
-			// Показываем скроллбары
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			awakenScrollBars(mScroller.getDuration());
 
 			// scrollBy(0, (int)distanceY);

@@ -1,7 +1,7 @@
 /*
- * TaskControlView класс
+ * TaskControlView пїЅпїЅпїЅпїЅпїЅ
  * 
- * View управляющего элемента для задач
+ * View пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
  * 
  * Copyright 2012 hexonxons
  * 
@@ -19,9 +19,9 @@ import app.tascact.manual.R;
 
 public class TaskControlView extends RelativeLayout {
 	public RelativeLayout mControlLayout = null;
-	// Кнопка "Проверить"
+	// пїЅпїЅпїЅпїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
 	public ImageView mCheckButton = null;
-	// Кнопка "Попробовать заново"
+	// пїЅпїЅпїЅпїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ"
 	public ImageView mRestartButton = null;
 
 	public TaskControlView(Context context) {
@@ -29,25 +29,25 @@ public class TaskControlView extends RelativeLayout {
 
 		LayoutParams mParams = null;
 
-		// Создаем RelativeLayout, в котором находятся
-		// все кнопки управления
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ RelativeLayout, пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		mControlLayout = new RelativeLayout(context);
 		mControlLayout.setBackgroundColor(Color.WHITE);
 		mControlLayout.setLayoutParams(new LayoutParams(
 				android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
 
-		// Создаем кнопку перехода на
-		// предыдущую страницу
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		mCheckButton = new ImageView(context);
 		mCheckButton.setImageResource(R.drawable.check);
 		mCheckButton.setId(0xF342AA);
 
-		// Создаем кнопку перехода к оглавлению
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		mRestartButton = new ImageView(context);
 		mRestartButton.setImageResource(R.drawable.restart);
 		mRestartButton.setId(0xF752A2);
 
-		// Собственно, рисуем
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ
 		mParams = new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
 				android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		mParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
@@ -67,9 +67,10 @@ public class TaskControlView extends RelativeLayout {
 		this.addView(mControlLayout);
 	}
 
-	// получение размеров экрана
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+	protected void onSizeChanged(int w, int h, int oldw, int oldh)
+	{
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
 }

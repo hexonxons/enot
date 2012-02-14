@@ -16,8 +16,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
@@ -42,6 +44,8 @@ public class ManualActivity extends Activity
 	private long mPrevTouchTime = 0;
 	// Номер отображаемого учебника
 	private int mManualNumber = 0;
+	// Обработчик жестов
+	private GestureDetector mGestureDetector = null;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -50,10 +54,10 @@ public class ManualActivity extends Activity
 		
 		Bundle extras = getIntent().getExtras();
 		mManualNumber = extras.getInt("manualId");
-	        
+		mGestureDetector = new GestureDetector(this, new GestureListener());
 		mResources = new CResources(mManualNumber);
 		mMainLayout = new LinearLayout(this);
-		mManualView = new ManualView(this, mClickListener, mManualNumber);
+		mManualView = new ManualView(this, mTouchListener, mClickListener, mManualNumber);
 		mControl = new ManualControlView(this);
 		// Лочим ориентацию экранаs
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -64,9 +68,60 @@ public class ManualActivity extends Activity
 		mMainLayout.addView(mControl, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
 		
 		// Задаем обработчики касаний 
-		mControl.mNextButton.setOnTouchListener(mNextTouchListener);
-		mControl.mPrevButton.setOnTouchListener(mPrevTouchListener);
-		mControl.mContentsButton.setOnTouchListener(mContentsTouchListener);
+		mControl.mNextButton.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent event) 
+			{
+				if(event.getEventTime() - mPrevTouchTime > 250)
+			    {
+					mPrevTouchTime = event.getEventTime();
+					mPageToDisplay++;
+					if(mPageToDisplay >= mResources.TotalPages)
+						mPageToDisplay = mResources.TotalPages - 1;
+					
+					SavePreferences();
+					mManualView.SetPage(mPageToDisplay);
+					//mManualView.invalidate();
+			    }
+				return true;
+			}
+		});
+		
+		mControl.mPrevButton.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				if(event.getEventTime() - mPrevTouchTime > 250)
+			    {
+					mPrevTouchTime = event.getEventTime();
+					mPageToDisplay--;
+					if(mPageToDisplay < 0)
+						mPageToDisplay = 0;
+					
+					SavePreferences();
+					mManualView.SetPage(mPageToDisplay);
+			    }
+				return true;
+			}
+		});
+		
+		mControl.mContentsButton.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				if(event.getEventTime() - mPrevTouchTime > 250)
+			    {
+					mPrevTouchTime = event.getEventTime();
+					Intent intent = new Intent(v.getContext(), ContentActivity.class);
+					intent.putExtra("PageCount", mResources.TotalPages);
+					startActivityForResult(intent, 0);
+			    }
+				return true;
+			}
+		});
 		
 		// Загружаем настройки
 		LoadPreferences();
@@ -75,61 +130,6 @@ public class ManualActivity extends Activity
 		// Отображаем
 		setContentView(mMainLayout);
 	}
-	
-	private OnTouchListener mNextTouchListener = new OnTouchListener()
-	{
-		@Override
-		public boolean onTouch(View v, MotionEvent event)
-		{
-			if(event.getEventTime() - mPrevTouchTime > 250)
-		    {
-				mPrevTouchTime = event.getEventTime();
-				mPageToDisplay++;
-				if(mPageToDisplay >= mResources.TotalPages)
-					mPageToDisplay = mResources.TotalPages - 1;
-				
-				SavePreferences();
-				mManualView.SetPage(mPageToDisplay);
-				mManualView.invalidate();
-		    }
-			return true;
-		}
-	};
-	
-	private OnTouchListener mPrevTouchListener = new OnTouchListener()
-	{
-		@Override
-		public boolean onTouch(View v, MotionEvent event)
-		{
-			if(event.getEventTime() - mPrevTouchTime > 250)
-		    {
-				mPrevTouchTime = event.getEventTime();
-				mPageToDisplay--;
-				if(mPageToDisplay < 0)
-					mPageToDisplay = 0;
-				
-				SavePreferences();
-				mManualView.SetPage(mPageToDisplay);
-		    }
-			return true;
-		}
-	};
-	
-	private OnTouchListener mContentsTouchListener = new OnTouchListener()
-	{
-		@Override
-		public boolean onTouch(View v, MotionEvent event)
-		{
-			if(event.getEventTime() - mPrevTouchTime > 250)
-		    {
-				mPrevTouchTime = event.getEventTime();
-				Intent intent = new Intent(v.getContext(), ContentActivity.class);
-				intent.putExtra("PageCount", mResources.TotalPages);
-				startActivityForResult(intent, 0);
-		    }
-			return true;
-		}
-	};
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -143,12 +143,12 @@ public class ManualActivity extends Activity
 		}
 	}
 	
-	private OnClickListener mClickListener = new OnClickListener()
-   	{
-   		@Override
-   		public void onClick(View v)
-   		{
-   			if(mResources.isTaskSet(mPageToDisplay, v.getId()))
+	private OnClickListener mClickListener = new OnClickListener() 
+	{
+		@Override
+		public void onClick(View v)
+		{
+			if(mResources.isTaskSet(mPageToDisplay, v.getId()))
    			{
    				Intent intent = new Intent(v.getContext(), TaskActivity.class);
    				intent.putExtra("ManualNumber", mManualNumber);
@@ -157,8 +157,47 @@ public class ManualActivity extends Activity
 	   			intent.putExtra("TaskType", mResources.GetTaskType(mPageToDisplay, v.getId()));
 	   			startActivity(intent);
    			}
-   		}
-   	};
+		}
+	};
+	
+	private OnTouchListener mTouchListener = new OnTouchListener() 
+	{
+		@Override
+		public boolean onTouch(View v, MotionEvent event)
+		{
+			if (mGestureDetector.onTouchEvent(event))
+				return true;
+	    	
+	    	return false;
+		}
+	};
+    
+    private class GestureListener extends SimpleOnGestureListener
+    {
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,	float velocityY)
+		{
+			if(velocityX < -1500)
+			{
+				mPageToDisplay++;
+				if(mPageToDisplay >= mResources.TotalPages)
+					mPageToDisplay = mResources.TotalPages - 1;
+				
+				SavePreferences();
+				mManualView.SetPage(mPageToDisplay);
+			}			
+			if(velocityX > 1500)
+			{
+				mPageToDisplay--;
+				if(mPageToDisplay < 0)
+					mPageToDisplay = 0;
+				
+				SavePreferences();
+				mManualView.SetPage(mPageToDisplay);
+			}
+			return true;
+		}
+	}
 
 	@Override
     protected void onStop()
@@ -175,8 +214,6 @@ public class ManualActivity extends Activity
 			editor.putInt("page1", mPageToDisplay);
 		if(mManualNumber == 2)
 			editor.putInt("page2", mPageToDisplay);
-		if(mManualNumber == 3)
-			editor.putInt("page3", mPageToDisplay);
 		editor.commit();
 	}
 	
@@ -187,8 +224,5 @@ public class ManualActivity extends Activity
 			mPageToDisplay = settings.getInt("page1", 0);;
 		if(mManualNumber == 2)
 			mPageToDisplay = settings.getInt("page2", 0);
-		if(mManualNumber == 3)
-			mPageToDisplay = settings.getInt("page3", 0);
-		
 	}
 }

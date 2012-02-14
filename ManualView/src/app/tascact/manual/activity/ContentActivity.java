@@ -11,6 +11,9 @@
 
 package app.tascact.manual.activity;
 
+import java.util.Calendar;
+import java.util.Random;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
@@ -43,6 +46,13 @@ public class ContentActivity extends Activity
         
         RelativeLayout.LayoutParams mParams = null;
         
+        int red = 0;
+        int green = 0;
+        int blue = 0;
+        Calendar c = Calendar.getInstance(); 
+        int seconds = c.get(Calendar.SECOND);
+        Random rand = new Random();
+        rand.setSeed(seconds);
         for(int i = 0; i < mPageCount; ++i)
 		{
         	// ����� ������ ����������
@@ -50,11 +60,16 @@ public class ContentActivity extends Activity
 			// ������� 130 px
 			newRow.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 130));
 			// ��� ������
-			if(i % 2 == 0)
+			/*if(i % 2 == 0)
 				newRow.setBackgroundColor(Color.rgb(214, 214, 169));
 			else
-				newRow.setBackgroundColor(Color.rgb(224, 224, 168));
-
+				newRow.setBackgroundColor(Color.rgb(224, 224, 168));*/
+			red = (red + rand.nextInt()) % 256;
+			green = (green + rand.nextInt()) % 256;
+			blue = (blue + rand.nextInt()) % 256;
+			newRow.setBackgroundColor(Color.rgb(red, green, blue));
+			
+			
 			// ����� � ��������
 			TextView text = new TextView(this);
 			ImageView img = new ImageView(this);

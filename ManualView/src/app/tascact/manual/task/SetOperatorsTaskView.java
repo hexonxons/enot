@@ -254,10 +254,12 @@ public class SetOperatorsTaskView extends TaskView
 						if(event.getEventTime() - mPrevTouchTime > 100)
 						{
 							mPrevTouchTime = event.getEventTime();
-							
+							if(!((KeyView) v).isSelectable())
+								return true;
 							if(mPressedKey == null)
 							{
 								mPressedKey = (KeyView) v;
+								mPressedKey.setFocus(false);
 							}
 							else
 								if(mPressedKey == v)
@@ -266,6 +268,7 @@ public class SetOperatorsTaskView extends TaskView
 								{
 									mPressedKey.setSelected(false);
 									mPressedKey = (KeyView) v;
+									mPressedKey.setFocus(false);
 								}
 						}
 						return false;
@@ -290,7 +293,8 @@ public class SetOperatorsTaskView extends TaskView
 		public void setKeyLabel(String label)
 		{
 			if(mPressedKey != null)
-				mPressedKey.setKeyLabel(label);
+				//mPressedKey.setKeyLabel(label);
+				mPressedKey.addSymb(label);
 		}
 		
 		public void setSelected(boolean selected)
@@ -410,6 +414,7 @@ public class SetOperatorsTaskView extends TaskView
 		private boolean mSelectable = false;
 		// является ли выделенной
 		private boolean mSelected = false;
+		private boolean focus = false;
 		
 		// время предыдущего касания
 		private long mPrevTouchTime = 0;
@@ -490,10 +495,28 @@ public class SetOperatorsTaskView extends TaskView
 		{
 			return mSelected;
 		}
+		
 		// setter
 		public void setSelected(boolean selected)
 		{
 			this.mSelected = selected;
+			focus = selected;
+			invalidate();
+		}
+		
+		public void setFocus(boolean focus)
+		{
+			this.focus = focus;
+		}
+		
+		public void addSymb(String symb)
+		{
+			if(!focus)
+				mKeyLabel = symb;
+			else
+				if(mKeyLabel.length() < 2)
+					mKeyLabel += symb;
+			focus = true;
 			invalidate();
 		}
 		

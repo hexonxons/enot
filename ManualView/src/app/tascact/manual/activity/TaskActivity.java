@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import app.tascact.manual.R;
 import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
@@ -73,7 +75,21 @@ public class TaskActivity extends Activity
 		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
-			mTaskView.CheckTask();
+			int eventAction = event.getAction();
+			
+			if (eventAction == MotionEvent.ACTION_DOWN)
+			{
+				((ImageView)v).setImageResource(R.drawable.checked);
+				return true;
+			}
+			
+			if (eventAction == MotionEvent.ACTION_UP)
+			{
+				((ImageView)v).setImageResource(R.drawable.check);
+				mTaskView.CheckTask();
+				return true;
+			}
+			
 			return true;
 		}
 	};
@@ -83,7 +99,21 @@ public class TaskActivity extends Activity
 		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
-			mTaskView.RestartTask();
+			int eventAction = event.getAction();
+			
+			if (eventAction == MotionEvent.ACTION_DOWN)
+			{
+				((ImageView)v).setImageResource(R.drawable.restarted);
+				return true;
+			}
+			
+			if (eventAction == MotionEvent.ACTION_UP)
+			{
+				((ImageView)v).setImageResource(R.drawable.restart);
+				mTaskView.RestartTask();
+				return true;
+			}
+			
 			return true;
 		}
 	};
