@@ -12,6 +12,7 @@ import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.R;
 import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsTaskView;
+import app.tascact.manual.task.ConnectElementsTaskViewBeta;
 import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.view.TaskControlView;
 import app.tascact.manual.view.TaskView;
@@ -45,6 +46,9 @@ public class TaskActivity extends Activity
 	    			break;
 	    		case 3:
 	    			mTaskView = new SetOperatorsTaskView(this, extras.getInt("ManualNumber"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+	    			break;
+	    		case 99:
+	    			mTaskView = new ConnectElementsTaskViewBeta(this, extras.getInt("ManualNumber"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
 	    			break;
 	    		default:
 	    			break;

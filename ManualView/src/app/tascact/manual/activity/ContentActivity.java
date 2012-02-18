@@ -60,14 +60,14 @@ public class ContentActivity extends Activity
 			// ������� 130 px
 			newRow.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 130));
 			// ��� ������
-			/*if(i % 2 == 0)
+			if(i % 2 == 0)
 				newRow.setBackgroundColor(Color.rgb(214, 214, 169));
 			else
-				newRow.setBackgroundColor(Color.rgb(224, 224, 168));*/
-			red = (red + rand.nextInt()) % 256;
+				newRow.setBackgroundColor(Color.rgb(224, 224, 168));
+				/*red = (red + rand.nextInt()) % 256;
 			green = (green + rand.nextInt()) % 256;
 			blue = (blue + rand.nextInt()) % 256;
-			newRow.setBackgroundColor(Color.rgb(red, green, blue));
+			newRow.setBackgroundColor(Color.rgb(red, green, blue));*/
 			
 			
 			// ����� � ��������
