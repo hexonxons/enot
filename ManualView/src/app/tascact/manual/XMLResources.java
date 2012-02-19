@@ -9,7 +9,7 @@
 package app.tascact.manual;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
@@ -33,7 +33,8 @@ public class XMLResources {
 	private static final String BOOK_TAG = "book";
 	private static final String PAGE_TAG = "page";
 	private static final String TASK_TAG = "task";
-	private static final String RES_TAG = "PageResources";
+	private static final String RES_LIST_TAG = "PageResources";
+	private static final String RES_TAG = "PageResource";
 	private static final String TYPE_ATTR = "type";
 	
 	
@@ -47,11 +48,11 @@ public class XMLResources {
 	 * @throws Throwable is thrown on any possible error.
 	 */
 	//TODO should if throw different exceptions?
-	public XMLResources(Context context, String XMLMarkupFile) throws Throwable {
+	public XMLResources(Context context, int XMLMarkupResourceId) throws Throwable {
 		this.context = context;
 	
-		FileInputStream fis = new FileInputStream(XMLMarkupFile);
-		InputStreamReader isr = new InputStreamReader(fis);
+		InputStream in = context.getResources().openRawResource(XMLMarkupResourceId); 
+		InputStreamReader isr = new InputStreamReader(in);
 		BufferedReader br = new BufferedReader(isr);
 		StringBuffer XMLMarkupBuffer = new StringBuffer();
 		
@@ -60,15 +61,19 @@ public class XMLResources {
 			XMLMarkupBuffer.append(text);
 			XMLMarkupBuffer.append("\n");
 		}
-		fis.close();
 		String XMLMarkup = XMLMarkupBuffer.toString();
-		
+		in.close();
 		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		InputSource is = new InputSource();
 		is.setCharacterStream(new StringReader(XMLMarkup));
 		resources = db.parse(is);
+	}
+	
+	public XMLResources(Context context, String XMLMarkupFile) throws Throwable {
+		// TODO Say "no" to hardcode
+		this(context, context.getResources().getIdentifier(XMLMarkupFile, "raw", "app.tascact.manual"));
 	}
 	
 	/**
@@ -86,14 +91,15 @@ public class XMLResources {
 	
 	/**
 	 * Returns drawable resources required by specified page.
-	 * @param docId document to refer.
-	 * @param pageId page of document to refer.
+	 * @param pageId page of document to refer. Index 1-based.
 	 * @return returns null on failure.
 	 */
-	public int[] getPageResources(int pageId) {
+	public int[] getPageResources(int pageId) {				
 		String expr = "/" + BOOK_TAG + "/" + PAGE_TAG + "["
-				+ Integer.toString(pageId) + "]/" + RES_TAG + "";
+				+ Integer.toString(pageId) + "]/" + RES_LIST_TAG + "/"
+				+ RES_TAG;
 		NodeList nl = (NodeList) evalXpathExpr(expr, XPathConstants.NODESET);
+		Log.d("XML", expr);
 		if (nl == null) {
 			return null;
 		}
@@ -102,8 +108,10 @@ public class XMLResources {
 
 		for (int i = 0; i < nl.getLength(); ++i) {
 			String name = nl.item(i).getTextContent();
+			name = name.trim();
 			Resources res = context.getResources();
-			res.getIdentifier(name, "drawable", null);
+			//TODO /manifest/@package
+			pageResources[i] = res.getIdentifier(name, "drawable", "app.tascact.manual");
 		}
 
 		return pageResources;
@@ -111,9 +119,8 @@ public class XMLResources {
 
 	/**
 	 * Returns Node referencing to specified task in XML document.
-	 * @param docId document to refer.
-	 * @param pageId page of document to refer.
-	 * @param taskId task id to refer.
+	 * @param pageId page of document to refer. Index 1-based.
+	 * @param taskId task id to refer. Index 1-based.
 	 * @return returns null on failure.
 	 */
 	public Node GetTaskResources(int pageId, int taskId) {
@@ -147,9 +154,8 @@ public class XMLResources {
 		try {
 			XPathFactory fac = XPathFactory.newInstance();
 			XPath xpath = fac.newXPath();		
-			XPathExpression pathexp;
-			pathexp = xpath.compile("/" + BOOK_TAG + "/" + PAGE_TAG);
-			return pathexp.evaluate(resources, XPathConstants.NODESET);
+			XPathExpression pathexp = xpath.compile(expr);
+			return pathexp.evaluate(resources, rType);
 		}
 		catch (XPathExpressionException e) {
 			e.printStackTrace();

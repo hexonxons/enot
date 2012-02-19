@@ -72,7 +72,7 @@ public class HomeActivity extends Activity
    		public void onClick(View v)
    		{
 			Intent intent = new Intent(v.getContext(), ManualActivity.class);
-			intent.putExtra("bookName", "book.xml");
+			intent.putExtra("bookName", "book1");
    			startActivity(intent);
    		}
    	};

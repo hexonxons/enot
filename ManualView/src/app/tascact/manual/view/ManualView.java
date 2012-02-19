@@ -14,6 +14,7 @@ package app.tascact.manual.view;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import app.tascact.manual.CResources;
@@ -26,10 +27,10 @@ public class ManualView extends LinearLayout
 	private OnTouchListener mTouchListener = null;
 	private OnClickListener mClickListener = null;
 	
-    public ManualView(Context context, OnTouchListener touchListener, OnClickListener clickListener, String bookName) throws Throwable
+    public ManualView(Context context, OnTouchListener touchListener, OnClickListener clickListener, XMLResources markup)
     {
 		super(context);		
-		mResources = new XMLResources(context, bookName);
+		mResources = markup;
 		this.setOrientation(1);
 		this.setBackgroundColor(Color.WHITE);
 		
@@ -37,14 +38,16 @@ public class ManualView extends LinearLayout
 		mTouchListener = touchListener;
 	}
     
-    @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
-	{
-        super.onSizeChanged(w, h, oldw, oldh);
-    }
-    
     public void SetPage(int pageNum)
     {
     	mPageRes = mResources.getPageResources(pageNum);
+    	
+    	String dbg = new String();
+    	for (int i = 0; i < mPageRes.length; ++i) {
+    		dbg += Integer.toString(mPageRes[i]) + " ";
+    	}
+    	Log.d("XML", dbg);
+    	
     	this.removeAllViews();
     	
 		for(int i = 0; i < mPageRes.length; ++i)

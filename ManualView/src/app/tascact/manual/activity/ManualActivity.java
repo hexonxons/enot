@@ -25,7 +25,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import app.tascact.manual.CResources;
 import app.tascact.manual.XMLResources;
 import app.tascact.manual.view.ManualControlView;
 import app.tascact.manual.view.ManualView;
@@ -45,7 +44,7 @@ public class ManualActivity extends Activity
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		
+
 		Bundle extras = getIntent().getExtras();
 		mManualName = extras.getString("bookName");
 		mGestureDetector = new GestureDetector(this, new GestureListener());
@@ -56,14 +55,11 @@ public class ManualActivity extends Activity
 			Log.e("XML", e.getMessage());
 			finish();
 		}
+
+		mPageToDisplay = 1;
 		
 		mMainLayout = new LinearLayout(this);
-		try {
-			mManualView = new ManualView(this, mTouchListener, mClickListener, mManualName);
-		} catch (Throwable e) {
-			Log.e("XML", "falled in ManualActivity", e);
-			finish();
-		}
+		mManualView = new ManualView(this, mTouchListener, mClickListener, mResources);
 		mControl = new ManualControlView(this);
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		mMainLayout.setOrientation(1);
@@ -97,9 +93,8 @@ public class ManualActivity extends Activity
 				if(event.getEventTime() - mPrevTouchTime > 250)
 			    {
 					mPrevTouchTime = event.getEventTime();
-					mPageToDisplay--;
-					if(mPageToDisplay < 0)
-						mPageToDisplay = 0;
+					if(mPageToDisplay > 1)
+						--mPageToDisplay;
 					
 					SavePreferences();
 					mManualView.SetPage(mPageToDisplay);
@@ -177,18 +172,16 @@ public class ManualActivity extends Activity
 		{
 			if(velocityX < -1500)
 			{
-				mPageToDisplay++;
-				if(mPageToDisplay >= mResources.getPageNumber())
-					mPageToDisplay = mResources.getPageNumber() - 1;
+				if(mPageToDisplay < mResources.getPageNumber())
+					++mPageToDisplay;
 				
 				SavePreferences();
 				mManualView.SetPage(mPageToDisplay);
 			}			
 			if(velocityX > 1500)
 			{
-				mPageToDisplay--;
-				if(mPageToDisplay < 0)
-					mPageToDisplay = 0;
+				if(mPageToDisplay > 1)
+					--mPageToDisplay;
 				
 				SavePreferences();
 				mManualView.SetPage(mPageToDisplay);
@@ -208,9 +201,9 @@ public class ManualActivity extends Activity
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
-		if(mManualName.equals("/sdcard/text.txt"))
+		if(mManualName.equals("book1"))
 			editor.putInt("page1", mPageToDisplay);
-		//if(mManualName == 2)
+		//if(mManualName.equals("book2"))
 		//	editor.putInt("page2", mPageToDisplay);
 		editor.commit();
 	}
@@ -218,9 +211,9 @@ public class ManualActivity extends Activity
 	private void LoadPreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		if(mManualName.equals("/sdcard/text.txt"))
-			mPageToDisplay = settings.getInt("page1", 0);
-		//if(mManualName == 2)
+		if(mManualName.equals("book1"))
+			mPageToDisplay = settings.getInt("page1", 1);
+		//if(mManualName.equals("book2"))
 		//	mPageToDisplay = settings.getInt("page2", 0);
 	}
 }
