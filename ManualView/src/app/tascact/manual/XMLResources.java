@@ -8,6 +8,9 @@
  */
 package app.tascact.manual;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 
 import javax.xml.namespace.QName;
@@ -30,20 +33,55 @@ public class XMLResources {
 	private static final String BOOK_TAG = "book";
 	private static final String PAGE_TAG = "page";
 	private static final String TASK_TAG = "task";
+	private static final String RES_TAG = "PageResources";
 	private static final String TYPE_ATTR = "type";
+	
 	
 	private Context context;
 	private Document resources;
 	
-	// TODO handle Exceptions within constructor
-	public XMLResources(Context context, String bookXML) throws Exception {
+	/**
+	 * Parses given xml file.
+	 * @param context 
+	 * @param XMLMarkupFile XML-markup containing file.
+	 * @throws Throwable is thrown on any possible error.
+	 */
+	//TODO should if throw different exceptions?
+	public XMLResources(Context context, String XMLMarkupFile) throws Throwable {
 		this.context = context;
+	
+		FileInputStream fis = new FileInputStream(XMLMarkupFile);
+		InputStreamReader isr = new InputStreamReader(fis);
+		BufferedReader br = new BufferedReader(isr);
+		StringBuffer XMLMarkupBuffer = new StringBuffer();
+		
+		String text;
+		while ((text = br.readLine()) != null) {
+			XMLMarkupBuffer.append(text);
+			XMLMarkupBuffer.append("\n");
+		}
+		fis.close();
+		String XMLMarkup = XMLMarkupBuffer.toString();
+		
 		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		InputSource is = new InputSource();
-		is.setCharacterStream(new StringReader(bookXML));
+		is.setCharacterStream(new StringReader(XMLMarkup));
 		resources = db.parse(is);
+	}
+	
+	/**
+	 * 
+	 * @return null on failure.
+	 */
+	public Integer getPageNumber() {
+		String expr = "/" + BOOK_TAG + "/" + PAGE_TAG;
+		NodeList nl = (NodeList)evalXpathExpr(expr, XPathConstants.NODESET);
+		if (nl == null)
+			return null;
+		
+		return nl.getLength();
 	}
 	
 	/**
@@ -53,7 +91,8 @@ public class XMLResources {
 	 * @return returns null on failure.
 	 */
 	public int[] getPageResources(int pageId) {
-		String expr = "//" + BOOK_TAG + "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]";
+		String expr = "/" + BOOK_TAG + "/" + PAGE_TAG + "["
+				+ Integer.toString(pageId) + "]/" + RES_TAG + "";
 		NodeList nl = (NodeList) evalXpathExpr(expr, XPathConstants.NODESET);
 		if (nl == null) {
 			return null;
@@ -78,13 +117,20 @@ public class XMLResources {
 	 * @return returns null on failure.
 	 */
 	public Node GetTaskResources(int pageId, int taskId) {
-		String expr = "//" + BOOK_TAG+ "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]/"
+		String expr = "/" + BOOK_TAG+ "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]/"
 				+ TASK_TAG + "[" + Integer.toString(taskId) + "]";
 		return (Node) evalXpathExpr(expr, XPathConstants.NODE);
 	}
 
+	// TODO why task type should be an integer type?
+	/**
+	 * 
+	 * @param pageId
+	 * @param taskId
+	 * @return null on failure.
+	 */
 	public Integer getTaskType(int pageId, int taskId) {
-		String expr = "//" + BOOK_TAG+ "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]/"
+		String expr = "/" + BOOK_TAG+ "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]/"
 				+ TASK_TAG + "[" + Integer.toString(taskId) + "]";
 		Node task = (Node)evalXpathExpr(expr, XPathConstants.NODE);
 		String s = ((Attr)task.getAttributes().getNamedItem(TYPE_ATTR)).getValue();
@@ -102,7 +148,7 @@ public class XMLResources {
 			XPathFactory fac = XPathFactory.newInstance();
 			XPath xpath = fac.newXPath();		
 			XPathExpression pathexp;
-			pathexp = xpath.compile("//" + BOOK_TAG + "/" + PAGE_TAG);
+			pathexp = xpath.compile("/" + BOOK_TAG + "/" + PAGE_TAG);
 			return pathexp.evaluate(resources, XPathConstants.NODESET);
 		}
 		catch (XPathExpressionException e) {
