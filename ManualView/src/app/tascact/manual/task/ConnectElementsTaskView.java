@@ -1,5 +1,10 @@
 package app.tascact.manual.task;
 
+import javax.xml.xpath.XPathConstants;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,11 +16,13 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.view.MotionEvent;
 import app.tascact.manual.CResources;
+import app.tascact.manual.XMLResources;
+import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
 public class ConnectElementsTaskView extends TaskView
 {
-	// размеры экрана
+	// �������������� ������������
 	private int mWidth = 0;
 	private int mHeight = 0;
 	
@@ -31,19 +38,52 @@ public class ConnectElementsTaskView extends TaskView
 	private Answer[] mAnswers = null;
 	private boolean mAnswer = true;
 	private boolean isSetLine = false;
-	private CResources mResources = null;
+	private XMLResources mResources = null;
 	private int mTouchedImageId = 0;
 	
-    public ConnectElementsTaskView(Context context, int ManualNumber, int PageNumber, int TaskNumber)
+    public ConnectElementsTaskView(Context context, XMLResources markup, int PageNumber, int TaskNumber)
     {
-		super(context,ManualNumber, PageNumber, TaskNumber);
-		mResources = new CResources(ManualNumber);
+		super(context);
+		mResources = markup;
 		mPrevTouchPoint = new PointF();
 		mAlertDialog = new AlertDialog.Builder(context).create();
-		mTaskResources = mResources.GetTaskResources(PageNumber, TaskNumber);
-		mTaskAnswers = mResources.GetTaskAnswer(PageNumber, TaskNumber);
+		Node res = mResources.getTaskResources(PageNumber, TaskNumber);
+		
+		// Getting resources of this task
+		NodeList taskRes = (NodeList) XMLUtils.evalXpathExpr(res,
+				"./TaskResources/TaskResource", XPathConstants.NODESET);
+		mTaskResources = new int[taskRes.getLength()];
+		for (int i = 0; i < taskRes.getLength(); ++i) {
+			String img = taskRes.item(i).getTextContent();
+			mTaskResources[i] = getResources().getIdentifier(img, "drawable",
+					context.getPackageName());
+		}		
+		
+		// Getting answer resources
+		NodeList taskAns = (NodeList) XMLUtils.evalXpathExpr(res,
+				"./TaskAnswer/Answer", XPathConstants.NODESET);
+		mTaskAnswers = new int[taskAns.getLength()][2]; 
+		for (int i = 0; i < taskAns.getLength(); ++i) {
+			Node ans = taskAns.item(i);
+						
+			String ans1 = ((Node) XMLUtils.evalXpathExpr(ans,
+					"./TaskResource[1]", XPathConstants.NODE))
+					.getTextContent();
+			String ans2 = ((Node) XMLUtils.evalXpathExpr(ans,
+					"./TaskResource[2]", XPathConstants.NODE))
+					.getTextContent();
+
+			mTaskAnswers[i][0] = getResources().getIdentifier(ans1, "drawable",
+					context.getPackageName());
+			mTaskAnswers[i][1] = getResources().getIdentifier(ans2, "drawable",
+					context.getPackageName());
+					
+		}
+		
+		
 		
 		mAnswers = new Answer[mTaskAnswers.length];
+		
 		for(int i = 0; i < mTaskAnswers.length; ++i)
 		{
 			mAnswers[i] = new Answer(mTaskAnswers[i][0], mTaskAnswers[i][1]);
@@ -57,7 +97,7 @@ public class ConnectElementsTaskView extends TaskView
 		setBackgroundColor(Color.WHITE);
 	}
     
-    // получение размеров экрана
+    // ������������������ ���������������� ������������
     @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
         super.onSizeChanged(w, h, oldw, oldh);
@@ -67,7 +107,7 @@ public class ConnectElementsTaskView extends TaskView
         mCanvas = new Canvas(mBitmap);
     }
     
-    // отрисовка страницы
+    // ������������������ ����������������
     @Override protected void onDraw(Canvas canvas) 
 	{
     	Point[] set = mTask.getSetCoord(mWidth, mHeight);
@@ -82,16 +122,16 @@ public class ConnectElementsTaskView extends TaskView
     
     @Override public boolean onTouchEvent(MotionEvent event)
 	{
-		// получаем action
+		// ���������������� action
 	    int eventAction = event.getAction(); 
 	    
-	    // получаем координаты прикасания
+	    // ���������������� �������������������� ��������������������
 	    float X = event.getX(); 
 	    float Y = event.getY(); 
 	    		
 	    switch (eventAction)
 	    { 
-	    	// action - нажали на экран
+	    	// action - ������������ ���� ����������
 		    case MotionEvent.ACTION_DOWN:
 		    {
 		    	mTouchedImageId = mTask.getTouchedImgId((int)X, (int)Y);
@@ -110,7 +150,7 @@ public class ConnectElementsTaskView extends TaskView
 	    		break; 
 		    }
 		    
-		    // action - ведем палец по экрану
+		    // action - ���������� ���������� ���� ������������
 		    case MotionEvent.ACTION_MOVE:
 		    {
 		    	if(!isSetLine)
@@ -127,7 +167,7 @@ public class ConnectElementsTaskView extends TaskView
 		        break; 
 		    }
 		    
-		    // action - убрали палец
+		    // action - ������������ ����������
 		    case MotionEvent.ACTION_UP:
 		    {
 		    	if(!isSetLine)
@@ -199,7 +239,7 @@ public class ConnectElementsTaskView extends TaskView
     
     private void DrawCurveLine(float firstX, float firstY, float secondX, float secondY, float lineWidth)
 	{
-		// запоминаем предыдущую ширину линии
+		// �������������������� �������������������� ������������ ����������
 		float lPrevWidth = mPaint.getStrokeWidth();
 		mPaint.setStrokeWidth(lineWidth);
 		mCanvas.drawLine(firstX, firstY, secondX, secondY, mPaint);
@@ -254,7 +294,7 @@ public class ConnectElementsTaskView extends TaskView
     			mSetCoord[i] = new Point();
     		}
     		
-    		// получаем массив размещения элементов
+    		// ���������������� ������������ �������������������� ������������������
     		for(int i = 0; i < TaskResId.length; ++i)
     		{
     			mTaskResBitmaps[i] = BitmapFactory.decodeResource(context.getResources(), TaskResId[i]);
@@ -273,7 +313,7 @@ public class ConnectElementsTaskView extends TaskView
     			int picWidth = mTaskSet[i].width;
     			int picHeight = mTaskSet[i].height;
     			
-    			// волшебная формула по вставке картинки посередине блока
+    			// ������������������ �������������� ���� �������������� ���������������� �������������������� ����������
     			
     			/*
     			 *  	 _________________

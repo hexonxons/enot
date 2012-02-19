@@ -40,14 +40,7 @@ public class ManualView extends LinearLayout
     
     public void SetPage(int pageNum)
     {
-    	mPageRes = mResources.getPageResources(pageNum);
-    	
-    	String dbg = new String();
-    	for (int i = 0; i < mPageRes.length; ++i) {
-    		dbg += Integer.toString(mPageRes[i]) + " ";
-    	}
-    	Log.d("XML", dbg);
-    	
+    	mPageRes = mResources.getPageResources(pageNum);    	
     	this.removeAllViews();
     	
 		for(int i = 0; i < mPageRes.length; ++i)

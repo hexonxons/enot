@@ -1,8 +1,8 @@
 /*
- * View задач по решению выражение
+ * View ���������� ���� �������������� ������������������
  * 
  * 
- * Порядок обработки событий нажатия:
+ * �������������� ������������������ �������������� ��������������:
  * 
  */
 
@@ -36,24 +36,24 @@ public class SetOperatorsTaskView extends TaskView
 	private boolean mAnswer = true;
 	private boolean mIsDescSet = false;
 	private AlertDialog mAlertDialog = null;
-	// время предыдущего касания
+	// ���������� ���������������������� ��������������
 	private long mPrevTouchTime = 0;
 	
 	private int DELtask = 0;
 	public SetOperatorsTaskView(Context context, int ManualNumber, int PageNumber, int TaskNumber)
 	{
-		super(context, ManualNumber, PageNumber, TaskNumber);
-		// создаем ресурсы
+		super(context);
+		// �������������� ��������������
 		mResources = new CResources(ManualNumber);
-		// получаем данные задачи
+		// ���������������� ������������ ������������
 		mTaskResources = mResources.GetStringTaskResources(PageNumber, TaskNumber);
-		// получаем ответы для задачи
+		// ���������������� ������������ ������ ������������
 		mTaskAnswers = mResources.GetTaskAnswerArray(PageNumber, TaskNumber);
-		// основная раскладка для задачи
+		// ���������������� ������������������ ������ ������������
 		mMainLayout = new RelativeLayout(context);
-		// клавиатура с размером кнопок 60x60 px
+		// �������������������� �� ���������������� ������������ 60x60 px
 		mKeyboard = new KeyboardView(context, 60, 60);
-		// задаем белый фон
+		// ������������ ���������� ������
 		mMainLayout.setBackgroundColor(Color.WHITE);
 		mAlertDialog = new AlertDialog.Builder(context).create();
 		int verticalOffcet = 50;
@@ -88,15 +88,15 @@ public class SetOperatorsTaskView extends TaskView
 			params.setMargins(250, 500, 0, 0);
 			mMainLayout.addView(second, params);
 			
-			// создаем выражения, которые надо будет закончить
+			// �������������� ������������������, �������������� �������� ���������� ������������������
 			for(int i = 0; i < mTaskResources.length; ++i)
 			{
 				ExpressionView expression = new ExpressionView(context, mTaskResources[i], 35, 35);
-				// слушатель на каждое выражение
+				// ������������������ ���� ������������ ������������������
 				expression.setOnTouchListener(new OnTouchListener()
 				{
-					// запоминаем только view, в котором произошло касание
-					// нет необходимости дальше обрабатывать (return true)
+					// �������������������� ������������ view, �� �������������� ������������������ ��������������
+					// ������ �������������������������� ������������ ������������������������ (return true)
 					@Override
 					public boolean onTouch(View v, MotionEvent event) 
 					{
@@ -109,7 +109,7 @@ public class SetOperatorsTaskView extends TaskView
 								mSelectedExpression = (ExpressionView) v;
 							}
 							else
-								// если выбираем то же самое выражение, то 
+								// �������� ���������������� ���� ���� ���������� ������������������, ���� 
 								if(mSelectedExpression == v)
 								{
 									if(mSelectedExpression.getPressedKey() == null)
@@ -161,21 +161,21 @@ public class SetOperatorsTaskView extends TaskView
 					params.setMargins(384, 714, 0, 0);
 				}
 				
-				// добавляем выражение
+				// ������������������ ������������������
 				mMainLayout.addView(expression, params);
 			}
 		}
 		else
 		{
-			// создаем выражения, которые надо будет закончить
+			// �������������� ������������������, �������������� �������� ���������� ������������������
 			for(int i = 0; i < mTaskResources.length; ++i)
 			{
 				ExpressionView expression = new ExpressionView(context, mTaskResources[i], 60, 60);
-				// слушатель на каждое выражение
+				// ������������������ ���� ������������ ������������������
 				expression.setOnTouchListener(new OnTouchListener()
 				{
-					// запоминаем только view, в котором произошло касание
-					// нет необходимости дальше обрабатывать (return true)
+					// �������������������� ������������ view, �� �������������� ������������������ ��������������
+					// ������ �������������������������� ������������ ������������������������ (return true)
 					@Override
 					public boolean onTouch(View v, MotionEvent event) 
 					{
@@ -188,7 +188,7 @@ public class SetOperatorsTaskView extends TaskView
 								mSelectedExpression = (ExpressionView) v;
 							}
 							else
-								// если выбираем то же самое выражение, то 
+								// �������� ���������������� ���� ���� ���������� ������������������, ���� 
 								if(mSelectedExpression == v)
 								{
 									if(mSelectedExpression.getPressedKey() == null)
@@ -206,7 +206,7 @@ public class SetOperatorsTaskView extends TaskView
 				
 				
 				/*
-				 * параметры раскладки
+				 * ������������������ ������������������
 				 * ------------------
 				 * |   Description  |
 				 * |(expr1)	(expr2)	|
@@ -216,43 +216,43 @@ public class SetOperatorsTaskView extends TaskView
 				 */
 				LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				
-				// Топорное размещение
+				// ���������������� ��������������������
 				if(mTaskResources[i].length() * 60 > 400)
 				{
 					horizontalOffset = (800 - mTaskResources[i].length() * 60)/2;
 					if(i != 0)
 						verticalOffcet += 75;
 				}
-				// если этот элемент помещается в 400px - половина ширины экрана
+				// �������� �������� �������������� �������������������� �� 400px - ���������������� ������������ ������������
 				else
 				{
-					// если этот элемент не последний
+					// �������� �������� �������������� ���� ������������������
 					if(i != mTaskResources.length - 1)
 					{
-						// если следующий элемент не помещается в 400px
+						// �������� ������������������ �������������� ���� �������������������� �� 400px
 						if(mTaskResources[i + 1].length() * 60 > 400)
 						{
-							// если смещение предыдущего элемента < 400, то есть текущий элемент - 2й в строчке
-							// то задаем горизонтальное смещение на середину второго блока в 400px
-							// и не делаем сдвига по вертикали
+							// �������� ���������������� ���������������������� ���������������� < 400, ���� �������� �������������� �������������� - 2�� �� ��������������
+							// ���� ������������ ���������������������������� ���������������� ���� ���������������� �������������� ���������� �� 400px
+							// �� ���� ������������ ������������ ���� ������������������
 							if(horizontalOffset < 400)
 							{
 								horizontalOffset = 400 + (400 - mTaskResources[i].length()* 60) / 2;
 							}
 						}
-						// если следующий элемент помещается в 400px
+						// �������� ������������������ �������������� �������������������� �� 400px
 						else
 						{
-							// если смещение предыдущего элемента < 400, то текущий элемент - 2й в строчке
-							// то задаем горизонтальное смещение на середину второго блока в 400px
-							// и не делаем сдвига по вертикали
+							// �������� ���������������� ���������������������� ���������������� < 400, ���� �������������� �������������� - 2�� �� ��������������
+							// ���� ������������ ���������������������������� ���������������� ���� ���������������� �������������� ���������� �� 400px
+							// �� ���� ������������ ������������ ���� ������������������
 							if(horizontalOffset < 400)
 							{
 								horizontalOffset = 400 + (400 - mTaskResources[i].length()* 60) / 2;
 							}
-							// если смещение предыдущего элемента > 400, то  текущий элемент - 1й в строчке
-							// задаем горизонтальное смещение на середину первого блока в 400px
-							// и делаем сдвиг по вертикали
+							// �������� ���������������� ���������������������� ���������������� > 400, ����  �������������� �������������� - 1�� �� ��������������
+							// ������������ ���������������������������� ���������������� ���� ���������������� �������������� ���������� �� 400px
+							// �� ������������ ���������� ���� ������������������
 							else
 							{
 								horizontalOffset = (400 - mTaskResources[i].length() * 60) / 2;
@@ -260,7 +260,7 @@ public class SetOperatorsTaskView extends TaskView
 							}
 						}
 					}
-					// последний элемент помещается в 400px
+					// ������������������ �������������� �������������������� �� 400px
 					else
 					{
 						if(horizontalOffset < 400)
@@ -279,7 +279,7 @@ public class SetOperatorsTaskView extends TaskView
 					horizontalOffset  = (800 - mTaskResources[i].length() * 60)/2;
 				
 				params.setMargins(horizontalOffset, verticalOffcet, 0, 0);
-				// добавляем выражение
+				// ������������������ ������������������
 				mMainLayout.addView(expression, params);
 			}
 		}
@@ -290,7 +290,7 @@ public class SetOperatorsTaskView extends TaskView
 		this.addView(mKeyboard, params);
 	}
 	
-	// вставляем значение
+	// ������������������ ����������������
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{
@@ -384,12 +384,12 @@ public class SetOperatorsTaskView extends TaskView
 			
 			mInputs = new KeyView[inputSz];
 			
-			// проходим по всем символам выражения
+			// ���������������� ���� �������� ���������������� ������������������
 			for(int i = 0; i < expression.length(); ++i)
 			{
-				// извлекаем i-й символ и создаем кнопку
+				// ������������������ i-�� ������������ �� �������������� ������������
 				KeyView key = new KeyView(context, expression.substring(i, i + 1), mWidth, mHeight);
-				// убираем свойство кнопки
+				// �������������� ���������������� ������������
 				key.setTouchable(false);
 				if(expression.charAt(i) == '?')
 				{
@@ -428,10 +428,10 @@ public class SetOperatorsTaskView extends TaskView
 					}
 				});
 				
-				// задаем размеры mWidth x mHeight
+				// ������������ �������������� mWidth x mHeight
 				LayoutParams params = new LayoutParams(mWidth, mHeight);
 				/*
-				 * сдвиг по горизонтали
+				 * ���������� ���� ����������������������
 				 * -----------------
 				 * |(key1)(key2)...|
 				 * -----------------
@@ -441,8 +441,8 @@ public class SetOperatorsTaskView extends TaskView
 			}
 		}
 		
-		// функция задания значения нажатого поля
-		// переделать
+		// �������������� �������������� ���������������� ���������������� ��������
+		// ��������������������
 		public void setKeyLabel(String label)
 		{
 			if(mPressedKey != null)
@@ -495,11 +495,11 @@ public class SetOperatorsTaskView extends TaskView
 		}
 	}
 
-	// Класс клавиатуры
+	// ���������� ��������������������
 	private class KeyboardView extends RelativeLayout
 	{
 		private final String mOperatorsSet = "+-*/><=";
-		// последний нажатый символ на клавиатуре
+		// ������������������ �������������� ������������ ���� ��������������������
 		private String mPressedKey = "";
 		public KeyboardView(Context context, int keyWidth, int keyHeight)
 		{
@@ -514,9 +514,9 @@ public class SetOperatorsTaskView extends TaskView
 				params.setMargins(margin + i * (keyWidth + margin), keyHeight / 2, 0, 0);
 				key.setOnTouchListener(new OnTouchListener()
 				{
-					// Слушатели кнопок
-					// при нажатии сохраняется значение нажатой кнопки
-					// отдаем дальнейшую обработку родителю (return false)
+					// ������������������ ������������
+					// ������ �������������� ���������������������� ���������������� �������������� ������������
+					// ������������ �������������������� ������������������ ���������������� (return false)
 					@Override
 					public boolean onTouch(View v, MotionEvent event)
 					{
@@ -537,9 +537,9 @@ public class SetOperatorsTaskView extends TaskView
 				
 				key.setOnTouchListener(new OnTouchListener()
 				{
-					// Слушатели кнопок
-					// при нажатии сохраняется значение нажатой кнопки
-					// отдаем дальнейшую обработку родителю (return false)
+					// ������������������ ������������
+					// ������ �������������� ���������������������� ���������������� �������������� ������������
+					// ������������ �������������������� ������������������ ���������������� (return false)
 					@Override
 					public boolean onTouch(View v, MotionEvent event)
 					{
@@ -560,19 +560,19 @@ public class SetOperatorsTaskView extends TaskView
 		}
 	}
 	
-	// класс-view кнопки
+	// ����������-view ������������
 	private class KeyView extends ImageView
 	{
 		private String mKeyLabel = null;
-		// является ли кнопкой или просто отображает символ
+		// ���������������� ���� �������������� ������ ������������ �������������������� ������������
 		private boolean mTouchable = true;
-		// является ли выделяемой для вставки символа
+		// ���������������� ���� �������������������� ������ �������������� ��������������
 		private boolean mSelectable = false;
-		// является ли выделенной
+		// ���������������� ���� ��������������������
 		private boolean mSelected = false;
 		private boolean focus = false;
 		
-		// время предыдущего касания
+		// ���������� ���������������������� ��������������
 		private long mPrevTouchTime = 0;
 		
 		private int mWidth = 0;
@@ -596,7 +596,7 @@ public class SetOperatorsTaskView extends TaskView
 			fg.setTextSize((float) (mHeight * 0.75));
 			
 			FontMetrics fm = fg.getFontMetrics();
-			// координаты помещения
+			// �������������������� ������������������
 			float textX = mWidth / 2;
 			float textY = (mHeight - fm.ascent - fm.descent) / 2;
 			canvas.drawText(mKeyLabel, textX, textY, fg);
@@ -621,7 +621,7 @@ public class SetOperatorsTaskView extends TaskView
 			invalidate();
 		}
 		
-		// нажимаема ли кнопка
+		// ������������������ ���� ������������
 		public boolean isTouchable()
 		{
 			return mTouchable;
@@ -634,7 +634,7 @@ public class SetOperatorsTaskView extends TaskView
 			this.mSelected = false;
 		}
 		
-		//выделяема ли кнопка
+		//������������������ ���� ������������
 		public boolean isSelectable()
 		{
 			return mSelectable;
@@ -646,7 +646,7 @@ public class SetOperatorsTaskView extends TaskView
 			this.mTouchable = false;
 		}
 		
-		// выделена ли кнопка
+		// ���������������� ���� ������������
 		public boolean isSelected()
 		{
 			return mSelected;
@@ -676,9 +676,9 @@ public class SetOperatorsTaskView extends TaskView
 			invalidate();
 		}
 		
-		// события нажатия на кнопку - если кнопка выделяема - выделяем ее
-		// и отдаем обработку родителю (return false)
-		// соответственно кнопки клавиатуры обрабатывает клавиатура, а кнопки выражения - выражение
+		// �������������� �������������� ���� ������������ - �������� ������������ ������������������ - ���������������� ����
+		// �� ������������ ������������������ ���������������� (return false)
+		// ���������������������������� ������������ �������������������� ������������������������ ��������������������, �� ������������ ������������������ - ������������������
 		@Override
 		public boolean onTouchEvent(MotionEvent event)
 		{

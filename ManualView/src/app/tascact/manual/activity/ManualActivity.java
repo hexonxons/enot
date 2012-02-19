@@ -141,13 +141,14 @@ public class ManualActivity extends Activity
 		@Override
 		public void onClick(View v)
 		{
-			if(mResources.getTaskType(mPageToDisplay, v.getId()) != null)
+			// Indexes are 1-based
+			if(mResources.getTaskType(mPageToDisplay, v.getId()+1) != null)
    			{
    				Intent intent = new Intent(v.getContext(), TaskActivity.class);
-   				intent.putExtra("ManualNumber", mManualName);
+   				intent.putExtra("ManualName", mManualName);
 	   			intent.putExtra("PageNumber", mPageToDisplay);
-	   			intent.putExtra("TaskNumber", v.getId());
-	   			intent.putExtra("TaskType", mResources.getTaskType(mPageToDisplay, v.getId()));
+	   			intent.putExtra("TaskNumber", v.getId()+1);
+	   			intent.putExtra("TaskType", mResources.getTaskType(mPageToDisplay, v.getId()+1));
 	   			startActivity(intent);
    			}
 		}
