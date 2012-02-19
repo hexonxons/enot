@@ -15,7 +15,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.view.MotionEvent;
-import app.tascact.manual.CResources;
 import app.tascact.manual.XMLResources;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;

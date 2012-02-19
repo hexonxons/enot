@@ -14,7 +14,6 @@ import app.tascact.manual.R;
 import app.tascact.manual.XMLResources;
 import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsTaskView;
-import app.tascact.manual.task.ConnectElementsTaskViewBeta;
 import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.view.TaskControlView;
 import app.tascact.manual.view.TaskView;
@@ -45,14 +44,15 @@ public class TaskActivity extends Activity {
 							extras.getInt("TaskNumber"));
 					break;
 				case 2:
-					// mTaskView = new CompleteTableTaskView(this, markup,
-					// extras.getInt("PageNumber"),
-					// extras.getInt("TaskNumber"));
+					mTaskView = new CompleteTableTaskView(this, markup,
+							extras.getInt("PageNumber"),
+							extras.getInt("TaskNumber"));
 					break;
 				case 3:
-					// mTaskView = new SetOperatorsTaskView(this, markup,
-					// extras.getInt("PageNumber"),
-					// extras.getInt("TaskNumber"));
+					 mTaskView = new SetOperatorsTaskView(this, markup,
+							 extras.getString("ManualName"),
+							 extras.getInt("PageNumber"),
+							 extras.getInt("TaskNumber"));
 					break;
 				case 99:
 					// mTaskView = new ConnectElementsTaskViewBeta(this, markup,

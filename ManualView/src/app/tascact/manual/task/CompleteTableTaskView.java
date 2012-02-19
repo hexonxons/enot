@@ -9,6 +9,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import app.tascact.manual.R;
+import app.tascact.manual.XMLResources;
 import app.tascact.manual.view.TaskView;
 
 public class CompleteTableTaskView extends TaskView {
@@ -38,12 +39,12 @@ public class CompleteTableTaskView extends TaskView {
 
 	private String[][] InitialResources = { { "7", "2", "" }, { "", "6", "9" },
 			{ "5", "", "10" }, { "", "0", "10" }, { "2", "3", "" },
-			{ "������������������", "������������������", "����������" } };
+			{ "Слагаемое", "Слагаемое", "Сумма" } };
 	private String[] InitialKeypadResources = { "1", "2", "3", "4", "5", "6",
 			"7", "8", "9", "0" };
 	private String[] Answers = { "9", "3", "5", "10", "5" };
 
-	public CompleteTableTaskView(Context context, int ManualNumber,
+	public CompleteTableTaskView(Context context, XMLResources markup,
 			int PageNumber, int TaskNumber) {
 		super(context);
 

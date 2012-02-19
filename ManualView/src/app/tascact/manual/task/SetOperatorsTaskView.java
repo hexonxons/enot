@@ -8,7 +8,13 @@
 
 package app.tascact.manual.task;
 
+import javax.xml.xpath.XPathConstants;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import app.tascact.manual.R;
+import app.tascact.manual.XMLResources;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -22,12 +28,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import app.tascact.manual.CResources;
+import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
 public class SetOperatorsTaskView extends TaskView
 {
-	private CResources mResources = null;
+	private XMLResources mResources = null;
 	private String[] mTaskResources = null;
 	private String[] mTaskAnswers = null;
 	private RelativeLayout mMainLayout = null;
@@ -40,20 +46,38 @@ public class SetOperatorsTaskView extends TaskView
 	private long mPrevTouchTime = 0;
 	
 	private int DELtask = 0;
-	public SetOperatorsTaskView(Context context, int ManualNumber, int PageNumber, int TaskNumber)
+	public SetOperatorsTaskView(Context context, XMLResources markup, String ManualName,  int PageNumber, int TaskNumber)
 	{
 		super(context);
-		// �������������� ��������������
-		mResources = new CResources(ManualNumber);
-		// ���������������� ������������ ������������
-		mTaskResources = mResources.GetStringTaskResources(PageNumber, TaskNumber);
-		// ���������������� ������������ ������ ������������
-		mTaskAnswers = mResources.GetTaskAnswerArray(PageNumber, TaskNumber);
-		// ���������������� ������������������ ������ ������������
+		mResources = markup;
+		Node res = markup.getTaskResources(PageNumber, TaskNumber);
+
+		// Getting description of this task
+		Node taskDescr = (Node) XMLUtils.evalXpathExpr(res,
+				"./TaskDescription", XPathConstants.NODE);
+		String descr = null;
+		if (taskDescr != null) {
+			descr = taskDescr.getTextContent();
+		}
+		
+		// Getting resources of this task
+		NodeList taskRes = (NodeList) XMLUtils.evalXpathExpr(res,
+				"./TaskResources/TaskResource", XPathConstants.NODESET);
+		mTaskResources = new String[taskRes.getLength()];
+		for (int i = 0; i < taskRes.getLength(); ++i) {
+			mTaskResources[i] = taskRes.item(i).getTextContent();
+		}
+		
+		// Getting answer resources
+		NodeList taskAns = (NodeList) XMLUtils.evalXpathExpr(res,
+				"./TaskAnswer/Answer", XPathConstants.NODESET);
+		mTaskAnswers = new String[taskAns.getLength()]; 
+		for (int i = 0; i < taskAns.getLength(); ++i) {
+			mTaskAnswers[i] = taskAns.item(i).getTextContent();
+		}
+		
 		mMainLayout = new RelativeLayout(context);
-		// �������������������� �� ���������������� ������������ 60x60 px
 		mKeyboard = new KeyboardView(context, 60, 60);
-		// ������������ ���������� ������
 		mMainLayout.setBackgroundColor(Color.WHITE);
 		mAlertDialog = new AlertDialog.Builder(context).create();
 		int verticalOffcet = 50;
@@ -62,11 +86,11 @@ public class SetOperatorsTaskView extends TaskView
 		
 		
 
-		if(mResources.GetTaskDescription(PageNumber, TaskNumber) != null)
+		if(descr != null)
 		{
 			LayoutParams params = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
 			TextView description = new TextView(context);
-			description.setText(mResources.GetTaskDescription(PageNumber, TaskNumber));
+			description.setText(descr);
 			description.setGravity(Gravity.CENTER_HORIZONTAL);
 			description.setTextSize(30);
 			description.setTextColor(Color.BLACK);
@@ -74,7 +98,7 @@ public class SetOperatorsTaskView extends TaskView
 			mIsDescSet = true;
 		}
 		
-		if(ManualNumber == 2 && PageNumber == 61 && TaskNumber == 2)
+		if(ManualName == "book2" && PageNumber == 61 && TaskNumber == 2)
 		{
 			DELtask = 1;
 			LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
