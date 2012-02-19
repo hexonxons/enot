@@ -1,7 +1,7 @@
 /*
- * ManualActivity класс
+ * ManualActivity ����������
  * 
- * Запуск процесса учебника
+ * ������������ ���������������� ����������������
  * 
  * Copyright 2012 hexonxons
  * 
@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,27 +26,20 @@ import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.CResources;
+import app.tascact.manual.XMLResources;
 import app.tascact.manual.view.ManualControlView;
 import app.tascact.manual.view.ManualView;
 
 public class ManualActivity extends Activity
 {
-	// View раскладки элементов
-	private LinearLayout mMainLayout = null;
-	// View страниц учебника
-	private ManualView mManualView = null;
-	// View элемента управления
-	private ManualControlView mControl = null;
-	// Номер страницы, которую отображаем
-	private int mPageToDisplay = 0;
-	// Ресурсы для построения учебника
-	private CResources mResources = null;
-	// Время предыдущего касания
-	private long mPrevTouchTime = 0;
-	// Номер отображаемого учебника
-	private int mManualNumber = 0;
-	// Обработчик жестов
-	private GestureDetector mGestureDetector = null;
+	private LinearLayout mMainLayout;
+	private ManualView mManualView;
+	private ManualControlView mControl;
+	private int mPageToDisplay;
+	private XMLResources mResources;
+	private long mPrevTouchTime;
+	private String mManualName;
+	private GestureDetector mGestureDetector;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -53,21 +47,29 @@ public class ManualActivity extends Activity
 		super.onCreate(savedInstanceState);
 		
 		Bundle extras = getIntent().getExtras();
-		mManualNumber = extras.getInt("manualId");
+		mManualName = extras.getString("bookName");
 		mGestureDetector = new GestureDetector(this, new GestureListener());
-		mResources = new CResources(mManualNumber);
+		
+		try {
+			mResources = new XMLResources(this, mManualName);
+		} catch (Throwable e) {
+			Log.e("XML", e.getMessage());
+			finish();
+		}
+		
 		mMainLayout = new LinearLayout(this);
-		mManualView = new ManualView(this, mTouchListener, mClickListener, mManualNumber);
+		try {
+			mManualView = new ManualView(this, mTouchListener, mClickListener, mManualName);
+		} catch (Throwable e) {
+			Log.e("XML", "falled in ManualActivity", e);
+			finish();
+		}
 		mControl = new ManualControlView(this);
-		// Лочим ориентацию экранаs
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		// Ориентируем View вертикально
 		mMainLayout.setOrientation(1);
-		// Добавляем View страницы учебника и View управления
 		mMainLayout.addView(mManualView, new LayoutParams(LayoutParams.MATCH_PARENT, 1040));
 		mMainLayout.addView(mControl, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
 		
-		// Задаем обработчики касаний 
 		mControl.mNextButton.setOnTouchListener(new OnTouchListener()
 		{
 			@Override
@@ -76,9 +78,8 @@ public class ManualActivity extends Activity
 				if(event.getEventTime() - mPrevTouchTime > 250)
 			    {
 					mPrevTouchTime = event.getEventTime();
-					mPageToDisplay++;
-					if(mPageToDisplay >= mResources.TotalPages)
-						mPageToDisplay = mResources.TotalPages - 1;
+					if(mPageToDisplay < mResources.getPageNumber())
+						++mPageToDisplay;
 					
 					SavePreferences();
 					mManualView.SetPage(mPageToDisplay);
@@ -116,18 +117,15 @@ public class ManualActivity extends Activity
 			    {
 					mPrevTouchTime = event.getEventTime();
 					Intent intent = new Intent(v.getContext(), ContentActivity.class);
-					intent.putExtra("PageCount", mResources.TotalPages);
+					intent.putExtra("PageCount", mResources.getPageNumber());
 					startActivityForResult(intent, 0);
 			    }
 				return true;
 			}
 		});
 		
-		// Загружаем настройки
 		LoadPreferences();
-		// Задаем отображаемую страницу
 		mManualView.SetPage(mPageToDisplay);
-		// Отображаем
 		setContentView(mMainLayout);
 	}
 	
@@ -148,13 +146,13 @@ public class ManualActivity extends Activity
 		@Override
 		public void onClick(View v)
 		{
-			if(mResources.isTaskSet(mPageToDisplay, v.getId()))
+			if(mResources.getTaskType(mPageToDisplay, v.getId()) != null)
    			{
    				Intent intent = new Intent(v.getContext(), TaskActivity.class);
-   				intent.putExtra("ManualNumber", mManualNumber);
+   				intent.putExtra("ManualNumber", mManualName);
 	   			intent.putExtra("PageNumber", mPageToDisplay);
 	   			intent.putExtra("TaskNumber", v.getId());
-	   			intent.putExtra("TaskType", mResources.GetTaskType(mPageToDisplay, v.getId()));
+	   			intent.putExtra("TaskType", mResources.getTaskType(mPageToDisplay, v.getId()));
 	   			startActivity(intent);
    			}
 		}
@@ -180,8 +178,8 @@ public class ManualActivity extends Activity
 			if(velocityX < -1500)
 			{
 				mPageToDisplay++;
-				if(mPageToDisplay >= mResources.TotalPages)
-					mPageToDisplay = mResources.TotalPages - 1;
+				if(mPageToDisplay >= mResources.getPageNumber())
+					mPageToDisplay = mResources.getPageNumber() - 1;
 				
 				SavePreferences();
 				mManualView.SetPage(mPageToDisplay);
@@ -210,19 +208,19 @@ public class ManualActivity extends Activity
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
-		if(mManualNumber == 1)
+		if(mManualName.equals("/sdcard/text.txt"))
 			editor.putInt("page1", mPageToDisplay);
-		if(mManualNumber == 2)
-			editor.putInt("page2", mPageToDisplay);
+		//if(mManualName == 2)
+		//	editor.putInt("page2", mPageToDisplay);
 		editor.commit();
 	}
 	
 	private void LoadPreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		if(mManualNumber == 1)
-			mPageToDisplay = settings.getInt("page1", 0);;
-		if(mManualNumber == 2)
-			mPageToDisplay = settings.getInt("page2", 0);
+		if(mManualName.equals("/sdcard/text.txt"))
+			mPageToDisplay = settings.getInt("page1", 0);
+		//if(mManualName == 2)
+		//	mPageToDisplay = settings.getInt("page2", 0);
 	}
 }
