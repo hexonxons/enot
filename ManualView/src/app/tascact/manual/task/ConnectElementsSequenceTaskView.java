@@ -8,6 +8,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.view.View;
 import app.tascact.manual.view.TaskView;
 
@@ -22,6 +26,8 @@ public class ConnectElementsSequenceTaskView extends View {
 	private Node inputParams;
 	private Resources resources;
 	private Bitmap[] taskElements;
+	
+	private int width, height;
 
 	public ConnectElementsSequenceTaskView(Context context, Node theInputParams) {
 		super(context);
@@ -43,6 +49,20 @@ public class ConnectElementsSequenceTaskView extends View {
 					"drawable", context.getPackageName());
 			taskElements[i] = BitmapFactory.decodeResource(resources, id);
 		}
+		width = getWidth();
+		height = getHeight();
 	}
-
+	
+	@Override protected void onSizeChanged(int w, int h, int oldw, int oldh){
+		super.onSizeChanged(w, h, oldw, oldh);
+		width = w;
+		height = h;
+	}
+	
+	@Override protected void onDraw(Canvas canvas) 
+	{
+		Paint pnt = new Paint();
+		pnt.setColor(Color.BLACK);
+    	canvas.drawText("This is a new task testing", 10.0f, 10.0f, pnt);
+	}
 }

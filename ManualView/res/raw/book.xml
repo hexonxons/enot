@@ -71,9 +71,7 @@
             <PageResource>manual_1_1_pg9_4</PageResource>
         </PageResources>
          <Tasks>
-            <Task>
-                <TaskNumber>1</TaskNumber>
-                <TaskType>1</TaskType>
+            <Task number="1" tasktype="1">
                 <TaskResources>
                     <TaskResource>manual_1_1_pg9_1_task_1</TaskResource>
                     <TaskResource>manual_1_1_pg9_1_task_2</TaskResource>
