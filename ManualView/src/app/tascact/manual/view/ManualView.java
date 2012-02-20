@@ -1,7 +1,7 @@
 /*
- * ManualView класс
+ * ManualView ����������
  * 
- * Класс работы с учебником
+ * ���������� ������������ �� ������������������
  * 
  * Copyright 2012 hexonxons 
  * 
@@ -14,25 +14,23 @@ package app.tascact.manual.view;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import app.tascact.manual.CResources;
+import app.tascact.manual.XMLResources;
 
 public class ManualView extends LinearLayout
 {
-	// Ресурсы для построения учебника
-	private CResources mResources = null;
-	// Массив ресурсов страницы учебника
+	private XMLResources mResources = null;
 	private int mPageRes[] = null;
-	// Обработчик клика по задаче
 	private OnTouchListener mTouchListener = null;
 	private OnClickListener mClickListener = null;
 	
-    public ManualView(Context context, OnTouchListener touchListener, OnClickListener clickListener, int pageNumber)
+    public ManualView(Context context, OnTouchListener touchListener, OnClickListener clickListener, XMLResources markup)
     {
 		super(context);		
-		mResources = new CResources(pageNumber);
-		// ориентируем View вертикально
+		mResources = markup;
 		this.setOrientation(1);
 		this.setBackgroundColor(Color.WHITE);
 		
@@ -40,18 +38,9 @@ public class ManualView extends LinearLayout
 		mTouchListener = touchListener;
 	}
     
-    // получение размеров экрана
-    @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
-	{
-        super.onSizeChanged(w, h, oldw, oldh);
-    }
-    
-    // Задание отображаемой страницы
     public void SetPage(int pageNum)
     {
-    	// Получаем ресурсы новой страницы
-    	mPageRes = mResources.GetPageResources(pageNum);
-    	// Очищаем весь View
+    	mPageRes = mResources.getPageResources(pageNum);    	
     	this.removeAllViews();
     	
 		for(int i = 0; i < mPageRes.length; ++i)

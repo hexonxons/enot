@@ -1,7 +1,5 @@
 /*
- * ContentActivity �����
- * 
- * ������ �������� ����������
+ * ContentActivity 
  * 
  * Copyright 2012 hexonxons
  * 
@@ -39,7 +37,6 @@ public class ContentActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         
-        // �������� ���������� �������
         Bundle extras = getIntent().getExtras();
         mPageCount = extras.getInt("PageCount");
         mMainView = new ContentView(this);
@@ -55,11 +52,8 @@ public class ContentActivity extends Activity
         rand.setSeed(seconds);
         for(int i = 0; i < mPageCount; ++i)
 		{
-        	// ����� ������ ����������
-			RelativeLayout newRow = new RelativeLayout(this);
-			// ������� 130 px
+        	RelativeLayout newRow = new RelativeLayout(this);
 			newRow.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 130));
-			// ��� ������
 			if(i % 2 == 0)
 				newRow.setBackgroundColor(Color.rgb(214, 214, 169));
 			else
@@ -70,36 +64,28 @@ public class ContentActivity extends Activity
 			newRow.setBackgroundColor(Color.rgb(red, green, blue));*/
 			
 			
-			// ����� � ��������
 			TextView text = new TextView(this);
 			ImageView img = new ImageView(this);
 
-			// ������������ ������ - �� ������
 			mParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			mParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-			// ������� ������� �����, ����� ������ � ������ ������
+			
 			text.setTextSize(TypedValue.COMPLEX_UNIT_PX , 60);
 			text.setTextColor(Color.BLACK);
 			text.setText(title + Integer.toString(i + 1));	
-			// ��������� �����
+			
 			newRow.addView(text, mParams);
 
-			// ������������ �������� - ������
 			mParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			mParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 			mParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-			// ����� �� ������ �������
 			mParams.setMargins(0, 0, 10, 0);
-			// ���� id-���� - ����� ��������
+			
 			img.setId(i);
-			// ��������� ����� �� ��������
 			img.setOnClickListener(mClickListener);
-			// ����������, ���� ��������
 			img.setImageResource(R.drawable.contents);
-			// ��������� ��������
 			newRow.addView(img, mParams);
 
-			// ��������� ������� ����������
 			mMainView.addContextElem(newRow);
 		}
         setContentView(mMainView);
@@ -112,7 +98,7 @@ public class ContentActivity extends Activity
    		{
    			Intent intent = getIntent();
    			
-   			intent.putExtra("page", v.getId());
+   			intent.putExtra("page", v.getId()+1);
    			setResult(Activity.RESULT_OK, intent);
        		finish();
    		}

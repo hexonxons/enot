@@ -7,9 +7,8 @@ import android.widget.RelativeLayout;
 
 public class TaskView extends RelativeLayout {
 
-	public TaskView(Context context, int ManualNumber, int PageNumber, int TaskNumber) {
+	public TaskView(Context context) {
 		super(context);
-
 	}
 
 	@Override
