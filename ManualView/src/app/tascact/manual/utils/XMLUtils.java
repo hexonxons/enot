@@ -2,14 +2,15 @@ package app.tascact.manual.utils;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Node;
+import org.w3c.dom.*;
 
 import android.util.Log;
-public class XMLUtils {
+public final class XMLUtils {
 	/**
 	 * Applies xpath expression to the node. 
 	 * @param node node to apply expression to.
@@ -29,5 +30,13 @@ public class XMLUtils {
 			Log.e("XML", e.getMessage());
 			return null;
 		}
+	}
+	
+	public static Node evalXpathExprAsNode(Node node, String expr) {
+		return (Node)evalXpathExpr(node, expr, XPathConstants.NODE);
+	}
+	
+	public static NodeList evalXpathExprAsNodeList(Node node, String expr) {
+		return (NodeList)evalXpathExpr(node, expr, XPathConstants.NODESET);
 	}
 }
