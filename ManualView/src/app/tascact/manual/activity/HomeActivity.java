@@ -1,7 +1,7 @@
 /*
- * HomeActivity ����������
+ * HomeActivity класс
  * 
- * ������������ ���������������� �������������� ����������������
+ * Запуск процесса главной страницы
  * 
  * Copyright 2012 hexonxons
  * 
@@ -72,7 +72,10 @@ public class HomeActivity extends Activity
    		public void onClick(View v)
    		{
 			Intent intent = new Intent(v.getContext(), ManualActivity.class);
-			intent.putExtra("bookName", "book1");
+			if(v.getId() == 1)
+				intent.putExtra("bookName", "geydman_1_1");
+			if(v.getId() == 2)
+				intent.putExtra("bookName", "geydman_1_2");
    			startActivity(intent);
    		}
    	};

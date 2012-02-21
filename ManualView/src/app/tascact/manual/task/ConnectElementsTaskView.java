@@ -1,3 +1,14 @@
+/*
+ * ConnectElementsTaskView класс
+ * 
+ * Класс задачи по соединению элементов 
+ * 
+ * Copyright 2012 hexonxons
+ * 
+ * :mailto killgamesh666@gmail.com
+ * 
+ */
+
 package app.tascact.manual.task;
 
 import javax.xml.xpath.XPathConstants;
@@ -21,7 +32,7 @@ import app.tascact.manual.view.TaskView;
 
 public class ConnectElementsTaskView extends TaskView
 {
-	// �������������� ������������
+	// размеры экрана
 	private int mWidth = 0;
 	private int mHeight = 0;
 	
@@ -96,7 +107,7 @@ public class ConnectElementsTaskView extends TaskView
 		setBackgroundColor(Color.WHITE);
 	}
     
-    // ������������������ ���������������� ������������
+    // получение размеров экрана
     @Override protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
         super.onSizeChanged(w, h, oldw, oldh);
@@ -106,7 +117,7 @@ public class ConnectElementsTaskView extends TaskView
         mCanvas = new Canvas(mBitmap);
     }
     
-    // ������������������ ����������������
+    // отрисовка страницы
     @Override protected void onDraw(Canvas canvas) 
 	{
     	Point[] set = mTask.getSetCoord(mWidth, mHeight);
@@ -121,16 +132,16 @@ public class ConnectElementsTaskView extends TaskView
     
     @Override public boolean onTouchEvent(MotionEvent event)
 	{
-		// ���������������� action
+    	// получаем action
 	    int eventAction = event.getAction(); 
 	    
-	    // ���������������� �������������������� ��������������������
+	    // получаем координаты прикасания
 	    float X = event.getX(); 
 	    float Y = event.getY(); 
 	    		
 	    switch (eventAction)
 	    { 
-	    	// action - ������������ ���� ����������
+	    	// action - нажали на экран
 		    case MotionEvent.ACTION_DOWN:
 		    {
 		    	mTouchedImageId = mTask.getTouchedImgId((int)X, (int)Y);
@@ -149,7 +160,7 @@ public class ConnectElementsTaskView extends TaskView
 	    		break; 
 		    }
 		    
-		    // action - ���������� ���������� ���� ������������
+		    // action - ведем палец по экрану
 		    case MotionEvent.ACTION_MOVE:
 		    {
 		    	if(!isSetLine)
@@ -166,7 +177,7 @@ public class ConnectElementsTaskView extends TaskView
 		        break; 
 		    }
 		    
-		    // action - ������������ ����������
+		    // action - убрали палец
 		    case MotionEvent.ACTION_UP:
 		    {
 		    	if(!isSetLine)
@@ -238,7 +249,7 @@ public class ConnectElementsTaskView extends TaskView
     
     private void DrawCurveLine(float firstX, float firstY, float secondX, float secondY, float lineWidth)
 	{
-		// �������������������� �������������������� ������������ ����������
+    	// запоминаем предыдущую ширину линии
 		float lPrevWidth = mPaint.getStrokeWidth();
 		mPaint.setStrokeWidth(lineWidth);
 		mCanvas.drawLine(firstX, firstY, secondX, secondY, mPaint);
@@ -293,7 +304,7 @@ public class ConnectElementsTaskView extends TaskView
     			mSetCoord[i] = new Point();
     		}
     		
-    		// ���������������� ������������ �������������������� ������������������
+    		// получаем массив размещения элементов
     		for(int i = 0; i < TaskResId.length; ++i)
     		{
     			mTaskResBitmaps[i] = BitmapFactory.decodeResource(context.getResources(), TaskResId[i]);
@@ -304,7 +315,6 @@ public class ConnectElementsTaskView extends TaskView
     	
     	public Point[] getSetCoord(int width, int height)
     	{		
-    		//int avgW = width / mSetCoord.length;
     		int avgH = (int)(height * 1.5 / mSetCoord.length);
     		
     		for(int i = 0; i < mSetCoord.length; ++i)
@@ -312,7 +322,7 @@ public class ConnectElementsTaskView extends TaskView
     			int picWidth = mTaskSet[i].width;
     			int picHeight = mTaskSet[i].height;
     			
-    			// ������������������ �������������� ���� �������������� ���������������� �������������������� ����������
+    			// волшебная формула по вставке картинки посередине блока
     			
     			/*
     			 *  	 _________________

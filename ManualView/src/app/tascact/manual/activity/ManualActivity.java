@@ -1,7 +1,7 @@
 /*
- * ManualActivity ����������
+ * ManualActivity класс
  * 
- * ������������ ���������������� ����������������
+ * Запуск процесса учебника
  * 
  * Copyright 2012 hexonxons
  * 
@@ -49,9 +49,12 @@ public class ManualActivity extends Activity
 		mManualName = extras.getString("bookName");
 		mGestureDetector = new GestureDetector(this, new GestureListener());
 		
-		try {
+		try 
+		{
 			mResources = new XMLResources(this, mManualName);
-		} catch (Throwable e) {
+		} 
+		catch (Throwable e) 
+		{
 			Log.e("XML", e.getMessage());
 			finish();
 		}
@@ -79,7 +82,6 @@ public class ManualActivity extends Activity
 					
 					SavePreferences();
 					mManualView.SetPage(mPageToDisplay);
-					//mManualView.invalidate();
 			    }
 				return true;
 			}
@@ -202,19 +204,19 @@ public class ManualActivity extends Activity
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
-		if(mManualName.equals("book1"))
+		if(mManualName.equals("geydman_1_1"))
 			editor.putInt("page1", mPageToDisplay);
-		//if(mManualName.equals("book2"))
-		//	editor.putInt("page2", mPageToDisplay);
+		if(mManualName.equals("geydman_1_2"))
+			editor.putInt("page2", mPageToDisplay);
 		editor.commit();
 	}
 	
 	private void LoadPreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		if(mManualName.equals("book1"))
+		if(mManualName.equals("geydman_1_1"))
 			mPageToDisplay = settings.getInt("page1", 1);
-		//if(mManualName.equals("book2"))
-		//	mPageToDisplay = settings.getInt("page2", 0);
+		if(mManualName.equals("geydman_1_2"))
+			mPageToDisplay = settings.getInt("page2", 0);
 	}
 }

@@ -1,7 +1,7 @@
 /*
- * ManualView ����������
+ * ManualView класс
  * 
- * ���������� ������������ �� ������������������
+ * Класс работы с учебником
  * 
  * Copyright 2012 hexonxons 
  * 
@@ -14,10 +14,8 @@ package app.tascact.manual.view;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import app.tascact.manual.CResources;
 import app.tascact.manual.XMLResources;
 
 public class ManualView extends LinearLayout
@@ -27,7 +25,10 @@ public class ManualView extends LinearLayout
 	private OnTouchListener mTouchListener = null;
 	private OnClickListener mClickListener = null;
 	
-    public ManualView(Context context, OnTouchListener touchListener, OnClickListener clickListener, XMLResources markup)
+    public ManualView(Context context, 
+    				  OnTouchListener touchListener, // обработчик касаний
+    				  OnClickListener clickListener, // обработчик клика
+    				  XMLResources markup)
     {
 		super(context);		
 		mResources = markup;
@@ -40,7 +41,9 @@ public class ManualView extends LinearLayout
     
     public void SetPage(int pageNum)
     {
+    	// получаем ресурсы страницы
     	mPageRes = mResources.getPageResources(pageNum);    	
+    	// удаляем все предыдущие части страницы
     	this.removeAllViews();
     	
 		for(int i = 0; i < mPageRes.length; ++i)

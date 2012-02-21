@@ -195,7 +195,7 @@ public class CompleteTableTaskView extends TaskView {
 		Rect r = new Rect(keyX, keyY, (int) (keyX + mLegendWidth),
 				(int) (keyY + mRowHeight));
 		canvas.drawRect(r, background);
-		canvas.drawText("��������", keyX + x, keyY + y, foreground);
+		canvas.drawText("Ввод", keyX + x, keyY + y, foreground);
 		mKeypad[KEYPAD_COUNT] = r;
 
 		keyX = (int) (mTableMargin + 2 * mLegendWidth + 60);
@@ -203,7 +203,7 @@ public class CompleteTableTaskView extends TaskView {
 		r = new Rect(keyX, keyY, (int) (keyX + mLegendWidth),
 				(int) (keyY + mRowHeight));
 		canvas.drawRect(r, background);
-		canvas.drawText("��������������", keyX + x, keyY + y, foreground);
+		canvas.drawText("Стереть", keyX + x, keyY + y, foreground);
 		mKeypad[KEYPAD_COUNT + 1] = r;
 
 		for (int i = 0; i < mColNum; i++) {

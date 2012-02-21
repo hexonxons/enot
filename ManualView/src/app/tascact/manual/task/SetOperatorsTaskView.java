@@ -1,8 +1,8 @@
 /*
- * View ���������� ���� �������������� ������������������
+ * View задач по решению выражение
  * 
  * 
- * �������������� ������������������ �������������� ��������������:
+ * Порядок обработки событий нажатия:
  * 
  */
 
@@ -33,7 +33,6 @@ import app.tascact.manual.view.TaskView;
 
 public class SetOperatorsTaskView extends TaskView
 {
-	private XMLResources mResources = null;
 	private String[] mTaskResources = null;
 	private String[] mTaskAnswers = null;
 	private RelativeLayout mMainLayout = null;
@@ -42,49 +41,46 @@ public class SetOperatorsTaskView extends TaskView
 	private boolean mAnswer = true;
 	private boolean mIsDescSet = false;
 	private AlertDialog mAlertDialog = null;
-	// ���������� ���������������������� ��������������
+	// время предыдущего касания
 	private long mPrevTouchTime = 0;
 	
-	private int DELtask = 0;
 	public SetOperatorsTaskView(Context context, XMLResources markup, String ManualName,  int PageNumber, int TaskNumber)
 	{
 		super(context);
-		mResources = markup;
 		Node res = markup.getTaskResources(PageNumber, TaskNumber);
 
 		// Getting description of this task
-		Node taskDescr = (Node) XMLUtils.evalXpathExpr(res,
-				"./TaskDescription", XPathConstants.NODE);
+		Node taskDescr = (Node) XMLUtils.evalXpathExpr(res, "./TaskDescription", XPathConstants.NODE);
 		String descr = null;
-		if (taskDescr != null) {
+		if (taskDescr != null) 
+		{
 			descr = taskDescr.getTextContent();
 		}
 		
 		// Getting resources of this task
-		NodeList taskRes = (NodeList) XMLUtils.evalXpathExpr(res,
-				"./TaskResources/TaskResource", XPathConstants.NODESET);
+		NodeList taskRes = (NodeList) XMLUtils.evalXpathExpr(res, "./TaskResources/TaskResource", XPathConstants.NODESET);
 		mTaskResources = new String[taskRes.getLength()];
-		for (int i = 0; i < taskRes.getLength(); ++i) {
+		for (int i = 0; i < taskRes.getLength(); ++i) 
+		{
 			mTaskResources[i] = taskRes.item(i).getTextContent();
 		}
 		
 		// Getting answer resources
-		NodeList taskAns = (NodeList) XMLUtils.evalXpathExpr(res,
-				"./TaskAnswer/Answer", XPathConstants.NODESET);
+		NodeList taskAns = (NodeList) XMLUtils.evalXpathExpr(res, "./TaskAnswer/Answer", XPathConstants.NODESET);
 		mTaskAnswers = new String[taskAns.getLength()]; 
-		for (int i = 0; i < taskAns.getLength(); ++i) {
+		for (int i = 0; i < taskAns.getLength(); ++i) 
+		{
 			mTaskAnswers[i] = taskAns.item(i).getTextContent();
 		}
 		
 		mMainLayout = new RelativeLayout(context);
+		// клавиатура с размером кнопок 60x60 px
 		mKeyboard = new KeyboardView(context, 60, 60);
+		// задаем белый фон
 		mMainLayout.setBackgroundColor(Color.WHITE);
 		mAlertDialog = new AlertDialog.Builder(context).create();
-		int verticalOffcet = 50;
+		int verticalOffcet = 75;
 		int horizontalOffset = 800;
-		
-		
-		
 
 		if(descr != null)
 		{
@@ -98,199 +94,87 @@ public class SetOperatorsTaskView extends TaskView
 			mIsDescSet = true;
 		}
 		
-		if(ManualName == "book2" && PageNumber == 61 && TaskNumber == 2)
+		for(int i = 0; i < mTaskResources.length; ++i)
 		{
-			DELtask = 1;
-			LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			ImageView first = new ImageView(context);
-			first.setBackgroundResource(R.drawable.manual_1_2_pg62_3_task_1);
-			ImageView second = new ImageView(context);
-			second.setBackgroundResource(R.drawable.manual_1_2_pg62_3_task_2);
-			params.setMargins(250, 200, 0, 0);
-			mMainLayout.addView(first, params);
-			params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			params.setMargins(250, 500, 0, 0);
-			mMainLayout.addView(second, params);
-			
-			// �������������� ������������������, �������������� �������� ���������� ������������������
-			for(int i = 0; i < mTaskResources.length; ++i)
+			ExpressionView expression = new ExpressionView(context, mTaskResources[i], 60, 60);
+			expression.setOnTouchListener(new OnTouchListener()
 			{
-				ExpressionView expression = new ExpressionView(context, mTaskResources[i], 35, 35);
-				// ������������������ ���� ������������ ������������������
-				expression.setOnTouchListener(new OnTouchListener()
+				@Override
+				public boolean onTouch(View v, MotionEvent event) 
 				{
-					// �������������������� ������������ view, �� �������������� ������������������ ��������������
-					// ������ �������������������������� ������������ ������������������������ (return true)
-					@Override
-					public boolean onTouch(View v, MotionEvent event) 
+					if(event.getEventTime() - mPrevTouchTime > 100)
 					{
-						if(event.getEventTime() - mPrevTouchTime > 100)
+						mPrevTouchTime = event.getEventTime();
+						
+						if(mSelectedExpression == null)
 						{
-							mPrevTouchTime = event.getEventTime();
-							
-							if(mSelectedExpression == null)
-							{
-								mSelectedExpression = (ExpressionView) v;
-							}
-							else
-								// �������� ���������������� ���� ���� ���������� ������������������, ���� 
-								if(mSelectedExpression == v)
-								{
-									if(mSelectedExpression.getPressedKey() == null)
-										mSelectedExpression = null;
-								}
-								else
-								{
-									mSelectedExpression.setSelected(false);
-									mSelectedExpression = (ExpressionView) v;
-								}
+							mSelectedExpression = (ExpressionView) v;
 						}
-						return true;
-					}
-				});
-				
-				if(i == 0)
-				{
-					params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					params.setMargins(326, 330, 0, 0);
-				}
-				
-				if(i == 1)
-				{
-					params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					params.setMargins(438, 330, 0, 0);
-				}
-				
-				if(i == 2)
-				{
-					params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					params.setMargins(384, 417, 0, 0);
-				}
-				
-				if(i == 3)
-				{
-					params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					params.setMargins(326, 630, 0, 0);
-				}
-				
-				if(i == 4)
-				{
-					params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					params.setMargins(440, 630, 0, 0);
-				}
-				
-				if(i == 5)
-				{
-					params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					params.setMargins(384, 714, 0, 0);
-				}
-				
-				// ������������������ ������������������
-				mMainLayout.addView(expression, params);
-			}
-		}
-		else
-		{
-			// �������������� ������������������, �������������� �������� ���������� ������������������
-			for(int i = 0; i < mTaskResources.length; ++i)
-			{
-				ExpressionView expression = new ExpressionView(context, mTaskResources[i], 60, 60);
-				// ������������������ ���� ������������ ������������������
-				expression.setOnTouchListener(new OnTouchListener()
-				{
-					// �������������������� ������������ view, �� �������������� ������������������ ��������������
-					// ������ �������������������������� ������������ ������������������������ (return true)
-					@Override
-					public boolean onTouch(View v, MotionEvent event) 
-					{
-						if(event.getEventTime() - mPrevTouchTime > 100)
-						{
-							mPrevTouchTime = event.getEventTime();
-							
-							if(mSelectedExpression == null)
-							{
-								mSelectedExpression = (ExpressionView) v;
-							}
-							else
-								// �������� ���������������� ���� ���� ���������� ������������������, ���� 
-								if(mSelectedExpression == v)
-								{
-									if(mSelectedExpression.getPressedKey() == null)
-										mSelectedExpression = null;
-								}
-								else
-								{
-									mSelectedExpression.setSelected(false);
-									mSelectedExpression = (ExpressionView) v;
-								}
-						}
-						return true;
-					}
-				});
-				
-				
-				/*
-				 * ������������������ ������������������
-				 * ------------------
-				 * |   Description  |
-				 * |(expr1)	(expr2)	|
-				 * |(expr3)	(expr4)	|
-				 * |(expr5)	(expr6)	|
-				 * \/\/\/\/\//\/\/\/
-				 */
-				LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				
-				// ���������������� ��������������������
-				if(mTaskResources[i].length() * 60 > 400)
-				{
-					horizontalOffset = (800 - mTaskResources[i].length() * 60)/2;
-					if(i != 0)
-						verticalOffcet += 75;
-				}
-				// �������� �������� �������������� �������������������� �� 400px - ���������������� ������������ ������������
-				else
-				{
-					// �������� �������� �������������� ���� ������������������
-					if(i != mTaskResources.length - 1)
-					{
-						// �������� ������������������ �������������� ���� �������������������� �� 400px
-						if(mTaskResources[i + 1].length() * 60 > 400)
-						{
-							// �������� ���������������� ���������������������� ���������������� < 400, ���� �������� �������������� �������������� - 2�� �� ��������������
-							// ���� ������������ ���������������������������� ���������������� ���� ���������������� �������������� ���������� �� 400px
-							// �� ���� ������������ ������������ ���� ������������������
-							if(horizontalOffset < 400)
-							{
-								horizontalOffset = 400 + (400 - mTaskResources[i].length()* 60) / 2;
-							}
-						}
-						// �������� ������������������ �������������� �������������������� �� 400px
 						else
-						{
-							// �������� ���������������� ���������������������� ���������������� < 400, ���� �������������� �������������� - 2�� �� ��������������
-							// ���� ������������ ���������������������������� ���������������� ���� ���������������� �������������� ���������� �� 400px
-							// �� ���� ������������ ������������ ���� ������������������
-							if(horizontalOffset < 400)
+							if(mSelectedExpression == v)
 							{
-								horizontalOffset = 400 + (400 - mTaskResources[i].length()* 60) / 2;
+								if(mSelectedExpression.getPressedKey() == null)
+									mSelectedExpression = null;
 							}
-							// �������� ���������������� ���������������������� ���������������� > 400, ����  �������������� �������������� - 1�� �� ��������������
-							// ������������ ���������������������������� ���������������� ���� ���������������� �������������� ���������� �� 400px
-							// �� ������������ ���������� ���� ������������������
 							else
 							{
-								horizontalOffset = (400 - mTaskResources[i].length() * 60) / 2;
-								verticalOffcet += 75;
+								mSelectedExpression.setSelected(false);
+								mSelectedExpression = (ExpressionView) v;
 							}
-						}
 					}
-					// ������������������ �������������� �������������������� �� 400px
-					else
+					return true;
+				}
+			});
+			
+			
+			/*
+		 	* параметры раскладки
+			 * ------------------
+			 * |   Description  |
+			 * |(expr1)	(expr2)	|
+			 * |(expr3)	(expr4)	|
+			 * |(expr5)	(expr6)	|
+			 * \/\/\/\/\//\/\/\/
+			 */
+			LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			
+			// Топорное размещение
+			if(mTaskResources[i].length() * 60 > 400)
+			{
+				horizontalOffset = (800 - mTaskResources[i].length() * 60)/2;
+				if(i != 0)
+					verticalOffcet += 75;
+			}
+			// если этот элемент помещается в 400px - половина ширины экрана
+			else
+			{
+				// если этот элемент не последний
+				if(i != mTaskResources.length - 1)
+				{
+					// если следующий элемент не помещается в 400px
+					if(mTaskResources[i + 1].length() * 60 > 400)
 					{
+						// если смещение предыдущего элемента < 400, то есть текущий элемент - 2й в строчке
+						// то задаем горизонтальное смещение на середину второго блока в 400px
+						// и не делаем сдвига по вертикали
 						if(horizontalOffset < 400)
 						{
-							horizontalOffset = 400 + (400 - mTaskResources[i].length() * 60) / 2;
+							horizontalOffset = 400 + (400 - mTaskResources[i].length()* 60) / 2;
 						}
+					}
+					// если следующий элемент помещается в 400px
+					else
+					{
+						// если смещение предыдущего элемента < 400, то текущий элемент - 2й в строчке
+						// то задаем горизонтальное смещение на середину второго блока в 400px
+						// и не делаем сдвига по вертикали
+						if(horizontalOffset < 400)
+						{
+							horizontalOffset = 400 + (400 - mTaskResources[i].length()* 60) / 2;
+						}
+						// если смещение предыдущего элемента > 400, то  текущий элемент - 1й в строчке
+						// задаем горизонтальное смещение на середину первого блока в 400px
+						// и делаем сдвиг по вертикали
 						else
 						{
 							horizontalOffset = (400 - mTaskResources[i].length() * 60) / 2;
@@ -298,14 +182,27 @@ public class SetOperatorsTaskView extends TaskView
 						}
 					}
 				}
-			
-				if( mTaskResources.length == 1)
-					horizontalOffset  = (800 - mTaskResources[i].length() * 60)/2;
-				
-				params.setMargins(horizontalOffset, verticalOffcet, 0, 0);
-				// ������������������ ������������������
-				mMainLayout.addView(expression, params);
+				// последний элемент помещается в 400px
+				else
+				{
+					if(horizontalOffset < 400)
+					{
+						horizontalOffset = 400 + (400 - mTaskResources[i].length() * 60) / 2;
+					}
+					else
+					{
+						horizontalOffset = (400 - mTaskResources[i].length() * 60) / 2;
+						verticalOffcet += 75;
+					}
+				}
 			}
+		
+			if( mTaskResources.length == 1)
+				horizontalOffset  = (800 - mTaskResources[i].length() * 60)/2;
+			
+			params.setMargins(horizontalOffset, verticalOffcet, 0, 0);
+			// добавляем выражение
+			mMainLayout.addView(expression, params);
 		}
 		
 		this.addView(mMainLayout, new LayoutParams(LayoutParams.MATCH_PARENT, 830));
@@ -314,7 +211,7 @@ public class SetOperatorsTaskView extends TaskView
 		this.addView(mKeyboard, params);
 	}
 	
-	// ������������������ ����������������
+	// вставляем значение
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{
@@ -333,22 +230,11 @@ public class SetOperatorsTaskView extends TaskView
 	public void RestartTask()
     {
 		int i = 0;
-		if(DELtask == 1)
+		if(mIsDescSet)
+			i++;
+		for(; i < mMainLayout.getChildCount(); ++i)
     	{
-    		i += 3;
-    		for(; i < mMainLayout.getChildCount(); ++i)
-	    	{
-	    		((ExpressionView)(mMainLayout.getChildAt(i))).clearValues();
-	    	}
-    	}
-    	else
-    	{
-			if(mIsDescSet)
-				i++;
-			for(; i < mMainLayout.getChildCount(); ++i)
-	    	{
-	    		((ExpressionView)(mMainLayout.getChildAt(i))).clearValues();
-	    	}
+    		((ExpressionView)(mMainLayout.getChildAt(i))).clearValues();
     	}
     	mSelectedExpression = null;
     	mAnswer = true;
@@ -360,26 +246,13 @@ public class SetOperatorsTaskView extends TaskView
     	mAnswer = true;
     	int i = 0;
     	int j = 0;
-    	if(DELtask == 1)
+		if(mIsDescSet)
+			i++;
+    	for(; i < mMainLayout.getChildCount(); ++i)
     	{
-    		i += 3;
-    		for(; i < mMainLayout.getChildCount(); ++i)
-	    	{
-	    		if(!((ExpressionView)(mMainLayout.getChildAt(i))).checkValues(mTaskAnswers[j]))
-	    			mAnswer = false;
-	    		++j;
-	    	}
-    	}
-    	else
-    	{
-			if(mIsDescSet)
-				i++;
-	    	for(; i < mMainLayout.getChildCount(); ++i)
-	    	{
-	    		if(!((ExpressionView)(mMainLayout.getChildAt(i))).checkValues(mTaskAnswers[j]))
-	    			mAnswer = false;
-	    		++j;
-	    	}
+    		if(!((ExpressionView)(mMainLayout.getChildAt(i))).checkValues(mTaskAnswers[j]))
+    			mAnswer = false;
+    		++j;
     	}
     	
     	mAlertDialog.setMessage(Boolean.toString(mAnswer)) ;
@@ -408,12 +281,12 @@ public class SetOperatorsTaskView extends TaskView
 			
 			mInputs = new KeyView[inputSz];
 			
-			// ���������������� ���� �������� ���������������� ������������������
+			// проходим по всем символам выражения
 			for(int i = 0; i < expression.length(); ++i)
 			{
-				// ������������������ i-�� ������������ �� �������������� ������������
+				// извлекаем i-й символ и создаем кнопку
 				KeyView key = new KeyView(context, expression.substring(i, i + 1), mWidth, mHeight);
-				// �������������� ���������������� ������������
+				// убираем свойство кнопки
 				key.setTouchable(false);
 				if(expression.charAt(i) == '?')
 				{
@@ -452,10 +325,10 @@ public class SetOperatorsTaskView extends TaskView
 					}
 				});
 				
-				// ������������ �������������� mWidth x mHeight
+				// задаем размеры mWidth x mHeight
 				LayoutParams params = new LayoutParams(mWidth, mHeight);
 				/*
-				 * ���������� ���� ����������������������
+				 * сдвиг по горизонтали
 				 * -----------------
 				 * |(key1)(key2)...|
 				 * -----------------
@@ -465,8 +338,8 @@ public class SetOperatorsTaskView extends TaskView
 			}
 		}
 		
-		// �������������� �������������� ���������������� ���������������� ��������
-		// ��������������������
+		// функция задания значения нажатого поля
+		// переделать
 		public void setKeyLabel(String label)
 		{
 			if(mPressedKey != null)
@@ -519,11 +392,11 @@ public class SetOperatorsTaskView extends TaskView
 		}
 	}
 
-	// ���������� ��������������������
+	// Класс клавиатуры
 	private class KeyboardView extends RelativeLayout
 	{
 		private final String mOperatorsSet = "+-*/><=";
-		// ������������������ �������������� ������������ ���� ��������������������
+		// последний нажатый символ на клавиатуре
 		private String mPressedKey = "";
 		public KeyboardView(Context context, int keyWidth, int keyHeight)
 		{
@@ -538,9 +411,9 @@ public class SetOperatorsTaskView extends TaskView
 				params.setMargins(margin + i * (keyWidth + margin), keyHeight / 2, 0, 0);
 				key.setOnTouchListener(new OnTouchListener()
 				{
-					// ������������������ ������������
-					// ������ �������������� ���������������������� ���������������� �������������� ������������
-					// ������������ �������������������� ������������������ ���������������� (return false)
+					// Слушатели кнопок
+					// при нажатии сохраняется значение нажатой кнопки
+					// отдаем дальнейшую обработку родителю (return false)
 					@Override
 					public boolean onTouch(View v, MotionEvent event)
 					{
@@ -561,9 +434,9 @@ public class SetOperatorsTaskView extends TaskView
 				
 				key.setOnTouchListener(new OnTouchListener()
 				{
-					// ������������������ ������������
-					// ������ �������������� ���������������������� ���������������� �������������� ������������
-					// ������������ �������������������� ������������������ ���������������� (return false)
+					// Слушатели кнопок
+					// при нажатии сохраняется значение нажатой кнопки
+					// отдаем дальнейшую обработку родителю (return false)
 					@Override
 					public boolean onTouch(View v, MotionEvent event)
 					{
@@ -584,19 +457,19 @@ public class SetOperatorsTaskView extends TaskView
 		}
 	}
 	
-	// ����������-view ������������
+	// класс-view кнопки
 	private class KeyView extends ImageView
 	{
 		private String mKeyLabel = null;
-		// ���������������� ���� �������������� ������ ������������ �������������������� ������������
+			// является ли кнопкой или просто отображает символ
 		private boolean mTouchable = true;
-		// ���������������� ���� �������������������� ������ �������������� ��������������
+			// является ли выделяемой для вставки символа
 		private boolean mSelectable = false;
-		// ���������������� ���� ��������������������
+			// является ли выделенной
 		private boolean mSelected = false;
 		private boolean focus = false;
 		
-		// ���������� ���������������������� ��������������
+			// время предыдущего касания
 		private long mPrevTouchTime = 0;
 		
 		private int mWidth = 0;
@@ -620,7 +493,7 @@ public class SetOperatorsTaskView extends TaskView
 			fg.setTextSize((float) (mHeight * 0.75));
 			
 			FontMetrics fm = fg.getFontMetrics();
-			// �������������������� ������������������
+				// координаты помещения
 			float textX = mWidth / 2;
 			float textY = (mHeight - fm.ascent - fm.descent) / 2;
 			canvas.drawText(mKeyLabel, textX, textY, fg);
@@ -645,7 +518,7 @@ public class SetOperatorsTaskView extends TaskView
 			invalidate();
 		}
 		
-		// ������������������ ���� ������������
+			// нажимаема ли кнопка
 		public boolean isTouchable()
 		{
 			return mTouchable;
@@ -658,7 +531,7 @@ public class SetOperatorsTaskView extends TaskView
 			this.mSelected = false;
 		}
 		
-		//������������������ ���� ������������
+			//выделяема ли кнопка
 		public boolean isSelectable()
 		{
 			return mSelectable;
@@ -670,7 +543,7 @@ public class SetOperatorsTaskView extends TaskView
 			this.mTouchable = false;
 		}
 		
-		// ���������������� ���� ������������
+			// выделена ли кнопка
 		public boolean isSelected()
 		{
 			return mSelected;
@@ -700,9 +573,9 @@ public class SetOperatorsTaskView extends TaskView
 			invalidate();
 		}
 		
-		// �������������� �������������� ���� ������������ - �������� ������������ ������������������ - ���������������� ����
-		// �� ������������ ������������������ ���������������� (return false)
-		// ���������������������������� ������������ �������������������� ������������������������ ��������������������, �� ������������ ������������������ - ������������������
+			// события нажатия на кнопку - если кнопка выделяема - выделяем ее
+			// и отдаем обработку родителю (return false)
+			// соответственно кнопки клавиатуры обрабатывает клавиатура, а кнопки выражения - выражение
 		@Override
 		public boolean onTouchEvent(MotionEvent event)
 		{

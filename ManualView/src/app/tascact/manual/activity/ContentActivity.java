@@ -1,5 +1,7 @@
 /*
- * ContentActivity 
+ * ContentActivity класс
+ * 
+ * Запуск процесса выбора отображаемой страницы
  * 
  * Copyright 2012 hexonxons
  * 
@@ -46,22 +48,21 @@ public class ContentActivity extends Activity
         int red = 0;
         int green = 0;
         int blue = 0;
-        Calendar c = Calendar.getInstance(); 
-        int seconds = c.get(Calendar.SECOND);
         Random rand = new Random();
-        rand.setSeed(seconds);
+        rand.setSeed(Calendar.getInstance().get(Calendar.SECOND));
+        
         for(int i = 0; i < mPageCount; ++i)
 		{
         	RelativeLayout newRow = new RelativeLayout(this);
 			newRow.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 130));
-			if(i % 2 == 0)
+			/*if(i % 2 == 0)
 				newRow.setBackgroundColor(Color.rgb(214, 214, 169));
 			else
-				newRow.setBackgroundColor(Color.rgb(224, 224, 168));
-				/*red = (red + rand.nextInt()) % 256;
+				newRow.setBackgroundColor(Color.rgb(224, 224, 168));*/
+			red = (red + rand.nextInt()) % 256;
 			green = (green + rand.nextInt()) % 256;
 			blue = (blue + rand.nextInt()) % 256;
-			newRow.setBackgroundColor(Color.rgb(red, green, blue));*/
+			newRow.setBackgroundColor(Color.rgb(red, green, blue));
 			
 			
 			TextView text = new TextView(this);
@@ -93,7 +94,7 @@ public class ContentActivity extends Activity
     
     private OnClickListener mClickListener = new OnClickListener()
    	{
-   		//@Override
+   		@Override
    		public void onClick(View v)
    		{
    			Intent intent = getIntent();

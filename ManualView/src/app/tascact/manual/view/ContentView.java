@@ -1,7 +1,7 @@
 /*
- * ContentView �����
+ * ContentView класс
  * 
- * View ����������
+ * View оглавления
  * 
  * Copyright 2012 hexonxons
  * 
@@ -15,46 +15,49 @@ import android.content.Context;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Scroller;
 
-public class ContentView extends ScrollView {
+public class ContentView extends ScrollView 
+{
 	private GestureDetector mGestureDetector = null;
 	private Scroller mScroller;
 	private int mHeight = 0;
 	private LinearLayout mMainTable = null;
 
-	public ContentView(Context context) {
+	public ContentView(Context context)
+	{
 		super(context);
 
-		// ���������� ������
 		mGestureDetector = new GestureDetector(context, new GestureListener());
 		mScroller = new Scroller(context);
-		// this.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-		// LayoutParams.MATCH_PARENT));
 		mMainTable = new LinearLayout(context);
+		
 		mMainTable.setOrientation(1);
 		this.addView(mMainTable);
-		// ���������� ����������
+		// Показываем скроллбары
 		setVerticalScrollBarEnabled(true);
 	}
 
-	// ��������� �������� ������
+	// получение размеров экрана
 	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+	protected void onSizeChanged(int w, int h, int oldw, int oldh)
+	{
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		// ������ �������/������ ��� ������� ��
-		// �����
-		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+	public boolean onTouchEvent(MotionEvent event)
+	{
+		// Отмена скролла/флинта при нажатии на экран
+		if (event.getAction() == MotionEvent.ACTION_DOWN)
+		{
 			if (!mScroller.isFinished())
 				mScroller.abortAnimation();
 		}
-		// ��������� �����
+		// обработка жеста
 		if (mGestureDetector.onTouchEvent(event))
 			return true;
 
@@ -62,61 +65,67 @@ public class ContentView extends ScrollView {
 	}
 
 	@Override
-	protected int computeVerticalScrollRange() {
-		// ������ ������ ����� View
+	protected int computeVerticalScrollRange()
+	{
+		// задаем размер всего View
 		mHeight = mMainTable.getBottom() - mMainTable.getTop();
 		return mHeight;
 	}
 
-	public void addContextElem(android.view.View child) {
-		// ��������� �������� ����������
+	public void addContextElem(View child)
+	{
+		// добавляем элементы оглавления
 		mMainTable.addView(child);
 	};
 
-	private class GestureListener extends SimpleOnGestureListener {
-		// ���������� �������
+	private class GestureListener extends SimpleOnGestureListener 
+	{
+		// Обработчик скролла
 		@Override
-		public boolean onScroll(MotionEvent event1, MotionEvent event2,
-				float distanceX, float distanceY) {
+		public boolean onScroll(MotionEvent event1, MotionEvent event2,	float distanceX, float distanceY)
+		{
 			int newScrollY = getScrollY();
 
-			if (getScrollY() < 0) {
+			if (getScrollY() < 0) 
+			{
 				newScrollY = 0;
 				distanceY = 0;
-			} else if (getScrollY() > mHeight - getHeight())
+			} 
+			else 
+				if (getScrollY() > mHeight - getHeight())
+				{
 				newScrollY = mHeight - getHeight();
+				}
 
-			// ����������, �� �������
-			// ������������
-			int offset = newScrollY + (int) distanceY >= mHeight - getHeight() ? 0
-					: (int) distanceY;
-			// ������ ���������
+			// расстояние, на которое прокручиваем
+            int offset = newScrollY + (int)distanceY >= mHeight - getHeight() ? 0 : (int)distanceY;
+            // запуск прокрутки
 			mScroller.startScroll(0, getScrollY(), 0, offset, 60);
-			// ���������� ����������
+        	// Показываем скроллбары
 			awakenScrollBars(mScroller.getDuration());
-
-			// scrollBy(0, (int)distanceY);
 			return true;
 		}
 
 		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-				float velocityY) {
-			mScroller.fling(0, getScrollY(), 0, -(int) velocityY, 0, 0, 0,
-					mHeight - getHeight());
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
+		{
+			mScroller.fling(0, getScrollY(), 0, -(int) velocityY, 0, 0, 0,	mHeight - getHeight());
 			awakenScrollBars(mScroller.getDuration());
 			return true;
 		}
 	}
 
 	@Override
-	public void computeScroll() {
-		if (mScroller.computeScrollOffset()) {
+	public void computeScroll()
+	{
+		if (mScroller.computeScrollOffset())
+		{
 			int oldY = getScrollY();
 			int y = mScroller.getCurrY();
 			scrollTo(0, y);
 
-			if (oldY != getScrollY()) {
+			if (oldY != getScrollY())
+			{
 				onScrollChanged(0, getScrollY(), 0, oldY);
 			}
 
