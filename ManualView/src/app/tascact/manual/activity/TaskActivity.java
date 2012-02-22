@@ -13,8 +13,10 @@ import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.R;
 import app.tascact.manual.XMLResources;
 import app.tascact.manual.task.CompleteTableTaskView;
+import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.ConnectElementsTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
+import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskControlView;
 import app.tascact.manual.view.TaskView;
 
@@ -39,9 +41,13 @@ public class TaskActivity extends Activity {
 
 				switch (extras.getInt("TaskType")) {
 				case 1:
-					mTaskView = new ConnectElementsTaskView(this, markup,
+					mTaskView = new ConnectElementsSequenceTaskView(this,
+							markup.getTaskResources(
+									extras.getInt("PageNumber"),
+									extras.getInt("TaskNumber")));
+					/*mTaskView = new ConnectElementsTaskView(this, markup,
 							extras.getInt("PageNumber"),
-							extras.getInt("TaskNumber"));
+							extras.getInt("TaskNumber"));*/
 					break;
 				case 2:
 					mTaskView = new CompleteTableTaskView(this, markup,
@@ -49,10 +55,10 @@ public class TaskActivity extends Activity {
 							extras.getInt("TaskNumber"));
 					break;
 				case 3:
-					 mTaskView = new SetOperatorsTaskView(this, markup,
-							 extras.getString("ManualName"),
-							 extras.getInt("PageNumber"),
-							 extras.getInt("TaskNumber"));
+					mTaskView = new SetOperatorsTaskView(this, markup,
+							extras.getString("ManualName"),
+							extras.getInt("PageNumber"),
+							extras.getInt("TaskNumber"));
 					break;
 				case 99:
 					// mTaskView = new ConnectElementsTaskViewBeta(this, markup,
@@ -60,6 +66,7 @@ public class TaskActivity extends Activity {
 					// extras.getInt("TaskNumber"));
 					break;
 				default:
+					
 					break;
 				}
 
