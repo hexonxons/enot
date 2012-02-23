@@ -1,9 +1,4 @@
 /**
- * UNSTABLE CODE!!!
- * THIS CODE IS KNOWN TO WORK POORLY
- * OR NOT TO WORK AT ALL. DO NOT RECOMMIT
- * THIS CODE TO STABLE BRANCHES.
- * 
  * @author Losev Vladimir (myselflosik@gmail.com)
  */
 package app.tascact.manual;
@@ -165,17 +160,4 @@ public class XMLResources {
 		String s = ((Attr) attribute).getValue();
 		return Integer.parseInt(s);
 	}
-	// protected List<Node> extractNodesWithTag(Node src, String tag) {
-	// List<Node> result = new ArrayList<Node>();
-	// NodeList documentList = resources.getChildNodes();
-	//
-	// for (int i = 0; i != documentList.getLength(); ++i) {
-	// Node node = documentList.item(i);
-	// if (node.getNodeName().equals(tag)) {
-	// result.add(node);
-	// }
-	// }
-	//
-	// return result;
-	// }
 }
