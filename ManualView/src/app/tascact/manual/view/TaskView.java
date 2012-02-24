@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
+import javax.xml.*;
 
 public class TaskView extends RelativeLayout {
 
