@@ -20,8 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import app.tascact.manual.utils.XMLUtils;
 
-import javax.xml.xpath.*;
-
 public class XMLResources {
 	private static final String BOOK_TAG = "book";
 	private static final String PAGE_TAG = "page";
@@ -36,15 +34,14 @@ public class XMLResources {
 	private Context context;
 	private Document resources;
 	private String manualName;
+	
+	private int[][] pageResourcesCache;
 
 	/**
-	 * Parses given xml file.
-	 * 
+	 * Parses given XML file.
 	 * @param context
-	 * @param XMLMarkupFile
-	 *            XML-markup containing file.
-	 * @throws Throwable
-	 *             is thrown on any possible error.
+	 * @param XMLMarkupFile XML-markup containing file.
+	 * @throws Throwable is thrown on any possible error.
 	 */
 	// TODO should if throw different exceptions?
 	public XMLResources(Context context, int XMLMarkupResourceId)
@@ -74,6 +71,8 @@ public class XMLResources {
 		is.setCharacterStream(new StringReader(XMLMarkup));
 		resources = db.parse(is);
 		
+		// Creating cache
+		pageResourcesCache = new int[getPageNumber()][];
 	}
 
 	public XMLResources(Context context, String XMLMarkupFile) throws Throwable {
@@ -82,16 +81,12 @@ public class XMLResources {
 		manualName = XMLMarkupFile;
 	}
 
-	/**
-	 * @return null if constructed not from file
-	 */
+	/** @return null if constructed not from file.*/
 	public String getManualName() {
 		return manualName;
 	}
 	
-	/**
-	 * @return null on failure.
-	 */
+	/** @return null on failure.*/
 	public Integer getPageNumber() {
 		if (pageNumber == null) {
 			String expr = "/" + BOOK_TAG + 
@@ -107,42 +102,42 @@ public class XMLResources {
 
 	/**
 	 * Returns drawable resources required by specified page.
-	 * 
-	 * @param pageId
-	 *            page of document to refer. Index 1-based.
+	 * @param pageId page of document to refer. Index 1-based.
 	 * @return returns null on failure.
 	 */
 	public int[] getPageResources(int pageId) {
-		String expr = "/" + BOOK_TAG + 
-					  "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]" + 
-					  "/" + RES_LIST_TAG + 
-					  "/" + RES_TAG;
+		// If resources were not cached evaluating
+		// and caching them in pageResourcesCache. 
+		if (pageResourcesCache[pageId - 1] == null) {
+			String expr = "/" + BOOK_TAG + 
+						  "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]" + 
+						  "/" + RES_LIST_TAG + 
+						  "/" + RES_TAG;
+			
+			NodeList nl = XMLUtils.evalXpathExprAsNodeList(resources, expr);
+			if (nl == null) {
+				return null;
+			}
+	
+			pageResourcesCache[pageId - 1] = new int[nl.getLength()];
+	
+			for (int i = 0; i < nl.getLength(); ++i) {
+				String name = nl.item(i).getTextContent();
+				name = name.trim();
+				Resources res = context.getResources();
+				pageResourcesCache[pageId - 1][i] = res.getIdentifier(name,
+						"drawable", context.getPackageName());
+			}
+		}
 		
-		NodeList nl = XMLUtils.evalXpathExprAsNodeList(resources, expr);
-		if (nl == null) {
-			return null;
-		}
-
-		int[] pageResources = new int[nl.getLength()];
-
-		for (int i = 0; i < nl.getLength(); ++i) {
-			String name = nl.item(i).getTextContent();
-			name = name.trim();
-			Resources res = context.getResources();
-			pageResources[i] = res.getIdentifier(name, "drawable",
-					context.getPackageName());
-		}
-
-		return pageResources;
+		// Returning cached value.
+		return pageResourcesCache[pageId - 1];
 	}
 
 	/**
 	 * Returns Node referencing to specified task in XML document.
-	 * 
-	 * @param pageId
-	 *            page of document to refer. Index 1-based.
-	 * @param taskId
-	 *            task id to refer. Index 1-based.
+	 * @param pageId page of document to refer. Index 1-based.
+	 * @param taskId task id to refer. Index 1-based.
 	 * @return returns null on failure.
 	 */
 	public Node getTaskResources(int pageId, int taskId) {
@@ -156,7 +151,6 @@ public class XMLResources {
 
 	// TODO why task type should be an integer type?
 	/**
-	 * 
 	 * @param pageId
 	 * @param taskId
 	 * @return null on failure.

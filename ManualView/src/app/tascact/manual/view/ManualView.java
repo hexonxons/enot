@@ -24,7 +24,7 @@ public class ManualView extends SoftScrollView {
 		
 		pages = new PageView[markup.getPageNumber()];
 		for (int i = 0; i < markup.getPageNumber(); ++i) {
-			pages[i] = new PageView(context, markup.getPageResources(i+1), clickListener);
+		//	pages[i] = new PageView(context, markup.getPageResources(i+1), clickListener);
 		}
 		
 		setBackgroundColor(Color.WHITE);

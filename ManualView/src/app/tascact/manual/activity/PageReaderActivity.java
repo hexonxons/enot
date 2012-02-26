@@ -16,9 +16,9 @@ import app.tascact.manual.view.ManualControlView;
 import app.tascact.manual.view.PageReaderView;
 
 public class PageReaderActivity extends Activity {
-	private LinearLayout mMainLayout;
-	private PageReaderView mManualView;
-	private ManualControlView mControl;
+	private LinearLayout mainLayout;
+	private PageReaderView reader;
+	private ManualControlView controlPanel;
 	private int pageToDisplay;
 	private XMLResources markup;
 	private long mPrevTouchTime;
@@ -28,73 +28,58 @@ public class PageReaderActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
-
 		Bundle extras = getIntent().getExtras();
 		mManualName = extras.getString("bookName");
 		try {
 			markup = new XMLResources(this, mManualName);
 		} catch (Throwable e) {
-			Log.e("XML", e.getMessage());
+			// Stopping activity on failure.
+			// No markup - no pages to read.
+			Log.e("XML", "While creating Page Reader", e);
 			finish();
 		}
 
 		loadPreferences();
 
-		mMainLayout = new LinearLayout(this);
-		mManualView = new PageReaderView(this, markup);
-		// TODO hardcode
-		mManualView.setPage(4);
-		//mManualView.setOnClickListener(mClickListener);
-		mControl = new ManualControlView(this);
-		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		mMainLayout.setOrientation(1);
-		mMainLayout.addView(mManualView, new LayoutParams(LayoutParams.MATCH_PARENT, 1040));
-		mMainLayout.addView(mControl, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
+		mainLayout = new LinearLayout(this);
+		mainLayout.setOrientation(LinearLayout.VERTICAL);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+		// Setting up page reader.
+		reader = new PageReaderView(this, markup, pageToDisplay);
+		mainLayout.addView(reader, new LayoutParams(LayoutParams.MATCH_PARENT, 1040));
+
+		// Setting up control panel.
+		controlPanel = new ManualControlView(this);		
 		
-		mControl.mNextButton.setOnTouchListener(new OnTouchListener()
-		{
+		controlPanel.mNextButton.setOnTouchListener(new OnTouchListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event) 
-			{
-				if(event.getEventTime() - mPrevTouchTime > 250)
-			    {
+			public boolean onTouch(View v, MotionEvent event) {
+				if(event.getEventTime() - mPrevTouchTime > 250) {
 					mPrevTouchTime = event.getEventTime();
-					if(pageToDisplay < markup.getPageNumber())
-						++pageToDisplay;
-					
+					pageToDisplay = reader.nextPage();
 					savePreferences();
-					mManualView.setPage(pageToDisplay);
 			    }
 				return true;
 			}
 		});
 		
-		mControl.mPrevButton.setOnTouchListener(new OnTouchListener()
-		{
+		controlPanel.mPrevButton.setOnTouchListener(new OnTouchListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event)
-			{
-				if(event.getEventTime() - mPrevTouchTime > 250)
-			    {
-					mPrevTouchTime = event.getEventTime();
-					if(pageToDisplay > 1)
-						--pageToDisplay;
-					
+			public boolean onTouch(View v, MotionEvent event) {
+				if(event.getEventTime() - mPrevTouchTime > 250) {
+					mPrevTouchTime = event.getEventTime();					
+					pageToDisplay = reader.prevPage();
 					savePreferences();
-					mManualView.setPage(pageToDisplay);
 			    }
 				return true;
 			}
 		});
 		
-		mControl.mContentsButton.setOnTouchListener(new OnTouchListener()
-		{
+		controlPanel.mContentsButton.setOnTouchListener(new OnTouchListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event)
-			{
-				if(event.getEventTime() - mPrevTouchTime > 250)
-			    {
+			public boolean onTouch(View v, MotionEvent event) {
+				if(event.getEventTime() - mPrevTouchTime > 250) {
 					mPrevTouchTime = event.getEventTime();
 					Intent intent = new Intent(v.getContext(), ContentActivity.class);
 					intent.putExtra("PageCount", markup.getPageNumber());
@@ -104,30 +89,29 @@ public class PageReaderActivity extends Activity {
 			}
 		});
 		
-		setContentView(mMainLayout);
+		mainLayout.addView(controlPanel, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
+		
+		// Displaying
+		setContentView(mainLayout);
 	}
 	
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data)
-	{
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(resultCode == RESULT_OK && requestCode == 0)
-		{
+		if(resultCode == RESULT_OK && requestCode == 0)	{
 			pageToDisplay = data.getIntExtra("page", -1);
 			savePreferences();
-			mManualView.setPage(pageToDisplay);
+			reader.setPage(pageToDisplay);
 		}
 	}
 	
 	@Override
-    protected void onStop()
-	{
+    protected void onStop() {
 		super.onStop();
 		savePreferences();
     }
 	
-	private void savePreferences()
-	{
+	private void savePreferences() {
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
 		if(mManualName.equals("book1"))
@@ -137,13 +121,11 @@ public class PageReaderActivity extends Activity {
 		editor.commit();
 	}
 	
-	private void loadPreferences()
-	{
+	private void loadPreferences() {
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		if(mManualName.equals("book1"))
 			pageToDisplay = settings.getInt("page1", 1);
 		//if(mManualName.equals("book2"))
 		//	mPageToDisplay = settings.getInt("page2", 0);
-		
 	}
 }
