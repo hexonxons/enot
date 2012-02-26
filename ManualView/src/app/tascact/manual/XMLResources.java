@@ -31,8 +31,11 @@ public class XMLResources {
 	private static final String RES_TAG = "PageResource";
 	private static final String TYPE_ATTR = "tasktype";
 
+	private Integer pageNumber;
+	
 	private Context context;
 	private Document resources;
+	private String manualName;
 
 	/**
 	 * Parses given xml file.
@@ -48,12 +51,14 @@ public class XMLResources {
 			throws Throwable {
 		this.context = context;
 
+		// Prepare source to read from		
 		InputStream in = context.getResources().openRawResource(
 				XMLMarkupResourceId);
 		InputStreamReader isr = new InputStreamReader(in);
 		BufferedReader br = new BufferedReader(isr);
 		StringBuffer XMLMarkupBuffer = new StringBuffer();
 
+		// Reading XML file to string
 		String text;
 		while ((text = br.readLine()) != null) {
 			XMLMarkupBuffer.append(text);
@@ -62,30 +67,42 @@ public class XMLResources {
 		String XMLMarkup = XMLMarkupBuffer.toString();
 		in.close();
 
+		// Parsing XML
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		InputSource is = new InputSource();
 		is.setCharacterStream(new StringReader(XMLMarkup));
 		resources = db.parse(is);
+		
 	}
 
 	public XMLResources(Context context, String XMLMarkupFile) throws Throwable {
 		this(context, context.getResources().getIdentifier(XMLMarkupFile,
 				"raw", context.getPackageName()));
+		manualName = XMLMarkupFile;
 	}
 
 	/**
-	 * 
+	 * @return null if constructed not from file
+	 */
+	public String getManualName() {
+		return manualName;
+	}
+	
+	/**
 	 * @return null on failure.
 	 */
 	public Integer getPageNumber() {
-		String expr = "/" + BOOK_TAG + "/" + PAGE_TAG;
-		NodeList nl = (NodeList) XMLUtils.evalXpathExpr(resources, expr,
-				XPathConstants.NODESET);
-		if (nl == null)
-			return null;
-
-		return nl.getLength();
+		if (pageNumber == null) {
+			String expr = "/" + BOOK_TAG + 
+						  "/" + PAGE_TAG;
+			
+			NodeList nl = XMLUtils.evalXpathExprAsNodeList(resources, expr);
+			if (nl != null) {
+				pageNumber = nl.getLength();
+			}
+		}
+		return pageNumber;
 	}
 
 	/**
@@ -96,12 +113,12 @@ public class XMLResources {
 	 * @return returns null on failure.
 	 */
 	public int[] getPageResources(int pageId) {
-		String expr = "/" + BOOK_TAG + "/" + PAGE_TAG + "["
-				+ Integer.toString(pageId) + "]/" + RES_LIST_TAG + "/"
-				+ RES_TAG;
-		NodeList nl = (NodeList) XMLUtils.evalXpathExpr(resources, expr,
-				XPathConstants.NODESET);
+		String expr = "/" + BOOK_TAG + 
+					  "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]" + 
+					  "/" + RES_LIST_TAG + 
+					  "/" + RES_TAG;
 		
+		NodeList nl = XMLUtils.evalXpathExprAsNodeList(resources, expr);
 		if (nl == null) {
 			return null;
 		}
@@ -129,11 +146,12 @@ public class XMLResources {
 	 * @return returns null on failure.
 	 */
 	public Node getTaskResources(int pageId, int taskId) {
-		String expr = "/" + BOOK_TAG + "/" + PAGE_TAG + "["
-				+ Integer.toString(pageId) + "]/" + TASK_LIST_TAG + "/"
-				+ TASK_TAG + "[@number='" + Integer.toString(taskId) + "']";
-		return (Node) XMLUtils.evalXpathExpr(resources, expr,
-				XPathConstants.NODE);
+		String expr = "/" + BOOK_TAG + 
+					  "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]" + 
+					  "/" + TASK_LIST_TAG + 
+					  "/" + TASK_TAG + 
+					  "[@number='" + Integer.toString(taskId) + "']";
+		return XMLUtils.evalXpathExprAsNode(resources, expr);
 	}
 
 	// TODO why task type should be an integer type?
@@ -144,14 +162,13 @@ public class XMLResources {
 	 * @return null on failure.
 	 */
 	public Integer getTaskType(int pageId, int taskId) {
-		String expr = "/" + BOOK_TAG + "/" + PAGE_TAG + "["
-				+ Integer.toString(pageId) + "]/"
-				// TODO add constant for number attr
-				+ TASK_LIST_TAG + "/" + TASK_TAG + "[@number='"
-				+ Integer.toString(taskId) + "']";
-		Node task = (Node) XMLUtils.evalXpathExpr(resources, expr,
-				XPathConstants.NODE);
-
+		String expr = "/" + BOOK_TAG + 
+					  "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]" +
+					  "/" + TASK_LIST_TAG + 
+					  "/" + TASK_TAG + 
+					  "[@number='" + Integer.toString(taskId) + "']";
+		
+		Node task = XMLUtils.evalXpathExprAsNode(resources, expr);
 		if (task == null) {
 			return null;
 		}

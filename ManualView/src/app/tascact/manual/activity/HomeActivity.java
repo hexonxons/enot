@@ -71,11 +71,8 @@ public class HomeActivity extends Activity
    		@Override
    		public void onClick(View v)
    		{
-			Intent intent = new Intent(v.getContext(), ManualActivity.class);
-			if(v.getId() == 1)
-				intent.putExtra("bookName", "geydman_1_1");
-			if(v.getId() == 2)
-				intent.putExtra("bookName", "geydman_1_2");
+			Intent intent = new Intent(v.getContext(), PageReaderActivity.class);
+			intent.putExtra("bookName", "book1");
    			startActivity(intent);
    		}
    	};
