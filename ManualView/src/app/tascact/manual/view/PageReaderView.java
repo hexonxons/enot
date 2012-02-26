@@ -1,6 +1,7 @@
 package app.tascact.manual.view;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -19,6 +20,8 @@ public class PageReaderView extends HorizontalScrollView {
 	private XMLResources markup;
 	private FrameLayout innerWrapper;
 	private int pageWidth;
+	private int pageToDisplay;
+	private boolean firstTime = true;
 	/** 
 	 * Number of item (0-based) that is brought to front.
 	 * This one must be changed only with changeActiveItem method.
@@ -33,6 +36,7 @@ public class PageReaderView extends HorizontalScrollView {
 	public PageReaderView(Context context, XMLResources markup, int pageToDisplay) {
 		super(context);
 		
+		this.pageToDisplay = pageToDisplay;
 		setClickable(true);
 		setFocusableInTouchMode(true);
 		setFocusable(true);
@@ -62,8 +66,7 @@ public class PageReaderView extends HorizontalScrollView {
 		innerWrapper.addView(beforeEverything, p1);
 		innerWrapper.addView(afterEverything, p2);
 		
-		setPage(pageToDisplay);
-		
+		//setPage(pageToDisplay);		
 	}
 	
 	/**
@@ -73,6 +76,15 @@ public class PageReaderView extends HorizontalScrollView {
 	 */
 	public PageReaderView(Context context, XMLResources markup) {
 		this(context, markup, 1);
+	}
+	
+	@Override
+	protected void onDraw(Canvas canvas) {
+		super.onDraw(canvas);
+		if (firstTime) {
+			setPage(pageToDisplay);
+			firstTime = false;
+		}
 	}
 	
 	/**
@@ -85,6 +97,7 @@ public class PageReaderView extends HorizontalScrollView {
 		changeActiveItem(pageNumber - 1);
 		scrollTo(activeItem * pageWidth, 0);
 		smoothScrollTo(activeItem * pageWidth, 0);
+		invalidate();
 		Log.d("Scroll", "Current scroll x offset is " + Integer.toString(getScrollX()));
 		return activeItem + 1;
 	}
@@ -135,8 +148,10 @@ public class PageReaderView extends HorizontalScrollView {
 		// Invalidating old cache
 		for (int i = oldLeftCacheBorder; i < oldRightCacheBorder; ++i) {
 			if (!(newLeftCacheBorder <= i && i < newRightCacheBorder)) {
-				innerWrapper.removeView(pages[i]);
-				pages[i] = null;
+				if (pages[i] != null) {
+					innerWrapper.removeView(pages[i]);
+					pages[i] = null;
+				}
 			}
 		}
 
@@ -154,9 +169,7 @@ public class PageReaderView extends HorizontalScrollView {
 			}
 		}
 		
-		requestLayout();
 		activeItem = newActiveItem;
-
 		
 		// DEBUG
 		String a = new String();
@@ -191,7 +204,7 @@ public class PageReaderView extends HorizontalScrollView {
 		}
 		
 		// Scrolling to the current active element
-		smoothScrollTo(pageWidth * activeItem, 0);
+		scrollTo(pageWidth * activeItem, 0);
 		Log.d("Scroll", "Current offset is " + Integer.toString(getScrollX()));
 	}
 	
