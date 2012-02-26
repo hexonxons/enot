@@ -4,7 +4,6 @@
 
 package app.tascact.manual.task;
 
-//import android.R;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,12 +20,10 @@ import android.view.MotionEvent;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
-// Temporary extends View class
-
 public class ConnectElementsSequenceTaskView extends TaskView {
 	private final float MARGIN = 0.07f;
 	private final float LINE_WIDTH = 8.0f;
-	
+
 	private Node inputParams;
 	private Resources resources;
 	private int[] elementResourceIds;
@@ -36,8 +33,8 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	private Bitmap userBitmap; // user-drawn lines
 	private Bitmap oldUserBitmap;
 	private Canvas userCanvas;
-	private boolean isConsequentnessImportant;
-	private boolean isSwapAvailable;
+	private boolean isConsequentnessImportant = false;
+	private boolean isSwapAvailable = true;
 	private AlertDialog alertDialog;
 	private int width, height;
 	private boolean isLineDrawing;
@@ -55,6 +52,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		NodeList nodes = null;
 		nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
 				"./TaskResources/TaskResource");
+		readFlags();
 		int N = nodes.getLength();
 		taskElements = new Bitmap[N];
 		elementPositions = new PointF[N];
@@ -63,19 +61,13 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 
 		for (int i = 0; i < N; ++i) {
 			elementNames[i] = nodes.item(i).getTextContent();
-			elementResourceIds[i] = resources.getIdentifier(elementNames[i], "drawable",
-					context.getPackageName());
-			taskElements[i] = BitmapFactory.decodeResource(resources, elementResourceIds[i]);
+			elementResourceIds[i] = resources.getIdentifier(elementNames[i],
+					"drawable", context.getPackageName());
+			taskElements[i] = BitmapFactory.decodeResource(resources,
+					elementResourceIds[i]);
 			elementPositions[i] = new PointF();
 		}
 
-		isConsequentnessImportant = Boolean.valueOf(XMLUtils
-				.evalXpathExprAsNode(inputParams, "./ConsequentnessImportant")
-				.getTextContent());
-		isSwapAvailable = Boolean.valueOf(XMLUtils
-				.evalXpathExprAsNode(inputParams, "./SwapAvailable")
-				.getTextContent());
-		
 		NodeList answerNodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
 				"./TaskAnswer/Answer");
 		trueAnswers = new LinkedList<Answer>();
@@ -89,12 +81,12 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 					names.item(1).getTextContent(), "drawable",
 					context.getPackageName());
 			Answer ans = new Answer(first, second);
-			if(isSwapAvailable){
+			if (isSwapAvailable) {
 				ans.sort();
 			}
 			trueAnswers.add(ans);
 		}
-		
+
 		if (!isConsequentnessImportant) {
 			Collections.sort(trueAnswers);
 		}
@@ -104,7 +96,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		setBackgroundColor(Color.WHITE);
 		emptyPaint = new Paint(Paint.DITHER_FLAG);
 		emptyPaint.setAntiAlias(true);
-		emptyPaint.setARGB(255, 25, 155,25);
+		emptyPaint.setARGB(255, 25, 155, 25);
 		emptyPaint.setStrokeWidth(LINE_WIDTH);
 
 		alertDialog = new AlertDialog.Builder(context).create();
@@ -139,15 +131,15 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 
 	@Override
 	public void CheckTask() {
-		if(!isConsequentnessImportant){
+		if (!isConsequentnessImportant) {
 			Collections.sort(givenAnswers);
 		}
 		boolean result = true;
-		if(trueAnswers.size()!=givenAnswers.size()){
+		if (trueAnswers.size() != givenAnswers.size()) {
 			result = false;
-		}else{
-			for(int i=0;i<trueAnswers.size();++i){
-				if(trueAnswers.get(i).compareTo(givenAnswers.get(i))!=0){
+		} else {
+			for (int i = 0; i < trueAnswers.size(); ++i) {
+				if (trueAnswers.get(i).compareTo(givenAnswers.get(i)) != 0) {
 					result = false;
 				}
 			}
@@ -201,8 +193,9 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				userCanvas.drawCircle(x, y, LINE_WIDTH * 0.5f, emptyPaint);
 				userCanvas.drawLine(lastTouchedPoint.x, lastTouchedPoint.y, x,
 						y, emptyPaint);
-				Answer ans = new Answer(elementResourceIds[firstImageId], elementResourceIds[secondImageId]);
-				if(isSwapAvailable){
+				Answer ans = new Answer(elementResourceIds[firstImageId],
+						elementResourceIds[secondImageId]);
+				if (isSwapAvailable) {
 					ans.sort();
 				}
 				givenAnswers.add(ans);
@@ -253,6 +246,19 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		return -1;
 	}
 
+	private void readFlags() {
+		Node nd;
+		nd = XMLUtils.evalXpathExprAsNode(inputParams,
+				"./ConsequentnessImportant");
+		if (nd != null) {
+			isConsequentnessImportant = Boolean.valueOf(nd.getTextContent());
+		}
+		nd = XMLUtils.evalXpathExprAsNode(inputParams, "./SwapAvailable");
+		if (nd != null) {
+			isSwapAvailable = Boolean.valueOf(nd.getTextContent());
+		}
+	}
+
 	private class Answer implements Comparable<Answer> {
 		public int first;
 		public int second;
@@ -274,17 +280,19 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				return 1;
 			return 0;
 		}
-		
-		public void sort(){
-			if(first>second){
+
+		public void sort() {
+			if (first > second) {
 				int tmp = first;
-				first=second;
+				first = second;
 				second = tmp;
 			}
 		}
+
 		@Override
-		public String toString(){
-			return "[ "+Integer.toString(first)+" -> "+Integer.toString(second)+" ]";
+		public String toString() {
+			return "[ " + Integer.toString(first) + " -> "
+					+ Integer.toString(second) + " ]";
 		}
 	}
 }
