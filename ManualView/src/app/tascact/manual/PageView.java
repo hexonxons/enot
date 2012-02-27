@@ -2,6 +2,7 @@ package app.tascact.manual;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,11 +23,11 @@ public class PageView extends LinearLayout {
 		setFocusableInTouchMode(true);
 		setClickable(true);
 		setOrientation(VERTICAL);
-		
+
 		this.markup = markup;
 		this.pageNumber = pageNumber;
 		pageResources = markup.getPageResources(pageNumber); 
-		
+
 		for(int i = 0; i < pageResources.length; ++i) {
 			ImageView pageElem = new ImageView(this.getContext());
 			// Tasks are enumerated 1-based 
@@ -36,7 +37,7 @@ public class PageView extends LinearLayout {
 			this.addView(pageElem);
 		}
 	}	
-	
+
 	private int pageNumber;
 	private int[] pageResources;
 	private XMLResources markup;

@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.tascact.manual.utils.XMLUtils;
+import app.tascact.manual.view.AnimationView;
 import app.tascact.manual.view.TaskView;
 
 public class SetOperatorsTaskView extends TaskView
@@ -43,12 +44,13 @@ public class SetOperatorsTaskView extends TaskView
 	private AlertDialog mAlertDialog = null;
 	// время предыдущего касания
 	private long mPrevTouchTime = 0;
+	private AnimationView mAnswerAnimation = null;
 	
 	public SetOperatorsTaskView(Context context, XMLResources markup, String ManualName,  int PageNumber, int TaskNumber)
 	{
 		super(context);
 		Node res = markup.getTaskResources(PageNumber, TaskNumber);
-
+		
 		// Getting description of this task
 		Node taskDescr = (Node) XMLUtils.evalXpathExpr(res, "./TaskDescription", XPathConstants.NODE);
 		String descr = null;
@@ -209,12 +211,17 @@ public class SetOperatorsTaskView extends TaskView
 		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, 830);
 		params.setMargins(0, 830, 0, 0);
 		this.addView(mKeyboard, params);
+		
+		mAnswerAnimation = new AnimationView(getContext(), 400, 400, 400, 400, "MarioAnimationResources", 60, -3, true, true);
+		mAnswerAnimation.setVisibility(INVISIBLE);
+		this.addView(mAnswerAnimation);
 	}
 	
 	// вставляем значение
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{
+		mAnswerAnimation.setVisibility(INVISIBLE);
 		if(event.getEventTime() - mPrevTouchTime > 100)
 		{
 			mPrevTouchTime = event.getEventTime();
@@ -255,8 +262,10 @@ public class SetOperatorsTaskView extends TaskView
     		++j;
     	}
     	
-    	mAlertDialog.setMessage(Boolean.toString(mAnswer)) ;
-		mAlertDialog.show();
+    	String weee = mAnswer ? "Прально!" : "Непрально!";
+    	mAnswerAnimation.setVisibility(VISIBLE);
+    	mAnswerAnimation.setTextToDisplay(weee);
+    	mAnswerAnimation.Animate();
     }
 	
 	private class ExpressionView extends RelativeLayout

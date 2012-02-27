@@ -8,7 +8,6 @@
  * :mailto killgamesh666@gmail.com
  * 
  */
-
 package app.tascact.manual.view;
 
 import android.content.Context;
@@ -18,15 +17,15 @@ import app.tascact.manual.XMLResources;
 
 public class ManualView extends SoftScrollView {
 	private PageView[] pages;	
-	
+
 	public ManualView(Context context, XMLResources markup, OnClickListener clickListener) {
 		super(context);
-		
+
 		pages = new PageView[markup.getPageNumber()];
 		for (int i = 0; i < markup.getPageNumber(); ++i) {
 		//	pages[i] = new PageView(context, markup.getPageResources(i+1), clickListener);
 		}
-		
+
 		setBackgroundColor(Color.WHITE);
 		setVerticalScrollBarEnabled(false);
 		setHorizontalScrollBarEnabled(false);
@@ -35,7 +34,7 @@ public class ManualView extends SoftScrollView {
 		setClickable(true);
 		setFeatureItems(pages);
 	}
-	
+
 	/**
 	 * @param pageNum 1-based page number
 	 */

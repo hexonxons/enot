@@ -72,8 +72,7 @@ public class HomeActivity extends Activity
    		public void onClick(View v)
    		{
 			Intent intent = new Intent(v.getContext(), PageReaderActivity.class);
-			intent.putExtra("bookName", (v.getId() == 1) ? "geydman_1_1"
-					: "geydman_1_2");
+			intent.putExtra("bookName", (v.getId() == 1) ? "geydman_1_1" : "geydman_1_2");
    			startActivity(intent);
    		}
    	};

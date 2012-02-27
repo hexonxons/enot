@@ -57,7 +57,6 @@ public class ManualActivity extends Activity
 		mMainLayout = new LinearLayout(this);
 		mManualView = new ManualView(this, markup, mClickListener);
 		mManualView.setPage(pageToDisplay);
-		//mManualView.setOnClickListener(mClickListener);
 		mControl = new ManualControlView(this);
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		mMainLayout.setOrientation(1);
@@ -160,20 +159,20 @@ public class ManualActivity extends Activity
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
-		if(mManualName.equals("book1"))
+		if(mManualName.equals("geydman_1_1"))
 			editor.putInt("page1", pageToDisplay);
-		//if(mManualName.equals("book2"))
-		//	editor.putInt("page2", mPageToDisplay);
+		if(mManualName.equals("geydman_1_2"))
+			editor.putInt("page2", pageToDisplay);
 		editor.commit();
 	}
 	
 	private void loadPreferences()
 	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		if(mManualName.equals("book1"))
+		if(mManualName.equals("geydman_1_1"))
 			pageToDisplay = settings.getInt("page1", 1);
-		//if(mManualName.equals("book2"))
-		//	mPageToDisplay = settings.getInt("page2", 0);
+		if(mManualName.equals("geydman_1_2"))
+			pageToDisplay = settings.getInt("page2", 0);
 		
 	}
 }

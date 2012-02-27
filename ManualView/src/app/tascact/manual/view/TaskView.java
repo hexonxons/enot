@@ -13,7 +13,6 @@ package app.tascact.manual.view;
 
 import android.content.Context;
 import android.widget.RelativeLayout;
-import javax.xml.*;
 
 public abstract class TaskView extends RelativeLayout
 {
