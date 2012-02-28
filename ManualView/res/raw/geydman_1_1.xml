@@ -33,6 +33,8 @@
             <Task number="2" tasktype="1">
             	<ConsequentnessImportant>false</ConsequentnessImportant>
             	<SwapAvailable>true</SwapAvailable>
+            	<Margin>0.07</Margin>
+            	<LineWidth>8.0</LineWidth>
                 <TaskResources>
                     <TaskResource>manual_1_1_pg5_2_task_1</TaskResource>
                     <TaskResource>manual_1_1_pg5_2_task_2</TaskResource>
@@ -76,6 +78,8 @@
             <Task number="1" tasktype="1">
             	<ConsequentnessImportant>false</ConsequentnessImportant>
             	<SwapAvailable>true</SwapAvailable>
+            	<LineWidth>8.0</LineWidth>
+            	<Margin>0.07</Margin>
                 <TaskResources>
                     <TaskResource>manual_1_1_pg9_1_task_1</TaskResource>
                     <TaskResource>manual_1_1_pg9_1_task_2</TaskResource>

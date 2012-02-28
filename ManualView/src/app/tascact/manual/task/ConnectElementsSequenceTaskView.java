@@ -21,9 +21,6 @@ import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
 public class ConnectElementsSequenceTaskView extends TaskView {
-	private final float MARGIN = 0.07f;
-	private final float LINE_WIDTH = 8.0f;
-
 	private Node inputParams;
 	private Resources resources;
 	private int[] elementResourceIds;
@@ -33,8 +30,6 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	private Bitmap userBitmap; // user-drawn lines
 	private Bitmap oldUserBitmap;
 	private Canvas userCanvas;
-	private boolean isConsequentnessImportant = false;
-	private boolean isSwapAvailable = true;
 	private AlertDialog alertDialog;
 	private int width, height;
 	private boolean isLineDrawing;
@@ -43,6 +38,12 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	private Paint emptyPaint;
 	private List<Answer> trueAnswers;
 	private List<Answer> givenAnswers;
+	private float scaleKoeff = 1.0f;
+	// properties from XML
+	private boolean isConsequentnessImportant;
+	private boolean isSwapAvailable;
+	private float marginKoef;
+	private float lineWidth;
 
 	public ConnectElementsSequenceTaskView(Context context, Node theInputParams) {
 		super(context);
@@ -52,7 +53,13 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		NodeList nodes = null;
 		nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
 				"./TaskResources/TaskResource");
-		readFlags();
+		isConsequentnessImportant = XMLUtils.getBooleanProperty(inputParams,
+				"./ConsequentnessImportant", false);
+		isSwapAvailable = XMLUtils.getBooleanProperty(inputParams,
+				"./SwapAvailable", true);
+		marginKoef = XMLUtils.getFloatProperty(inputParams, "./Margin", 0.07f);
+		lineWidth = XMLUtils.getFloatProperty(inputParams, "./LineWidth", 8.0f);
+
 		int N = nodes.getLength();
 		taskElements = new Bitmap[N];
 		elementPositions = new PointF[N];
@@ -97,7 +104,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		emptyPaint = new Paint(Paint.DITHER_FLAG);
 		emptyPaint.setAntiAlias(true);
 		emptyPaint.setARGB(255, 25, 155, 25);
-		emptyPaint.setStrokeWidth(LINE_WIDTH);
+		emptyPaint.setStrokeWidth(lineWidth);
 
 		alertDialog = new AlertDialog.Builder(context).create();
 	}
@@ -107,6 +114,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		super.onSizeChanged(w, h, oldw, oldh);
 		width = w;
 		height = h;
+		scaleKoeff = countScaleKoeff();
 		recountPositions();
 		resetUserBitmap();
 	}
@@ -114,9 +122,18 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		canvas.drawBitmap(userBitmap, 0, 0, emptyPaint);
+		Rect src = new Rect();
+		RectF dst = new RectF();
 		for (int i = 0; i < taskElements.length; ++i) {
-			canvas.drawBitmap(taskElements[i], elementPositions[i].x,
-					elementPositions[i].y, emptyPaint);
+			src.left = 0;
+			src.top = 0;
+			src.right = taskElements[i].getWidth();
+			src.bottom = taskElements[i].getHeight();
+			dst.left = elementPositions[i].x;
+			dst.top = elementPositions[i].y;
+			dst.right = elementPositions[i].x+taskElements[i].getWidth()*scaleKoeff;
+			dst.bottom = elementPositions[i].y+taskElements[i].getHeight()*scaleKoeff;
+			canvas.drawBitmap(taskElements[i], src,dst, emptyPaint);
 		}
 	}
 
@@ -161,6 +178,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				isLineDrawing = true;
 				lastTouchedPoint.set(x, y);
 				oldUserBitmap = userBitmap.copy(Bitmap.Config.ARGB_8888, true);
+				userCanvas.drawCircle(x, y, lineWidth * 0.5f, emptyPaint);
 			} else {
 				isLineDrawing = false;
 			}
@@ -174,7 +192,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				break;
 			}
 
-			userCanvas.drawCircle(x, y, LINE_WIDTH * 0.5f, emptyPaint);
+			userCanvas.drawCircle(x, y, lineWidth * 0.5f, emptyPaint);
 			userCanvas.drawLine(lastTouchedPoint.x, lastTouchedPoint.y, x, y,
 					emptyPaint);
 			lastTouchedPoint.set(x, y);
@@ -190,7 +208,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 			}
 			int secondImageId = getImageId(x, y);
 			if (secondImageId >= 0) {
-				userCanvas.drawCircle(x, y, LINE_WIDTH * 0.5f, emptyPaint);
+				userCanvas.drawCircle(x, y, lineWidth * 0.5f, emptyPaint);
 				userCanvas.drawLine(lastTouchedPoint.x, lastTouchedPoint.y, x,
 						y, emptyPaint);
 				Answer ans = new Answer(elementResourceIds[firstImageId],
@@ -212,20 +230,44 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	}
 
 	private void recountPositions() {
-		float margin = width * MARGIN;
+		float margin = width * marginKoef * scaleKoeff;
 		float currLHeight = 0.0f, currRHeight = 0.0f;
 		for (int i = 0; i < elementPositions.length; ++i) {
 			if (i % 2 == 0) {
 				elementPositions[i].x = margin;
 				elementPositions[i].y = currLHeight + margin;
-				currLHeight += taskElements[i].getHeight();
+				currLHeight += taskElements[i].getHeight()* scaleKoeff + margin;
 			} else {
-				elementPositions[i].x = width - taskElements[i].getWidth()
+				elementPositions[i].x = width - taskElements[i].getWidth()* scaleKoeff
 						- margin;
 				elementPositions[i].y = currRHeight + margin;
-				currRHeight += taskElements[i].getHeight();
+				currRHeight += taskElements[i].getHeight()* scaleKoeff + margin;
 			}
 		}
+	}
+
+	private float countScaleKoeff() {
+		float margin = width * marginKoef;
+		float currLHeight = 0.0f, currRHeight = 0.0f;
+		for (int i = 0; i < elementPositions.length; ++i) {
+			if (i % 2 == 0) {
+				currLHeight += taskElements[i].getHeight() + margin;
+			} else {
+				currRHeight += taskElements[i].getHeight() + margin;
+			}
+		}
+		float maxHeight = Math.max(currLHeight, currRHeight);
+		float maxWidth = 0.0f;
+		for (int i = 0; i < elementPositions.length; i += 2) {
+			float w = taskElements[i].getWidth() + margin * 2.0f;
+			if (i + 1 < elementPositions.length) {
+				w += taskElements[i + 1].getWidth() + margin;
+			}
+			maxWidth = Math.max(maxWidth, w);
+		}
+		float hk = width / maxWidth;
+		float vk = height / maxHeight;
+		return Math.min(hk, vk);
 	}
 
 	private void resetUserBitmap() {
@@ -244,19 +286,6 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 			}
 		}
 		return -1;
-	}
-
-	private void readFlags() {
-		Node nd;
-		nd = XMLUtils.evalXpathExprAsNode(inputParams,
-				"./ConsequentnessImportant");
-		if (nd != null) {
-			isConsequentnessImportant = Boolean.valueOf(nd.getTextContent());
-		}
-		nd = XMLUtils.evalXpathExprAsNode(inputParams, "./SwapAvailable");
-		if (nd != null) {
-			isSwapAvailable = Boolean.valueOf(nd.getTextContent());
-		}
 	}
 
 	private class Answer implements Comparable<Answer> {

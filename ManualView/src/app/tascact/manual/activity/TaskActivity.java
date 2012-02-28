@@ -15,6 +15,7 @@ import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -24,6 +25,7 @@ import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.R;
 import app.tascact.manual.XMLResources;
 import app.tascact.manual.task.CompleteTableTaskView;
+import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.ConnectElementsTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.view.TaskControlView;
@@ -51,9 +53,10 @@ public class TaskActivity extends Activity
 
 				switch (extras.getInt("TaskType")) {
 				case 1:
-					mTaskView = new ConnectElementsTaskView(this, markup,
-							extras.getInt("PageNumber"),
-							extras.getInt("TaskNumber"));
+					mTaskView = new ConnectElementsSequenceTaskView(this,
+							markup.getTaskResources(
+									extras.getInt("PageNumber"),
+									extras.getInt("TaskNumber")));
 					break;
 				case 2:
 					mTaskView = new CompleteTableTaskView(this, markup,
@@ -81,9 +84,9 @@ public class TaskActivity extends Activity
 				mMainLayout.setOrientation(1);
 				// Лочим ориентацию экрана
 				this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
+				int h = getWindowManager().getDefaultDisplay().getHeight();
 				mMainLayout.addView(mTaskView, new LayoutParams(
-						LayoutParams.MATCH_PARENT, 1040));
+						LayoutParams.MATCH_PARENT, h-167));
 				mMainLayout.addView(mTaskControl, new LayoutParams(
 						LayoutParams.MATCH_PARENT, 167));
 

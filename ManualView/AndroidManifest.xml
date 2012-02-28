@@ -21,6 +21,7 @@
         <activity android:name=".activity.TaskActivity"></activity>
         <activity android:name=".activity.ContentActivity"></activity>
         <activity android:name=".activity.ManualActivity"></activity>
+        <activity android:name=".activity.PageReaderActivity"></activity>
     </application>
 
 </manifest>
