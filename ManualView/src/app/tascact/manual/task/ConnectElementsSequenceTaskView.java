@@ -207,7 +207,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				break;
 			}
 			int secondImageId = getImageId(x, y);
-			if (secondImageId >= 0) {
+			if (secondImageId >= 0 && firstImageId!=secondImageId) {
 				userCanvas.drawCircle(x, y, lineWidth * 0.5f, emptyPaint);
 				userCanvas.drawLine(lastTouchedPoint.x, lastTouchedPoint.y, x,
 						y, emptyPaint);
@@ -216,7 +216,16 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				if (isSwapAvailable) {
 					ans.sort();
 				}
-				givenAnswers.add(ans);
+				boolean alreadyAdded = false;
+				for(int i=0;i<givenAnswers.size();++i){
+					if(ans.compareTo(givenAnswers.get(i))==0){
+						alreadyAdded = true;
+						break;
+					}
+				}
+				if(!alreadyAdded){
+					givenAnswers.add(ans);
+				}
 			} else {
 				userBitmap = oldUserBitmap;
 				userCanvas = new Canvas(userBitmap);
@@ -279,9 +288,9 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	private int getImageId(float x, float y) {
 		for (int i = 0; i < elementPositions.length; ++i) {
 			if (x >= elementPositions[i].x
-					&& x <= elementPositions[i].x + taskElements[i].getWidth()
+					&& x <= elementPositions[i].x + taskElements[i].getWidth()*scaleKoeff
 					&& y >= elementPositions[i].y
-					&& y <= elementPositions[i].y + taskElements[i].getHeight()) {
+					&& y <= elementPositions[i].y + taskElements[i].getHeight()*scaleKoeff) {
 				return i;
 			}
 		}
