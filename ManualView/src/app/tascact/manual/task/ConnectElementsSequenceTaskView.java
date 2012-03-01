@@ -56,7 +56,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				"./SwapAvailable", true);
 		marginKoef = XMLUtils.getFloatProperty(inputParams, "./Margin", 0.07f);
 		lineWidth = XMLUtils.getFloatProperty(inputParams, "./LineWidth", 8.0f);
-		
+
 		NodeList nodes = null;
 		nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
 				"./TaskResources/TaskResource");
@@ -118,6 +118,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		scaleKoeff = countScaleKoeff();
 		recountPositions();
 		resetUserBitmap();
+		drawHint();
 	}
 
 	@Override
@@ -132,9 +133,11 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 			src.bottom = taskElements[i].getHeight();
 			dst.left = elementPositions[i].x;
 			dst.top = elementPositions[i].y;
-			dst.right = elementPositions[i].x+taskElements[i].getWidth()*scaleKoeff;
-			dst.bottom = elementPositions[i].y+taskElements[i].getHeight()*scaleKoeff;
-			canvas.drawBitmap(taskElements[i], src,dst, emptyPaint);
+			dst.right = elementPositions[i].x + taskElements[i].getWidth()
+					* scaleKoeff;
+			dst.bottom = elementPositions[i].y + taskElements[i].getHeight()
+					* scaleKoeff;
+			canvas.drawBitmap(taskElements[i], src, dst, emptyPaint);
 		}
 	}
 
@@ -143,6 +146,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		userBitmap = Bitmap
 				.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		userCanvas = new Canvas(userBitmap);
+		drawHint();
 		givenAnswers = new LinkedList<Answer>();
 		invalidate();
 	}
@@ -208,7 +212,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				break;
 			}
 			int secondImageId = getImageId(x, y);
-			if (secondImageId >= 0 && firstImageId!=secondImageId) {
+			if (secondImageId >= 0 && firstImageId != secondImageId) {
 				userCanvas.drawCircle(x, y, lineWidth * 0.5f, emptyPaint);
 				userCanvas.drawLine(lastTouchedPoint.x, lastTouchedPoint.y, x,
 						y, emptyPaint);
@@ -218,13 +222,13 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 					ans.sort();
 				}
 				boolean alreadyAdded = false;
-				for(int i=0;i<givenAnswers.size();++i){
-					if(ans.compareTo(givenAnswers.get(i))==0){
+				for (int i = 0; i < givenAnswers.size(); ++i) {
+					if (ans.compareTo(givenAnswers.get(i)) == 0) {
 						alreadyAdded = true;
 						break;
 					}
 				}
-				if(!alreadyAdded){
+				if (!alreadyAdded) {
 					givenAnswers.add(ans);
 				}
 			} else {
@@ -246,12 +250,14 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 			if (i % 2 == 0) {
 				elementPositions[i].x = margin;
 				elementPositions[i].y = currLHeight + margin;
-				currLHeight += taskElements[i].getHeight()* scaleKoeff + margin;
+				currLHeight += taskElements[i].getHeight() * scaleKoeff
+						+ margin;
 			} else {
-				elementPositions[i].x = width - taskElements[i].getWidth()* scaleKoeff
-						- margin;
+				elementPositions[i].x = width - taskElements[i].getWidth()
+						* scaleKoeff - margin;
 				elementPositions[i].y = currRHeight + margin;
-				currRHeight += taskElements[i].getHeight()* scaleKoeff + margin;
+				currRHeight += taskElements[i].getHeight() * scaleKoeff
+						+ margin;
 			}
 		}
 	}
@@ -289,17 +295,45 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	private int getImageId(float x, float y) {
 		for (int i = 0; i < elementPositions.length; ++i) {
 			if (x >= elementPositions[i].x
-					&& x <= elementPositions[i].x + taskElements[i].getWidth()*scaleKoeff
+					&& x <= elementPositions[i].x + taskElements[i].getWidth()
+							* scaleKoeff
 					&& y >= elementPositions[i].y
-					&& y <= elementPositions[i].y + taskElements[i].getHeight()*scaleKoeff) {
-				int color = taskElements[i].getPixel((int)((x-elementPositions[i].x)/scaleKoeff),(int)((y-elementPositions[i].y)/scaleKoeff));
-				if(Color.alpha(color)<20){
+					&& y <= elementPositions[i].y + taskElements[i].getHeight()
+							* scaleKoeff) {
+				int color = taskElements[i].getPixel(
+						(int) ((x - elementPositions[i].x) / scaleKoeff),
+						(int) ((y - elementPositions[i].y) / scaleKoeff));
+				if (Color.alpha(color) < 20) {
 					continue;
 				}
 				return i;
 			}
 		}
 		return -1;
+	}
+
+	private PointF getCenterByName(String name) {
+		for (int i = 0; i < elementNames.length; ++i) {
+			if (name.equals(elementNames[i])) {
+				PointF p = new PointF(elementPositions[i].x
+						+ taskElements[i].getWidth() * scaleKoeff * 0.5f,
+						elementPositions[i].y + taskElements[i].getHeight()
+								* scaleKoeff * 0.5f);
+				return p;
+			}
+		}
+		return null;
+	}
+
+	private void drawHint() {
+		NodeList nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
+				"./TaskHint/TaskResource");
+		if(nodes.getLength()<2){
+			return;
+		}
+		PointF start = getCenterByName(nodes.item(0).getTextContent());
+		PointF finish = getCenterByName(nodes.item(1).getTextContent());
+		userCanvas.drawLine(start.x, start.y, finish.x, finish.y, emptyPaint);
 	}
 
 	private class Answer implements Comparable<Answer> {

@@ -455,6 +455,47 @@
 	        		<Answer>4</Answer>
 	        	</TaskAnswer>
             </Task-->
+            <Task number="4" tasktype="1">
+            	<ConsequentnessImportant>false</ConsequentnessImportant>
+            	<SwapAvailable>true</SwapAvailable>
+            	<Margin>0.07</Margin>
+            	<LineWidth>8.0</LineWidth>
+	            <TaskResources>
+	            	<TaskResource>manual_1_2_pg62_4_task_7</TaskResource>
+	            	<TaskResource>manual_1_2_pg62_4_task_3</TaskResource>
+		            <TaskResource>manual_1_2_pg62_4_task_1</TaskResource>
+		            <TaskResource>manual_1_2_pg62_4_task_2</TaskResource>
+		            <TaskResource>manual_1_2_pg62_4_task_4</TaskResource>
+		            <TaskResource>manual_1_2_pg62_4_task_5</TaskResource>
+		            <TaskResource>manual_1_2_pg62_4_task_6</TaskResource>
+	            </TaskResources>
+	            <TaskHint>
+                        <TaskResource>manual_1_2_pg62_4_task_7</TaskResource>
+                        <TaskResource>manual_1_2_pg62_4_task_2</TaskResource>
+                </TaskHint>
+	            <TaskAnswer>
+                    <Answer>
+                        <TaskResource>manual_1_2_pg62_4_task_2</TaskResource>
+                        <TaskResource>manual_1_2_pg62_4_task_6</TaskResource>
+                    </Answer>
+                    <Answer>
+                        <TaskResource>manual_1_2_pg62_4_task_6</TaskResource>
+                        <TaskResource>manual_1_2_pg62_4_task_4</TaskResource>
+                    </Answer>
+                    <Answer>
+                        <TaskResource>manual_1_2_pg62_4_task_4</TaskResource>
+                        <TaskResource>manual_1_2_pg62_4_task_1</TaskResource>
+                    </Answer>
+                    <Answer>
+                        <TaskResource>manual_1_2_pg62_4_task_1</TaskResource>
+                        <TaskResource>manual_1_2_pg62_4_task_5</TaskResource>
+                    </Answer>
+                    <Answer>
+                        <TaskResource>manual_1_2_pg62_4_task_5</TaskResource>
+                        <TaskResource>manual_1_2_pg62_4_task_3</TaskResource>
+                    </Answer>
+                </TaskAnswer>
+            </Task>
         </Tasks>
     </page>
     <page>
