@@ -27,6 +27,7 @@ import app.tascact.manual.XMLResources;
 import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.ConnectElementsTaskView;
+import app.tascact.manual.task.GroupingElementsTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.view.TaskControlView;
 import app.tascact.manual.view.TaskView;
@@ -68,6 +69,12 @@ public class TaskActivity extends Activity
 							 extras.getString("ManualName"),
 							 extras.getInt("PageNumber"),
 							 extras.getInt("TaskNumber"));
+					break;
+				case 4:
+					mTaskView = new GroupingElementsTaskView(this,
+							markup.getTaskResources(
+									extras.getInt("PageNumber"),
+									extras.getInt("TaskNumber")));
 					break;
 				default:
 					

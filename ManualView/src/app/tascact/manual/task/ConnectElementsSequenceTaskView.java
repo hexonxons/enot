@@ -50,15 +50,16 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		inputParams = theInputParams;
 		resources = context.getResources();
 
-		NodeList nodes = null;
-		nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
-				"./TaskResources/TaskResource");
 		isConsequentnessImportant = XMLUtils.getBooleanProperty(inputParams,
 				"./ConsequentnessImportant", false);
 		isSwapAvailable = XMLUtils.getBooleanProperty(inputParams,
 				"./SwapAvailable", true);
 		marginKoef = XMLUtils.getFloatProperty(inputParams, "./Margin", 0.07f);
 		lineWidth = XMLUtils.getFloatProperty(inputParams, "./LineWidth", 8.0f);
+		
+		NodeList nodes = null;
+		nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
+				"./TaskResources/TaskResource");
 
 		int N = nodes.getLength();
 		taskElements = new Bitmap[N];
@@ -291,6 +292,10 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 					&& x <= elementPositions[i].x + taskElements[i].getWidth()*scaleKoeff
 					&& y >= elementPositions[i].y
 					&& y <= elementPositions[i].y + taskElements[i].getHeight()*scaleKoeff) {
+				int color = taskElements[i].getPixel((int)((x-elementPositions[i].x)/scaleKoeff),(int)((y-elementPositions[i].y)/scaleKoeff));
+				if(Color.alpha(color)<20){
+					continue;
+				}
 				return i;
 			}
 		}

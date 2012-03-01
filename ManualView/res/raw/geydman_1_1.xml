@@ -1,6 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--Нумерация задач с 1-->
 <book>
+<page>
+        <PageResources>
+            <PageResource>manual_1_1_pg23_1</PageResource>
+            <PageResource>manual_1_1_pg23_2</PageResource>
+            <PageResource>manual_1_1_pg23_3</PageResource>
+            <PageResource>manual_1_1_pg23_4</PageResource>
+        </PageResources>
+        <Tasks>
+            <Task number="1" tasktype="4">
+            	<ConsequentnessImportant>false</ConsequentnessImportant>
+            	<SwapAvailable>true</SwapAvailable>
+            	<Margin>0.07</Margin>
+            	<LineWidth>8.0</LineWidth>
+                <TaskResources>
+                    <TaskResource>manual_1_1_pg23_1_task_1</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_2</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_3</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_4</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_5</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_6</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_7</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_8</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_9</TaskResource>
+                    <TaskResource>manual_1_1_pg23_1_task_10</TaskResource>
+                </TaskResources>
+                <TaskAnswer>
+                    <Answer>
+                        <TaskResource>manual_1_1_pg23_1_task_1</TaskResource>
+                    	<TaskResource>manual_1_1_pg23_1_task_2</TaskResource>
+                    	<TaskResource>manual_1_1_pg23_1_task_3</TaskResource>
+                    </Answer>
+                    <Answer>
+                        <TaskResource>manual_1_1_pg23_1_task_4</TaskResource>
+                    	<TaskResource>manual_1_1_pg23_1_task_5</TaskResource>
+                    	<TaskResource>manual_1_1_pg23_1_task_6</TaskResource>
+                    	<TaskResource>manual_1_1_pg23_1_task_8</TaskResource>
+                    </Answer>
+                    <Answer>
+                        <TaskResource>manual_1_1_pg23_1_task_7</TaskResource>
+                    	<TaskResource>manual_1_1_pg23_1_task_9</TaskResource>
+                    	<TaskResource>manual_1_1_pg23_1_task_10</TaskResource>
+                    </Answer>
+                </TaskAnswer>
+            </Task>
+        </Tasks>
+    </page>
+    
     <page>
         <PageResources>
             <PageResource>manual_1_1_pg1</PageResource>
@@ -180,11 +227,6 @@
     <page>
         <PageResources>
             <PageResource>manual_1_1_pg22</PageResource>
-        </PageResources>
-    </page>
-    <page>
-        <PageResources>
-            <PageResource>manual_1_1_pg23</PageResource>
         </PageResources>
     </page>
     <page>
