@@ -265,7 +265,7 @@ public class SetOperatorsTaskView extends TaskView
     	String weee = mAnswer ? "Прально!" : "Непрально!";
     	mAnswerAnimation.setVisibility(VISIBLE);
     	mAnswerAnimation.setTextToDisplay(weee);
-    	mAnswerAnimation.Animate();
+    	//mAnswerAnimation.Animate();
     }
 	
 	private class ExpressionView extends RelativeLayout

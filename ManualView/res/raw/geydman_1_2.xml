@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--Нумерация задач с 1-->
-<book>
+<book height="4" width="3">
     <page>
         <PageResources>
             <PageResource>manual_1_2_pg1</PageResource>

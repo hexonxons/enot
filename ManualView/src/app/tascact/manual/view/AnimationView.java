@@ -65,7 +65,6 @@ public class AnimationView extends SurfaceView implements SurfaceHolder.Callback
 	 * Repeat					-	Повторять ли анимацию в цикле.
 	 * LastFrame				-	Установить ли последний кадр анимации первым кадром в наборе кадров.
 	 */
-    
 	public AnimationView(Context context,
 						 int Left,
 						 int Top,
@@ -131,13 +130,6 @@ public class AnimationView extends SurfaceView implements SurfaceHolder.Callback
     	this.setVisibility(INVISIBLE);
     	return super.onTouchEvent(event);
     }
-    
-	public void Animate()
-	{
-		/*mThread = new ViewThread(this);
-        mThread.setRunning(true);
-        mThread.start();*/
-	}
     
     public void setTextToDisplay(String TextToDisplay)
     {
@@ -349,7 +341,7 @@ public class AnimationView extends SurfaceView implements SurfaceHolder.Callback
 			paint.setColor(Color.BLACK); 
 			paint.setTextSize(20); 
 			// Рисуем текст
-			canvas.drawText(mTextToDisplay, 0, 120, paint);
+			canvas.drawText(mTextToDisplay, 80, 40, paint);
 		}
 		
 	    public void setTextToDisplay(String TextToDisplay)
