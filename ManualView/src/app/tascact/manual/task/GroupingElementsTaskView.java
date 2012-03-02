@@ -22,6 +22,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Handler;
 import android.util.Pair;
 import android.view.MotionEvent;
 import app.tascact.manual.utils.XMLUtils;
@@ -32,13 +33,21 @@ public class GroupingElementsTaskView extends TaskView {
 	private Resources resources;
 	private TaskElement[] taskElements;
 	private Paint emptyPaint;
-	private float scaleKoeff = 1.0f;
 	private int width;
 	private int height;
 	private int touchedElement = -1;
 	private PointF lastTouchedPoint;
 	private String[][] trueAnswers;
 	private AlertDialog alertDialog;
+	
+	/*private Runnable updatePhysicsProc = new Runnable(){
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub	
+		}
+	};
+	
+	private Handler timerRunner = new Handler();*/
 
 	public GroupingElementsTaskView(Context context, Node theInputParams) {
 		super(context);
@@ -80,6 +89,8 @@ public class GroupingElementsTaskView extends TaskView {
 		emptyPaint = new Paint();
 
 		alertDialog = new AlertDialog.Builder(context).create();
+		
+		//timerRunner.postDelayed(updatePhysicsProc, 100);
 	}
 
 	@Override
@@ -89,19 +100,12 @@ public class GroupingElementsTaskView extends TaskView {
 		paint.setARGB(255, 255, 255, 255);
 		canvas.drawRect(r, paint);
 		Rect src = new Rect();
-		RectF dst = new RectF();
 		for (int i = 0; i < taskElements.length; ++i) {
 			src.left = 0;
 			src.top = 0;
 			src.right = taskElements[i].bitmap.getWidth();
 			src.bottom = taskElements[i].bitmap.getHeight();
-			dst.left = taskElements[i].position.x;
-			dst.top = taskElements[i].position.y;
-			dst.right = taskElements[i].position.x
-					+ taskElements[i].bitmap.getWidth() * scaleKoeff;
-			dst.bottom = taskElements[i].position.y
-					+ taskElements[i].bitmap.getHeight() * scaleKoeff;
-			canvas.drawBitmap(taskElements[i].bitmap, src, dst, emptyPaint);
+			canvas.drawBitmap(taskElements[i].bitmap, src, taskElements[i].getRectF(), emptyPaint);
 		}
 	}
 
@@ -110,7 +114,10 @@ public class GroupingElementsTaskView extends TaskView {
 		super.onSizeChanged(w, h, oldw, oldh);
 		width = w;
 		height = h;
-		scaleKoeff = countScaleKoeff();
+		float sc = countScaleKoeff();
+		for(int i=0;i<taskElements.length;++i){ 
+			taskElements[i].scaleKoeff = sc;
+		}
 		regeneratePositions();
 	}
 
@@ -141,9 +148,8 @@ public class GroupingElementsTaskView extends TaskView {
 				elems[j] = taskElements[j];
 			}
 			PointF center = new PointF(taskElements[i].position.x
-					+ taskElements[i].bitmap.getWidth() * scaleKoeff * 0.5f,
-					taskElements[i].position.y
-							+ taskElements[i].bitmap.getHeight() * scaleKoeff
+					+ taskElements[i].getWidth() * 0.5f,
+					taskElements[i].position.y + taskElements[i].getHeight()
 							* 0.5f);
 			Arrays.sort(elems, new PointComparer(center));
 			String[] closest = new String[N];
@@ -171,12 +177,10 @@ public class GroupingElementsTaskView extends TaskView {
 
 		@Override
 		public int compare(TaskElement lhs, TaskElement rhs) {
-			PointF pl = new PointF(lhs.position.x + lhs.bitmap.getWidth()
-					* scaleKoeff * 0.5f, lhs.position.y
-					+ lhs.bitmap.getHeight() * scaleKoeff * 0.5f);
-			PointF pr = new PointF(rhs.position.x + rhs.bitmap.getWidth()
-					* scaleKoeff * 0.5f, rhs.position.y
-					+ rhs.bitmap.getHeight() * scaleKoeff * 0.5f);
+			PointF pl = new PointF(lhs.position.x + lhs.getWidth() * 0.5f,
+					lhs.position.y + lhs.getHeight() * 0.5f);
+			PointF pr = new PointF(rhs.position.x + rhs.getWidth() * 0.5f,
+					rhs.position.y + rhs.getHeight() * 0.5f);
 			float r = (pl.x - center.x) * (pl.x - center.x) + (pl.y - center.y)
 					* (pl.y - center.y);
 			float l = (pr.x - center.x) * (pr.x - center.x) + (pr.y - center.y)
@@ -218,11 +222,11 @@ public class GroupingElementsTaskView extends TaskView {
 			if (pos.y <= 0.0f) {
 				pos.y = 0.0f;
 			}
-			if (pos.x >= width - elem.bitmap.getWidth() * scaleKoeff) {
-				pos.x = width - elem.bitmap.getWidth() * scaleKoeff;
+			if (pos.x >= width - elem.getWidth()) {
+				pos.x = width - elem.getWidth();
 			}
-			if (pos.y >= height - elem.bitmap.getHeight() * scaleKoeff) {
-				pos.y = height - elem.bitmap.getHeight() * scaleKoeff;
+			if (pos.y >= height - elem.getHeight()) {
+				pos.y = height - elem.getHeight();
 			}
 			invalidate();
 			break;
@@ -273,25 +277,13 @@ public class GroupingElementsTaskView extends TaskView {
 		for (int i = 0; i < taskElements.length; ++i) {
 			for (int j = 0; j < NUM_TRIES; ++j) {
 				taskElements[i].position.x = r
-						.nextInt((int) (width - scaleKoeff
-								* taskElements[i].bitmap.getWidth()));
+						.nextInt((int) (width - taskElements[i].getWidth()));
 				taskElements[i].position.y = r
-						.nextInt((int) (height - scaleKoeff
-								* taskElements[i].bitmap.getHeight()));
-				RectF rct = new RectF(taskElements[i].position.x,
-						taskElements[i].position.y, taskElements[i].position.x
-								+ scaleKoeff
-								* taskElements[i].bitmap.getWidth(),
-						taskElements[i].position.y + scaleKoeff
-								* taskElements[i].bitmap.getHeight());
+						.nextInt((int) (height - taskElements[i].getHeight()));
+				RectF rct = taskElements[i].getRectF();
 				boolean intersects = false;
 				for (int k = 0; k < i; ++k) {
-					if (rct.intersects(taskElements[k].position.x,
-							taskElements[k].position.y,
-							taskElements[k].position.x + scaleKoeff
-									* taskElements[k].bitmap.getWidth(),
-							taskElements[k].position.y + scaleKoeff
-									* taskElements[k].bitmap.getHeight())) {
+					if (RectF.intersects(rct, taskElements[k].getRectF())) {
 						intersects = true;
 						break;
 					}
@@ -305,16 +297,9 @@ public class GroupingElementsTaskView extends TaskView {
 
 	private int getElementId(float x, float y) {
 		for (int i = taskElements.length - 1; i >= 0; --i) {
-			if (x >= taskElements[i].position.x
-					&& x <= taskElements[i].position.x
-							+ taskElements[i].bitmap.getWidth() * scaleKoeff
-					&& y >= taskElements[i].position.y
-					&& y <= taskElements[i].position.y
-							+ taskElements[i].bitmap.getHeight() * scaleKoeff) {
-				int color = taskElements[i].bitmap.getPixel(
-						(int) ((x - taskElements[i].position.x) / scaleKoeff),
-						(int) ((y - taskElements[i].position.y) / scaleKoeff));
-				if(Color.alpha(color)<20){
+			if (taskElements[i].isPointInside(x, y)) {
+				int color = taskElements[i].getColorByAbsoluteCoords(x, y);
+				if (Color.alpha(color) < 20) {
 					continue;
 				}
 				return i;
@@ -328,5 +313,44 @@ public class GroupingElementsTaskView extends TaskView {
 		public PointF position;
 		public int resourceId;
 		public String resourceName;
+		public float scaleKoeff = 1.0f;
+
+		public float getWidth() {
+			return bitmap.getWidth() * scaleKoeff;
+		}
+
+		public float getHeight() {
+			return bitmap.getHeight() * scaleKoeff;
+		}
+
+		public float getLeft() {
+			return position.x;
+		}
+
+		public float getRight() {
+			return position.x + getWidth();
+		}
+
+		public float getTop() {
+			return position.y;
+		}
+
+		public float getBottom() {
+			return position.y + getHeight();
+		}
+
+		public boolean isPointInside(float x, float y) {
+			return x >= getLeft() && x <= getRight() && y >= getTop()
+					&& y <= getBottom();
+		}
+
+		public int getColorByAbsoluteCoords(float x, float y) {
+			return bitmap.getPixel((int) ((x - position.x) / scaleKoeff),
+					(int) ((y - position.y) / scaleKoeff));
+		}
+
+		public RectF getRectF() {
+			return new RectF(getLeft(), getTop(), getRight(), getBottom());
+		}
 	}
 }
