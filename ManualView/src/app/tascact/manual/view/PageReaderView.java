@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.OverScroller;
+import android.widget.Scroller;
 import app.tascact.manual.Markup;
 
 public class PageReaderView extends HorizontalScrollView {
@@ -27,6 +29,8 @@ public class PageReaderView extends HorizontalScrollView {
 	private int pageHeight;
 	private int pageToDisplay;
 	private boolean firstTime = true;
+	private OverScroller scroller = new OverScroller(getContext());
+
 
 	/** 
 	 * Number of item (0-based) that is brought to front.
@@ -238,34 +242,63 @@ public class PageReaderView extends HorizontalScrollView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		int newActiveItem = (getScrollX() + pageWidth / 2) / pageWidth;
-		changeActiveItem(newActiveItem);
-
 		if (gestureDecoder.onTouchEvent(event)) {
 			return true;
 		}
 		if (event.getAction() == MotionEvent.ACTION_UP) {
+			int newActiveItem = (getScrollX() + pageWidth / 2) / pageWidth;
+			changeActiveItem(newActiveItem);
 			smoothScrollTo(activeItem * pageWidth + displayXOffset, 0);
 			return true;
 		}
 		return super.onTouchEvent(event);
 	}
 
+//	@Override
+//	public void computeScroll() {
+//		if (scroller.computeScrollOffset()) {
+//			int oldY = getScrollY();
+//			int y = scroller.getCurrY();
+//			scrollTo(0, y);
+//
+//			if (oldY != getScrollY()) {
+//				onScrollChanged(0, getScrollY(), 0, oldY);
+//			}
+//
+//			postInvalidate();
+//		}
+//	}
+	
 	class SoftScrollOnGestureListener extends SimpleOnGestureListener {
 		private final int SWIPE_MIN_SPEED = 3000;
-
+		
+		// Обработчик скролла
+//		@Override
+//		public boolean onScroll(MotionEvent event1, MotionEvent event2,
+//				float distanceX, float distanceY) {
+//			int newScrollY = getScrollY();
+//
+//			if (getScrollY() > pageHeight - getHeight()) {
+//				newScrollY = pageHeight - getHeight();
+//			}
+//
+//			// расстояние, на которое прокручиваем
+//			int offset = newScrollY + (int) distanceY >= pageHeight
+//					- getHeight() ? 0 : (int) distanceY;
+//			// запуск прокрутки
+//			scroller.startScroll(0, getScrollY(), 0, offset, 60);
+//			return true;
+//		}
+		
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
 			try {
 				if (velocityX < -SWIPE_MIN_SPEED) {
-					changeActiveItem((activeItem < (pages.length - 1)) ? activeItem + 1
-							: pages.length - 1);
-					smoothScrollTo(pageWidth * activeItem + displayXOffset, 0);
+					nextPage();
 					return true;
-				} else if (velocityX > SWIPE_MIN_SPEED) {
-					changeActiveItem((activeItem > 0) ? activeItem - 1 : 0);
-					smoothScrollTo(pageWidth * activeItem + displayXOffset, 0);
+				} else if (velocityX >= SWIPE_MIN_SPEED) {
+					prevPage();
 					return true;
 				}
 			} catch (Exception e) {
