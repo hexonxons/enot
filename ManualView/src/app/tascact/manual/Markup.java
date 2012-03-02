@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import app.tascact.manual.activity.TaskActivity;
 import app.tascact.manual.utils.XMLUtils;
@@ -216,8 +217,6 @@ public class Markup {
 	 */
 	private class PageView extends LinearLayout {
 		public PageView(int pageNumber) {
-
-
 			super(context);
 			setBackgroundColor(Color.WHITE);
 			setOrientation(LinearLayout.VERTICAL);
@@ -232,7 +231,8 @@ public class Markup {
 				// Makes it keep the ratio when size changed
 				pageElem.setImageResource(getPageResources(pageNumber)[i]);
 				pageElem.setOnClickListener(taskLauncher);
-
+				pageElem.setAdjustViewBounds(true);
+				
 				LayoutParams params = new LayoutParams(
 						LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 				this.addView(pageElem, params);
