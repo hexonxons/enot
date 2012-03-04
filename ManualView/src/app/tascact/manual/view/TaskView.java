@@ -26,4 +26,17 @@ public abstract class TaskView extends RelativeLayout
 	public abstract void RestartTask();
 	// функция проверка задачи
 	public abstract void CheckTask();
+	
+	// These 3 procs are needed for tasks with a "game-loop"
+	public void onPause(){
+		
+	}
+	
+	public void onResume(){
+		
+	}
+	
+	public void onStop(){
+		
+	}
 }

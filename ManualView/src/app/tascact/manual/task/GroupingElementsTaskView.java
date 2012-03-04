@@ -23,8 +23,12 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
+import android.os.SystemClock;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
+import app.tascact.manual.utils.MathUtils;
+import app.tascact.manual.utils.TouchMoment;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
@@ -37,17 +41,81 @@ public class GroupingElementsTaskView extends TaskView {
 	private int height;
 	private int touchedElement = -1;
 	private PointF lastTouchedPoint;
+	private long lastTouchStart;
 	private String[][] trueAnswers;
 	private AlertDialog alertDialog;
 	
-	/*private Runnable updatePhysicsProc = new Runnable(){
+	private boolean isActive = true;
+	
+	private List<TouchMoment> touchHistory= new LinkedList<TouchMoment>();
+	
+	private long updatePhysicsLastTimeLaunched = -1;
+	private Runnable updatePhysicsProc = new Runnable(){
+		
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub	
+			final float frictionAccKoef = 4.9f;
+			float deltaTime = 0.0f;
+			long currentTime = SystemClock.elapsedRealtime();
+			if(updatePhysicsLastTimeLaunched>=0){
+				deltaTime = (currentTime - updatePhysicsLastTimeLaunched)/1000.0f;
+			}
+			for(int i=0;i<taskElements.length;++i){
+				if(i==touchedElement){
+					continue;
+				}
+				TaskElement elem = taskElements[i];
+				elem.position.x+=elem.velocity.x*deltaTime;
+				elem.position.y+=elem.velocity.y*deltaTime;
+				if(elem.position.x<=0){
+					elem.velocity.x = Math.abs(elem.velocity.x);
+				}
+				if(elem.position.y<=0){
+					elem.velocity.y = Math.abs(elem.velocity.y);
+				}
+				if(elem.position.x>=width-elem.getWidth()){
+					elem.velocity.x = -Math.abs(elem.velocity.x);
+				}
+				if(elem.position.y>=height-elem.getHeight()){
+					elem.velocity.y = -Math.abs(elem.velocity.y);
+				}
+				// make it slower
+				float len = elem.velocity.length();
+				if(len<=frictionAccKoef*len*deltaTime){
+					// stop it completely
+					elem.velocity.x = elem.velocity.y = 0.0f;
+				}else{
+					elem.velocity.x -= elem.velocity.x*frictionAccKoef*deltaTime;
+					elem.velocity.y -= elem.velocity.y*frictionAccKoef*deltaTime;
+				}
+			}
+			updatePhysicsLastTimeLaunched = currentTime;
+			invalidate();
+			if(isActive){
+				timerRunner.postDelayed(this,10);
+			}
+			Log.i("FUCK","One more cycle "+currentTime);
 		}
 	};
 	
-	private Handler timerRunner = new Handler();*/
+	@Override
+	public void onPause(){
+		isActive = false;
+	}
+	
+	@Override
+	public void onResume(){
+		isActive = true;
+		updatePhysicsLastTimeLaunched = -1;
+		timerRunner.postDelayed(updatePhysicsProc,100);
+	}
+	
+	@Override
+	public void onStop(){
+		isActive = false;
+	}
+	
+	private Handler timerRunner = new Handler();
 
 	public GroupingElementsTaskView(Context context, Node theInputParams) {
 		super(context);
@@ -90,7 +158,7 @@ public class GroupingElementsTaskView extends TaskView {
 
 		alertDialog = new AlertDialog.Builder(context).create();
 		
-		//timerRunner.postDelayed(updatePhysicsProc, 100);
+		timerRunner.postDelayed(updatePhysicsProc, 100);
 	}
 
 	@Override
@@ -164,6 +232,9 @@ public class GroupingElementsTaskView extends TaskView {
 				}
 			}
 		}
+		for(TaskElement elem:taskElements){
+			elem.velocity.x = elem.velocity.y = 0.0f;
+		}
 		alertDialog.setMessage(Boolean.toString(res));
 		alertDialog.show();
 	}
@@ -203,6 +274,9 @@ public class GroupingElementsTaskView extends TaskView {
 		case MotionEvent.ACTION_DOWN: {
 			touchedElement = getElementId(x, y);
 			lastTouchedPoint = new PointF(x, y);
+			touchHistory.clear();
+			lastTouchStart = SystemClock.elapsedRealtime();
+			touchHistory.add(new TouchMoment(x,y,0.0f));
 			invalidate();
 			break;
 		}
@@ -228,6 +302,9 @@ public class GroupingElementsTaskView extends TaskView {
 			if (pos.y >= height - elem.getHeight()) {
 				pos.y = height - elem.getHeight();
 			}
+			float deltaTime = (SystemClock.elapsedRealtime()-lastTouchStart)/1000.0f;
+			touchHistory.add(new TouchMoment(x, y, deltaTime));
+			cleanOldTouchHistory(deltaTime,0.1f);
 			invalidate();
 			break;
 		}
@@ -236,11 +313,27 @@ public class GroupingElementsTaskView extends TaskView {
 			if (touchedElement == -1) {
 				break;
 			}
+			float deltaTime = (SystemClock.elapsedRealtime()-lastTouchStart)/1000.0f;
+			touchHistory.add(new TouchMoment(x, y,deltaTime));
+			cleanOldTouchHistory(deltaTime,0.1f);
+			taskElements[touchedElement].velocity = MathUtils.getAverageVelocity(touchHistory);
+			touchedElement = -1;
 			invalidate();
 			break;
 		}
 		}
 		return true;
+	}
+	
+	private void cleanOldTouchHistory(float curr,float time){
+		while(!touchHistory.isEmpty()){
+			TouchMoment m = touchHistory.get(0);
+			if(curr-m.t>=time){
+				touchHistory.remove(0);
+			}else{
+				break;
+			}
+		}
 	}
 
 	private float countScaleKoeff() {
@@ -270,7 +363,9 @@ public class GroupingElementsTaskView extends TaskView {
 		}
 		return result;
 	}
-
+	/*
+	 * regenerates all positions and stops all velocities
+	 */
 	private void regeneratePositions() {
 		final int NUM_TRIES = 100;
 		Random r = new Random(System.nanoTime());
@@ -292,6 +387,7 @@ public class GroupingElementsTaskView extends TaskView {
 					break;
 				}
 			}
+			taskElements[i].velocity = new PointF(0.0f,0.0f);
 		}
 	}
 
@@ -311,6 +407,7 @@ public class GroupingElementsTaskView extends TaskView {
 	private class TaskElement {
 		public Bitmap bitmap;
 		public PointF position;
+		public PointF velocity;
 		public int resourceId;
 		public String resourceName;
 		public float scaleKoeff = 1.0f;

@@ -32,8 +32,7 @@ import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.view.TaskControlView;
 import app.tascact.manual.view.TaskView;
 
-public class TaskActivity extends Activity
-{
+public class TaskActivity extends Activity {
 	// View раскладки элементов
 	private LinearLayout mMainLayout = null;
 	// View страниц учебника
@@ -65,10 +64,10 @@ public class TaskActivity extends Activity
 							extras.getInt("TaskNumber"));
 					break;
 				case 3:
-					 mTaskView = new SetOperatorsTaskView(this, markup,
-							 extras.getString("ManualName"),
-							 extras.getInt("PageNumber"),
-							 extras.getInt("TaskNumber"));
+					mTaskView = new SetOperatorsTaskView(this, markup,
+							extras.getString("ManualName"),
+							extras.getInt("PageNumber"),
+							extras.getInt("TaskNumber"));
 					break;
 				case 4:
 					mTaskView = new GroupingElementsTaskView(this,
@@ -77,15 +76,17 @@ public class TaskActivity extends Activity
 									extras.getInt("TaskNumber")));
 					break;
 				default:
-					
+
 					break;
 				}
 
 				mTaskControl = new TaskControlView(this);
 
-				// Задаем обработчики касаний 
-				mTaskControl.mCheckButton.setOnTouchListener(mCheckTouchListener);
-				mTaskControl.mRestartButton.setOnTouchListener(mRestartTouchListener);
+				// Задаем обработчики касаний
+				mTaskControl.mCheckButton
+						.setOnTouchListener(mCheckTouchListener);
+				mTaskControl.mRestartButton
+						.setOnTouchListener(mRestartTouchListener);
 
 				// Ориентируем View вертикально
 				mMainLayout.setOrientation(1);
@@ -93,35 +94,29 @@ public class TaskActivity extends Activity
 				this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 				int h = getWindowManager().getDefaultDisplay().getHeight();
 				mMainLayout.addView(mTaskView, new LayoutParams(
-						LayoutParams.MATCH_PARENT, h-167));
+						LayoutParams.MATCH_PARENT, h - 167));
 				mMainLayout.addView(mTaskControl, new LayoutParams(
 						LayoutParams.MATCH_PARENT, 167));
 
 				setContentView(mMainLayout);
 			}
-		} 
-		catch (Throwable e) 
-		{
+		} catch (Throwable e) {
 			Log.e("XML", "Failed to get markup from XML in TaskActivity", e);
 			finish();
 		}
 	}
 
-	private OnTouchListener mCheckTouchListener = new OnTouchListener()
-	{
+	private OnTouchListener mCheckTouchListener = new OnTouchListener() {
 		@Override
-		public boolean onTouch(View v, MotionEvent event)
-		{
+		public boolean onTouch(View v, MotionEvent event) {
 			int eventAction = event.getAction();
 
-			if (eventAction == MotionEvent.ACTION_DOWN)
-			{
+			if (eventAction == MotionEvent.ACTION_DOWN) {
 				((ImageView) v).setImageResource(R.drawable.checked);
 				return true;
 			}
 
-			if (eventAction == MotionEvent.ACTION_UP)
-			{
+			if (eventAction == MotionEvent.ACTION_UP) {
 				((ImageView) v).setImageResource(R.drawable.check);
 				mTaskView.CheckTask();
 				return true;
@@ -131,21 +126,17 @@ public class TaskActivity extends Activity
 		}
 	};
 
-	private OnTouchListener mRestartTouchListener = new OnTouchListener()
-	{
+	private OnTouchListener mRestartTouchListener = new OnTouchListener() {
 		@Override
-		public boolean onTouch(View v, MotionEvent event)
-		{
+		public boolean onTouch(View v, MotionEvent event) {
 			int eventAction = event.getAction();
 
-			if (eventAction == MotionEvent.ACTION_DOWN) 
-			{
+			if (eventAction == MotionEvent.ACTION_DOWN) {
 				((ImageView) v).setImageResource(R.drawable.restarted);
 				return true;
 			}
 
-			if (eventAction == MotionEvent.ACTION_UP)
-			{
+			if (eventAction == MotionEvent.ACTION_UP) {
 				((ImageView) v).setImageResource(R.drawable.restart);
 				mTaskView.RestartTask();
 				return true;
@@ -154,4 +145,22 @@ public class TaskActivity extends Activity
 			return true;
 		}
 	};
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		mTaskView.onPause();
+	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		mTaskView.onResume();
+	}
+	
+	@Override
+	public void onStop(){
+		super.onStop();
+		mTaskView.onStop();
+	}
 }
