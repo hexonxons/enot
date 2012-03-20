@@ -182,6 +182,10 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 			if (firstImageId >= 0) {
 				isLineDrawing = true;
 				lastTouchedPoint.set(x, y);
+				// lastTouchedPoint.x = elementPositions[firstImageId].x +
+				// taskElements[firstImageId].getWidth()*0.5f;
+				// lastTouchedPoint.y = elementPositions[firstImageId].y +
+				// taskElements[firstImageId].getWidth()*0.5f;
 				oldUserBitmap = userBitmap.copy(Bitmap.Config.ARGB_8888, true);
 				userCanvas.drawCircle(x, y, lineWidth * 0.5f, emptyPaint);
 			} else {
@@ -300,12 +304,12 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 					&& y >= elementPositions[i].y
 					&& y <= elementPositions[i].y + taskElements[i].getHeight()
 							* scaleKoeff) {
-				int color = taskElements[i].getPixel(
-						(int) ((x - elementPositions[i].x) / scaleKoeff),
-						(int) ((y - elementPositions[i].y) / scaleKoeff));
-				if (Color.alpha(color) < 20) {
-					continue;
-				}
+				/*
+				 * int color = taskElements[i].getPixel( (int) ((x -
+				 * elementPositions[i].x) / scaleKoeff), (int) ((y -
+				 * elementPositions[i].y) / scaleKoeff)); if (Color.alpha(color)
+				 * < 20) { continue; }
+				 */
 				return i;
 			}
 		}
@@ -328,7 +332,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	private void drawHint() {
 		NodeList nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
 				"./TaskHint/TaskResource");
-		if(nodes.getLength()<2){
+		if (nodes.getLength() < 2) {
 			return;
 		}
 		PointF start = getCenterByName(nodes.item(0).getTextContent());
