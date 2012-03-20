@@ -19,6 +19,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -33,6 +34,7 @@ import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
 public class GroupingElementsTaskView extends TaskView {
+	private float frictionKoef = 4.9f;
 	private Node inputParams;
 	private Resources resources;
 	private TaskElement[] taskElements;
@@ -44,77 +46,79 @@ public class GroupingElementsTaskView extends TaskView {
 	private long lastTouchStart;
 	private String[][] trueAnswers;
 	private AlertDialog alertDialog;
-	
+	private float instrictionsTextSize = 0.0f;
+	private String[] instructions;
+
 	private boolean isActive = true;
-	
-	private List<TouchMoment> touchHistory= new LinkedList<TouchMoment>();
-	
+
+	private List<TouchMoment> touchHistory = new LinkedList<TouchMoment>();
+
 	private long updatePhysicsLastTimeLaunched = -1;
-	private Runnable updatePhysicsProc = new Runnable(){
-		
+	private Runnable updatePhysicsProc = new Runnable() {
+
 		@Override
 		public void run() {
-			final float frictionAccKoef = 4.9f;
 			float deltaTime = 0.0f;
 			long currentTime = SystemClock.elapsedRealtime();
-			if(updatePhysicsLastTimeLaunched>=0){
-				deltaTime = (currentTime - updatePhysicsLastTimeLaunched)/1000.0f;
+			if (updatePhysicsLastTimeLaunched >= 0) {
+				deltaTime = (currentTime - updatePhysicsLastTimeLaunched) / 1000.0f;
 			}
-			for(int i=0;i<taskElements.length;++i){
-				if(i==touchedElement){
+			for (int i = 0; i < taskElements.length; ++i) {
+				if (i == touchedElement) {
 					continue;
 				}
 				TaskElement elem = taskElements[i];
-				elem.position.x+=elem.velocity.x*deltaTime;
-				elem.position.y+=elem.velocity.y*deltaTime;
-				if(elem.position.x<=0){
+				if (elem.position.x <= 0) {
 					elem.velocity.x = Math.abs(elem.velocity.x);
 				}
-				if(elem.position.y<=0){
+				if (elem.position.y <= 0) {
 					elem.velocity.y = Math.abs(elem.velocity.y);
 				}
-				if(elem.position.x>=width-elem.getWidth()){
+				if (elem.position.x >= width - elem.getWidth()) {
 					elem.velocity.x = -Math.abs(elem.velocity.x);
 				}
-				if(elem.position.y>=height-elem.getHeight()){
+				if (elem.position.y >= height - elem.getHeight()) {
 					elem.velocity.y = -Math.abs(elem.velocity.y);
 				}
+				elem.position.x += elem.velocity.x * deltaTime;
+				elem.position.y += elem.velocity.y * deltaTime;
 				// make it slower
 				float len = elem.velocity.length();
-				if(len<=frictionAccKoef*len*deltaTime){
+				if (len <= frictionKoef * len * deltaTime) {
 					// stop it completely
 					elem.velocity.x = elem.velocity.y = 0.0f;
-				}else{
-					elem.velocity.x -= elem.velocity.x*frictionAccKoef*deltaTime;
-					elem.velocity.y -= elem.velocity.y*frictionAccKoef*deltaTime;
+				} else {
+					elem.velocity.x -= elem.velocity.x * frictionKoef
+							* deltaTime;
+					elem.velocity.y -= elem.velocity.y * frictionKoef
+							* deltaTime;
 				}
 			}
 			updatePhysicsLastTimeLaunched = currentTime;
 			invalidate();
-			if(isActive){
-				timerRunner.postDelayed(this,10);
+			if (isActive) {
+				timerRunner.postDelayed(this, 10);
 			}
-			Log.i("FUCK","One more cycle "+currentTime);
 		}
 	};
-	
+
 	@Override
-	public void onPause(){
+	public void onPause() {
 		isActive = false;
 	}
-	
+
 	@Override
-	public void onResume(){
+	public void onResume() {
 		isActive = true;
 		updatePhysicsLastTimeLaunched = -1;
-		timerRunner.postDelayed(updatePhysicsProc,100);
+		timerRunner.postDelayed(updatePhysicsProc, 100);
 	}
-	
+
 	@Override
-	public void onStop(){
+	public void onStop() {
 		isActive = false;
 	}
-	
+
 	private Handler timerRunner = new Handler();
 
 	public GroupingElementsTaskView(Context context, Node theInputParams) {
@@ -140,25 +144,56 @@ public class GroupingElementsTaskView extends TaskView {
 			taskElements[i].position = new PointF();
 		}
 
-		nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
-				"./TaskAnswer/Answer");
-		trueAnswers = new String[nodes.getLength()][];
-		for (int i = 0; i < trueAnswers.length; ++i) {
-			NodeList answers = XMLUtils.evalXpathExprAsNodeList(nodes.item(i),
-					"./TaskResource");
-			trueAnswers[i] = new String[answers.getLength()];
-			for (int j = 0; j < trueAnswers[i].length; ++j) {
-				trueAnswers[i][j] = answers.item(j).getTextContent();
+		trueAnswers = loadTrueAnswers(XMLUtils.evalXpathExprAsNode(inputParams,
+				"./TaskAnswer"));
+
+		// count answer groups
+
+		for (int j = 0; j < trueAnswers.length; ++j) {
+			for (int k = 0; k < trueAnswers[j].length; ++k) {
+				for (int i = 0; i < taskElements.length; ++i) {
+					if (trueAnswers[j][k].equals(taskElements[i].resourceName)) {
+						taskElements[i].answerGroup = j;
+						break;
+					}
+				}
 			}
-			Arrays.sort(trueAnswers[i]);
 		}
+
+		// load instructions textsize and text
+		instrictionsTextSize = XMLUtils.getFloatProperty(inputParams, "./TaskResources/TextSize", 4.9f);
+		nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
+				"./TaskResources/Text");
+		instructions = new String[nodes.getLength()];
+		for (int i = 0; i < nodes.getLength(); ++i) {
+			instructions[i] = nodes.item(i).getTextContent();
+		}
+		
+		frictionKoef = XMLUtils.getFloatProperty(inputParams, "./TaskResources/FrictionKoef", 4.9f);
 
 		setBackgroundColor(Color.WHITE);
 		emptyPaint = new Paint();
 
 		alertDialog = new AlertDialog.Builder(context).create();
-		
+
 		timerRunner.postDelayed(updatePhysicsProc, 100);
+	}
+
+	private String[][] loadTrueAnswers(Node rootAnswerNode) {
+		NodeList nodes = XMLUtils.evalXpathExprAsNodeList(rootAnswerNode,
+				"./Answer");
+		String[][] result;
+		result = new String[nodes.getLength()][];
+		for (int i = 0; i < result.length; ++i) {
+			NodeList answers = XMLUtils.evalXpathExprAsNodeList(nodes.item(i),
+					"./TaskResource");
+			result[i] = new String[answers.getLength()];
+			for (int j = 0; j < result[i].length; ++j) {
+				result[i][j] = answers.item(j).getTextContent();
+			}
+			Arrays.sort(result[i]);
+		}
+		return result;
 	}
 
 	@Override
@@ -168,12 +203,19 @@ public class GroupingElementsTaskView extends TaskView {
 		paint.setARGB(255, 255, 255, 255);
 		canvas.drawRect(r, paint);
 		Rect src = new Rect();
+		src.left = 0;
+		src.top = 0;
 		for (int i = 0; i < taskElements.length; ++i) {
-			src.left = 0;
-			src.top = 0;
 			src.right = taskElements[i].bitmap.getWidth();
 			src.bottom = taskElements[i].bitmap.getHeight();
-			canvas.drawBitmap(taskElements[i].bitmap, src, taskElements[i].getRectF(), emptyPaint);
+			canvas.drawBitmap(taskElements[i].bitmap, src,
+					taskElements[i].getRectF(), emptyPaint);
+		}
+		emptyPaint.setTextSize(width * instrictionsTextSize);
+		emptyPaint.setTextAlign(Align.CENTER);
+		for (int i = 0; i < instructions.length; ++i) {
+			canvas.drawText(instructions[i], width * 0.5f, width
+					* instrictionsTextSize * (i+1), emptyPaint);
 		}
 	}
 
@@ -183,7 +225,7 @@ public class GroupingElementsTaskView extends TaskView {
 		width = w;
 		height = h;
 		float sc = countScaleKoeff();
-		for(int i=0;i<taskElements.length;++i){ 
+		for (int i = 0; i < taskElements.length; ++i) {
 			taskElements[i].scaleKoeff = sc;
 		}
 		regeneratePositions();
@@ -200,15 +242,7 @@ public class GroupingElementsTaskView extends TaskView {
 		boolean res = true;
 		for (int i = 0; i < taskElements.length && res; ++i) { // for each elem
 			// find its answer-group
-			int answerGroup = -1;
-			for (int j = 0; j < trueAnswers.length && answerGroup < 0; ++j) {
-				for (int k = 0; k < trueAnswers[j].length; ++k) {
-					if (trueAnswers[j][k].equals(taskElements[i].resourceName)) {
-						answerGroup = j;
-						break;
-					}
-				}
-			}
+			int answerGroup = taskElements[i].answerGroup;
 			// number of answers in this group
 			int N = trueAnswers[answerGroup].length;
 			TaskElement[] elems = new TaskElement[taskElements.length];
@@ -232,7 +266,7 @@ public class GroupingElementsTaskView extends TaskView {
 				}
 			}
 		}
-		for(TaskElement elem:taskElements){
+		for (TaskElement elem : taskElements) {
 			elem.velocity.x = elem.velocity.y = 0.0f;
 		}
 		alertDialog.setMessage(Boolean.toString(res));
@@ -276,7 +310,7 @@ public class GroupingElementsTaskView extends TaskView {
 			lastTouchedPoint = new PointF(x, y);
 			touchHistory.clear();
 			lastTouchStart = SystemClock.elapsedRealtime();
-			touchHistory.add(new TouchMoment(x,y,0.0f));
+			touchHistory.add(new TouchMoment(x, y, 0.0f));
 			invalidate();
 			break;
 		}
@@ -302,9 +336,9 @@ public class GroupingElementsTaskView extends TaskView {
 			if (pos.y >= height - elem.getHeight()) {
 				pos.y = height - elem.getHeight();
 			}
-			float deltaTime = (SystemClock.elapsedRealtime()-lastTouchStart)/1000.0f;
+			float deltaTime = (SystemClock.elapsedRealtime() - lastTouchStart) / 1000.0f;
 			touchHistory.add(new TouchMoment(x, y, deltaTime));
-			cleanOldTouchHistory(deltaTime,0.1f);
+			cleanOldTouchHistory(deltaTime, 0.1f);
 			invalidate();
 			break;
 		}
@@ -313,10 +347,11 @@ public class GroupingElementsTaskView extends TaskView {
 			if (touchedElement == -1) {
 				break;
 			}
-			float deltaTime = (SystemClock.elapsedRealtime()-lastTouchStart)/1000.0f;
-			touchHistory.add(new TouchMoment(x, y,deltaTime));
-			cleanOldTouchHistory(deltaTime,0.1f);
-			taskElements[touchedElement].velocity = MathUtils.getAverageVelocity(touchHistory);
+			float deltaTime = (SystemClock.elapsedRealtime() - lastTouchStart) / 1000.0f;
+			touchHistory.add(new TouchMoment(x, y, deltaTime));
+			cleanOldTouchHistory(deltaTime, 0.1f);
+			taskElements[touchedElement].velocity = MathUtils
+					.getAverageVelocity(touchHistory);
 			touchedElement = -1;
 			invalidate();
 			break;
@@ -324,20 +359,20 @@ public class GroupingElementsTaskView extends TaskView {
 		}
 		return true;
 	}
-	
-	private void cleanOldTouchHistory(float curr,float time){
-		while(!touchHistory.isEmpty()){
+
+	private void cleanOldTouchHistory(float curr, float time) {
+		while (!touchHistory.isEmpty()) {
 			TouchMoment m = touchHistory.get(0);
-			if(curr-m.t>=time){
+			if (curr - m.t >= time) {
 				touchHistory.remove(0);
-			}else{
+			} else {
 				break;
 			}
 		}
 	}
 
 	private float countScaleKoeff() {
-		final float AREA_PROPORTION = 0.2f;
+		final float AREA_PROPORTION = 0.4f;
 		final float MAX_LINEAR_SIZE_PROPORTION = 0.5f;
 
 		if (taskElements.length == 0) {
@@ -351,7 +386,7 @@ public class GroupingElementsTaskView extends TaskView {
 		}
 
 		// Want: elementsArea*scaleKoeff/area = AREA_PROPORTION
-		float result = AREA_PROPORTION * area / elementsArea;
+		float result = (float) Math.sqrt(AREA_PROPORTION * area / elementsArea);
 		// Want: w*scaleKoeff<MAX_LINEAR_SIZE_PROPORTION*width,
 		// h*scaleKoeff<MAX_LINEAR_SIZE_PROPORTION*height,
 		// where w and h - linear sizes of bitmaps of taskElements
@@ -363,6 +398,7 @@ public class GroupingElementsTaskView extends TaskView {
 		}
 		return result;
 	}
+
 	/*
 	 * regenerates all positions and stops all velocities
 	 */
@@ -387,7 +423,7 @@ public class GroupingElementsTaskView extends TaskView {
 					break;
 				}
 			}
-			taskElements[i].velocity = new PointF(0.0f,0.0f);
+			taskElements[i].velocity = new PointF(0.0f, 0.0f);
 		}
 	}
 
@@ -411,6 +447,7 @@ public class GroupingElementsTaskView extends TaskView {
 		public int resourceId;
 		public String resourceName;
 		public float scaleKoeff = 1.0f;
+		public int answerGroup = -1;
 
 		public float getWidth() {
 			return bitmap.getWidth() * scaleKoeff;
