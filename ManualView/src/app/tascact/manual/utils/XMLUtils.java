@@ -124,4 +124,19 @@ public final class XMLUtils {
 			return defaultValue;
 		}
 	}
+	
+	public static int getIntegerProperty(Node node, String path,
+			int defaultValue) {
+		Node nd = evalXpathExprAsNode(node, path);
+		if (nd != null) {
+			String text = nd.getTextContent();
+			try {
+				return Integer.parseInt(text);
+			} catch (NumberFormatException e) {
+				return defaultValue;
+			}
+		} else {
+			return defaultValue;
+		}
+	}
 }

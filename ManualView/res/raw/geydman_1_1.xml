@@ -115,6 +115,29 @@
                     </Answer>
                 </TaskAnswer>
             </Task>
+            <Task number="2" tasktype="5">
+            	<Image>manual_1_1_pg9_2_img</Image>
+            	<Borders>manual_1_1_pg9_2_borders</Borders>
+            	<Zones>manual_1_1_pg9_2_zones</Zones>
+            	<Keyboard height="0.2">
+	            	<Rows>2</Rows>
+	            	<Columns>6</Columns>
+	            	<BackgroundColor R="127" G="63" B="0" />
+	            	<SelectionColor R="255" G="127" B="0" />
+	            	<Color row="0" column="0" R="255" G="255" B="255" />
+	            	<Color row="0" column="1" R="127" G="127" B="127" />
+	            	<Color row="0" column="2" R="255" G="0" B="0" />
+	            	<Color row="0" column="3" R="0" G="255" B="0" />
+	            	<Color row="0" column="4" R="0" G="0" B="255" />
+	            	<Color row="0" column="5" R="0" G="127" B="255" />
+	            	<Color row="1" column="0" R="63" G="63" B="63" />
+	            	<Color row="1" column="1" R="191" G="191" B="191" />
+	            	<Color row="1" column="2" R="0" G="255" B="255" />
+	            	<Color row="1" column="3" R="255" G="0" B="255" />
+	            	<Color row="1" column="4" R="255" G="255" B="0" />
+	            	<Color row="1" column="5" R="0" G="255" B="127" />
+            	</Keyboard>
+            </Task>
         </Tasks>
     </page>
     <page>

@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.R;
 import app.tascact.manual.XMLResources;
+import app.tascact.manual.task.ColoringPictureTaskView;
 import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.ConnectElementsTaskView;
@@ -71,6 +72,12 @@ public class TaskActivity extends Activity {
 					break;
 				case 4:
 					mTaskView = new GroupingElementsTaskView(this,
+							markup.getTaskResources(
+									extras.getInt("PageNumber"),
+									extras.getInt("TaskNumber")));
+					break;
+				case 5: 
+					mTaskView = new ColoringPictureTaskView(this,
 							markup.getTaskResources(
 									extras.getInt("PageNumber"),
 									extras.getInt("TaskNumber")));
