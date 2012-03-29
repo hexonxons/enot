@@ -52,10 +52,13 @@ public class TaskActivity extends Activity {
 
 				switch (extras.getInt("TaskType")) {
 				case 1:
+					// TODO here markup is passes as argument to almost every task.
+					// should pe replaced with string of current working directory.
 					mTaskView = new ConnectElementsSequenceTaskView(this,
 							markup.getTaskResources(
 									extras.getInt("PageNumber"),
-									extras.getInt("TaskNumber")));
+									extras.getInt("TaskNumber")),
+									markup);
 					break;
 				case 2:
 					mTaskView = new CompleteTableTaskView(this, markup,
@@ -72,13 +75,15 @@ public class TaskActivity extends Activity {
 					mTaskView = new GroupingElementsTaskView(this,
 							markup.getTaskResources(
 									extras.getInt("PageNumber"),
-									extras.getInt("TaskNumber")));
+									extras.getInt("TaskNumber")),
+									markup);
 					break;
 				case 5: 
 					mTaskView = new ColoringPictureTaskView(this,
 							markup.getTaskResources(
 									extras.getInt("PageNumber"),
-									extras.getInt("TaskNumber")));
+									extras.getInt("TaskNumber")), 
+							markup);
 					break;
 				default:
 

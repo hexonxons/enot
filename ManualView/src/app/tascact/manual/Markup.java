@@ -149,7 +149,9 @@ public class Markup {
 			for (int i = 0; i < nl.getLength(); ++i) {
 				String name = nl.item(i).getTextContent();
 				name = name.trim();
-				pageElementsUriCache[pageId - 1][i] = Uri.parse(markupDir + File.separator + "img" + File.separator + name + ".png");
+				pageElementsUriCache[pageId - 1][i] = Uri.parse(markupDir + File.separator + 
+																"img" + File.separator + 
+																name + ".png");
 			}
 		}
 
@@ -245,5 +247,9 @@ public class Markup {
 	   			}
 			}
 		};
+	}
+
+	public String getMarkupFileDirectory() {
+		return markupDir;
 	}
 }

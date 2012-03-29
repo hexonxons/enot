@@ -1,5 +1,6 @@
 package app.tascact.manual.task;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,6 +29,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
+import app.tascact.manual.Markup;
 import app.tascact.manual.utils.MathUtils;
 import app.tascact.manual.utils.TouchMoment;
 import app.tascact.manual.utils.XMLUtils;
@@ -36,7 +38,6 @@ import app.tascact.manual.view.TaskView;
 public class GroupingElementsTaskView extends TaskView {
 	private float frictionKoef = 4.9f;
 	private Node inputParams;
-	private Resources resources;
 	private TaskElement[] taskElements;
 	private Paint emptyPaint;
 	private int width;
@@ -48,6 +49,7 @@ public class GroupingElementsTaskView extends TaskView {
 	private AlertDialog alertDialog;
 	private float instrictionsTextSize = 0.0f;
 	private String[] instructions;
+	Markup markup;
 
 	private boolean isActive = true;
 
@@ -121,11 +123,11 @@ public class GroupingElementsTaskView extends TaskView {
 
 	private Handler timerRunner = new Handler();
 
-	public GroupingElementsTaskView(Context context, Node theInputParams) {
+	public GroupingElementsTaskView(Context context, Node theInputParams, Markup markup) {
 		super(context);
+		this.markup = markup;
 		inputParams = theInputParams;
-		resources = context.getResources();
-
+		
 		NodeList nodes = null;
 		nodes = XMLUtils.evalXpathExprAsNodeList(inputParams,
 				"./TaskResources/TaskResource");
@@ -136,11 +138,13 @@ public class GroupingElementsTaskView extends TaskView {
 		for (int i = 0; i < N; ++i) {
 			taskElements[i] = new TaskElement();
 			taskElements[i].resourceName = nodes.item(i).getTextContent();
-			taskElements[i].resourceId = resources.getIdentifier(
-					taskElements[i].resourceName, "drawable",
-					context.getPackageName());
-			taskElements[i].bitmap = BitmapFactory.decodeResource(resources,
-					taskElements[i].resourceId);
+			// taskElements[i].resourceId = resources.getIdentifier(
+			//		taskElements[i].resourceName, "drawable",
+			//		context.getPackageName());
+
+			String filePath = markup.getMarkupFileDirectory()
+					+ File.separator + "img" + File.separator + taskElements[i].resourceName + ".png";			
+			taskElements[i].bitmap = BitmapFactory.decodeFile(filePath);
 			taskElements[i].position = new PointF();
 		}
 

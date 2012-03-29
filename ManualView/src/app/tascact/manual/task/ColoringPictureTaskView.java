@@ -1,10 +1,9 @@
 package app.tascact.manual.task;
 
-import java.util.HashSet;
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 
 import org.w3c.dom.Node;
 
@@ -16,33 +15,27 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.MaskFilter;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import app.tascact.manual.Markup;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 import app.tascact.manual.view.utils.ColorKeyboard;
 
 public class ColoringPictureTaskView extends TaskView {
 
-	private RelativeLayout mainLayout;
 	private ColorKeyboard keyboard;
 	private Node inputParams;
 	private float keyboardHeightKoef;
 	private int width;
 	private int height;
-	private ImageView imageView;
 	private Bitmap picture;
 	private Bitmap borders;
 	private Bitmap zones;
@@ -50,9 +43,11 @@ public class ColoringPictureTaskView extends TaskView {
 	private Paint paint;
 	private List<Zone> splittedZones;
 	private AlertDialog alertDialog;
-
-	public ColoringPictureTaskView(Context context, Node theInputParams) {
+	private Markup markup;
+	
+	public ColoringPictureTaskView(Context context, Node theInputParams, Markup markup) {
 		super(context);
+		this.markup = markup;
 		inputParams = theInputParams;
 		resources = getResources();
 		paint = new Paint();
@@ -196,9 +191,12 @@ public class ColoringPictureTaskView extends TaskView {
 	private Bitmap loadBitmap(String path) {
 		String imageName = XMLUtils.evalXpathExprAsNode(inputParams, path)
 				.getTextContent();
-		Bitmap res = BitmapFactory.decodeResource(resources, resources
-				.getIdentifier(imageName, "drawable", getContext()
-						.getPackageName()));
+		String filePath = markup.getMarkupFileDirectory()
+				+ File.separator + "img" + File.separator + imageName + ".png";
+		Bitmap res = BitmapFactory.decodeFile(filePath);
+		//decodeResource(resources, resources
+		//		.getIdentifier(imageName, "drawable", getContext()
+		//				.getPackageName()));
 		return res;
 	}
 

@@ -4,6 +4,7 @@
 
 package app.tascact.manual.task;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,7 @@ import android.content.res.Resources;
 import android.graphics.*;
 import android.util.Log;
 import android.view.MotionEvent;
+import app.tascact.manual.Markup;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
@@ -45,7 +47,7 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	private float marginKoef;
 	private float lineWidth;
 
-	public ConnectElementsSequenceTaskView(Context context, Node theInputParams) {
+	public ConnectElementsSequenceTaskView(Context context, Node theInputParams, Markup markup) {
 		super(context);
 		inputParams = theInputParams;
 		resources = context.getResources();
@@ -69,10 +71,10 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 
 		for (int i = 0; i < N; ++i) {
 			elementNames[i] = nodes.item(i).getTextContent();
-			elementResourceIds[i] = resources.getIdentifier(elementNames[i],
-					"drawable", context.getPackageName());
-			taskElements[i] = BitmapFactory.decodeResource(resources,
-					elementResourceIds[i]);
+			
+			String filePath = markup.getMarkupFileDirectory()
+					+ File.separator + "img" + File.separator + elementNames[i] + ".png";
+			taskElements[i] = BitmapFactory.decodeFile(filePath);
 			elementPositions[i] = new PointF();
 		}
 
