@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -44,12 +46,11 @@ public class Markup {
 	private Document resources;
 	private String manualName;
 	private String markupDir;
-	private int[][] pageResourcesCache;
+	private Uri[][] pageElementsUriCache;
 	private int height;
 	private int width;
 
 	/**
-	 * 
 	 * Tries to open given document (textbook). 
 	 * Tries to find it in /sdcard/eNote/[yourTexbookName]
 	 * @param context
@@ -86,7 +87,7 @@ public class Markup {
 		resources = db.parse(is);
 
 		// Creating cache
-		pageResourcesCache = new int[getPageNumber()][];
+		pageElementsUriCache = new Uri[getPageNumber()][];
 
 		Node bookRoot = XMLUtils.evalXpathExprAsNode(resources, "/" + BOOK_TAG + "[1]");
 
@@ -130,16 +131,9 @@ public class Markup {
 		}
 		return pageNumber;
 	}
-
-	/**
-	 * Returns drawable resources required by specified page.
-	 * @param pageId page of document to refer. Index 1-based.
-	 * @return returns null on failure.
-	 */
-	public int[] getPageResources(int pageId) {
-		// If resources were not cached evaluating
-		// and caching them in pageResourcesCache. 
-		if (pageResourcesCache[pageId - 1] == null) {
+	
+	public Uri[] getPageElementsUri(int pageId) {
+		if (pageElementsUriCache[pageId - 1] == null) {
 			String expr = "/" + BOOK_TAG + 
 						  "/" + PAGE_TAG + "[" + Integer.toString(pageId) + "]" + 
 						  "/" + RES_LIST_TAG + 
@@ -150,19 +144,17 @@ public class Markup {
 				return null;
 			}
 
-			pageResourcesCache[pageId - 1] = new int[nl.getLength()];
-
+			pageElementsUriCache[pageId - 1] = new Uri[nl.getLength()];
+			
 			for (int i = 0; i < nl.getLength(); ++i) {
 				String name = nl.item(i).getTextContent();
 				name = name.trim();
-				Resources res = context.getResources();
-				pageResourcesCache[pageId - 1][i] = res.getIdentifier(name,
-						"drawable", context.getPackageName());
+				pageElementsUriCache[pageId - 1][i] = Uri.parse(markupDir + File.separator + "img" + File.separator + name + ".png");
 			}
 		}
 
 		// Returning cached value.
-		return pageResourcesCache[pageId - 1];
+		return pageElementsUriCache[pageId - 1];
 	}
 
 	/**Node attribute = task.getAttributes().getNamedItem(TYPE_ATTR);
@@ -220,14 +212,15 @@ public class Markup {
 			setOrientation(LinearLayout.VERTICAL);
 
 			this.pageNumber = pageNumber;
-			int[] resources = getPageResources(pageNumber);
-
+			Uri resources[] = getPageElementsUri(pageNumber);
+			
 			for(int i = 0; i < resources.length; ++i) {
 				ImageView pageElem = new ImageView(this.getContext());
 				// Tasks are enumerated 1-based 
 				pageElem.setId(i + 1);
 				// Makes it keep the ratio when size changed
-				pageElem.setImageResource(getPageResources(pageNumber)[i]);
+				pageElem.setImageURI(resources[i]);
+				//pageElem.setImageResource(getPageResources(pageNumber)[i]);
 				pageElem.setOnClickListener(taskLauncher);
 				pageElem.setAdjustViewBounds(true);
 				
