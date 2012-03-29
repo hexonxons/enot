@@ -22,7 +22,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import app.tascact.manual.activity.TaskActivity;
 import app.tascact.manual.utils.XMLUtils;

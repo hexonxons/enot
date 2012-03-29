@@ -26,7 +26,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.view.MotionEvent;
-import app.tascact.manual.XMLResources;
+import app.tascact.manual.Markup;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
@@ -48,10 +48,10 @@ public class ConnectElementsTaskView extends TaskView
 	private Answer[] mAnswers = null;
 	private boolean mAnswer = true;
 	private boolean isSetLine = false;
-	private XMLResources mResources = null;
+	private Markup mResources = null;
 	private int mTouchedImageId = 0;
 	
-    public ConnectElementsTaskView(Context context, XMLResources markup, int PageNumber, int TaskNumber)
+    public ConnectElementsTaskView(Context context, Markup markup, int PageNumber, int TaskNumber)
     {
 		super(context);
 		mResources = markup;

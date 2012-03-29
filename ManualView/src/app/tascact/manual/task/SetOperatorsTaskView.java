@@ -13,8 +13,8 @@ import javax.xml.xpath.XPathConstants;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import app.tascact.manual.Markup;
 import app.tascact.manual.R;
-import app.tascact.manual.XMLResources;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -46,7 +46,7 @@ public class SetOperatorsTaskView extends TaskView
 	private long mPrevTouchTime = 0;
 	private AnimationView mAnswerAnimation = null;
 	
-	public SetOperatorsTaskView(Context context, XMLResources markup, String ManualName,  int PageNumber, int TaskNumber)
+	public SetOperatorsTaskView(Context context, Markup markup, String ManualName,  int PageNumber, int TaskNumber)
 	{
 		super(context);
 		Node res = markup.getTaskResources(PageNumber, TaskNumber);

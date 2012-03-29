@@ -8,8 +8,8 @@ import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.view.MotionEvent;
+import app.tascact.manual.Markup;
 import app.tascact.manual.R;
-import app.tascact.manual.XMLResources;
 import app.tascact.manual.view.TaskView;
 
 public class CompleteTableTaskView extends TaskView {
@@ -44,7 +44,7 @@ public class CompleteTableTaskView extends TaskView {
 			"7", "8", "9", "0" };
 	private String[] Answers = { "9", "3", "5", "10", "5" };
 
-	public CompleteTableTaskView(Context context, XMLResources markup,
+	public CompleteTableTaskView(Context context, Markup markup,
 			int PageNumber, int TaskNumber) {
 		super(context);
 

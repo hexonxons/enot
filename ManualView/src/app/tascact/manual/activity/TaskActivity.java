@@ -15,19 +15,17 @@ import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import app.tascact.manual.Markup;
 import app.tascact.manual.R;
-import app.tascact.manual.XMLResources;
 import app.tascact.manual.task.ColoringPictureTaskView;
 import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
-import app.tascact.manual.task.ConnectElementsTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.view.TaskControlView;
@@ -45,9 +43,9 @@ public class TaskActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Bundle extras = getIntent().getExtras();
-		XMLResources markup;
+		Markup markup;
 		try {
-			markup = new XMLResources(this, extras.getString("ManualName"));
+			markup = new Markup(this, extras.getString("ManualName"));
 
 			if (extras != null) {
 				mMainLayout = new LinearLayout(this);

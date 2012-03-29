@@ -45,9 +45,6 @@ public class ContentActivity extends Activity
         
         RelativeLayout.LayoutParams mParams = null;
         
-        int red = 0;
-        int green = 0;
-        int blue = 0;
         Random rand = new Random();
         rand.setSeed(Calendar.getInstance().get(Calendar.SECOND));
         
@@ -59,10 +56,6 @@ public class ContentActivity extends Activity
 				newRow.setBackgroundColor(Color.WHITE);
 			else
 				newRow.setBackgroundColor(Color.rgb(220, 220, 220));
-//			red = (red + rand.nextInt()) % 256;
-//			green = (green + rand.nextInt()) % 256;
-//			blue = (blue + rand.nextInt()) % 256;
-//			newRow.setBackgroundColor(Color.rgb(red, green, blue));
 			
 			
 			TextView text = new TextView(this);

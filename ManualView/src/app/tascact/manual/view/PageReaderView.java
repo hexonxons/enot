@@ -11,8 +11,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.OverScroller;
-import android.widget.Scroller;
+// import android.widget.OverScroller;
+// import android.widget.Scroller;
 import app.tascact.manual.Markup;
 
 public class PageReaderView extends HorizontalScrollView {
@@ -29,7 +29,7 @@ public class PageReaderView extends HorizontalScrollView {
 	private int pageHeight;
 	private int pageToDisplay;
 	private boolean firstTime = true;
-	private OverScroller scroller = new OverScroller(getContext());
+	// private OverScroller scroller = new OverScroller(getContext());
 
 
 	/** 
@@ -270,7 +270,7 @@ public class PageReaderView extends HorizontalScrollView {
 //	}
 	
 	class SoftScrollOnGestureListener extends SimpleOnGestureListener {
-		private final int SWIPE_MIN_SPEED = 3000;
+		private final int SWIPE_MIN_SPEED = 500;
 		
 		// Обработчик скролла
 //		@Override
@@ -297,7 +297,7 @@ public class PageReaderView extends HorizontalScrollView {
 				if (velocityX < -SWIPE_MIN_SPEED) {
 					nextPage();
 					return true;
-				} else if (velocityX >= SWIPE_MIN_SPEED) {
+				} else if (velocityX > SWIPE_MIN_SPEED) {
 					prevPage();
 					return true;
 				}
