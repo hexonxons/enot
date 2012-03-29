@@ -4,7 +4,8 @@
 package app.tascact.manual;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
@@ -42,24 +43,28 @@ public class Markup {
 	private Context context;
 	private Document resources;
 	private String manualName;
+	private String markupDir;
 	private int[][] pageResourcesCache;
 	private int height;
 	private int width;
 
 	/**
-	 * Parses given XML file.
+	 * 
+	 * Tries to open given document (textbook). 
+	 * Tries to find it in /sdcard/eNote/[yourTexbookName]
 	 * @param context
-	 * @param XMLMarkupFile XML-markup containing file.
+	 * @param documentTitle XML-markup containing file.
 	 * @throws Throwable is thrown on any possible error.
 	 */
-	// TODO should if throw different exceptions?
-	public Markup(Context context, int XMLMarkupResourceId)
+	public Markup(Context context, String documentTitle)
 			throws Throwable {
 		this.context = context;
 
-		// Prepare source to read from		
-		InputStream in = context.getResources().openRawResource(
-				XMLMarkupResourceId);
+		manualName = documentTitle;
+		markupDir = "/sdcard/eNote/" + documentTitle;
+				
+		// Prepare source to read from
+		FileInputStream in = new FileInputStream(new File(markupDir, "markup.xml"));
 		InputStreamReader isr = new InputStreamReader(in);
 		BufferedReader br = new BufferedReader(isr);
 		StringBuffer XMLMarkupBuffer = new StringBuffer();
@@ -97,12 +102,6 @@ public class Markup {
 			throw new Throwable("Invalid page size.");
 		}
 
-	}
-
-	public Markup(Context context, String XMLMarkupFile) throws Throwable {
-		this(context, context.getResources().getIdentifier(XMLMarkupFile,
-				"raw", context.getPackageName()));
-		manualName = XMLMarkupFile;
 	}
 
 	public int getHeight() {

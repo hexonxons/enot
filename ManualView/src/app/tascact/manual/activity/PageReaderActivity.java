@@ -25,8 +25,7 @@ public class PageReaderActivity extends Activity {
 	private String mManualName;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Bundle extras = getIntent().getExtras();
 		mManualName = extras.getString("bookName");
@@ -37,7 +36,7 @@ public class PageReaderActivity extends Activity {
 			// No markup - no pages to read.
 			Log.e("XML", "While creating Page Reader", e);
 			finish();
-			// return;
+			return;
 		}
 
 		loadPreferences();
