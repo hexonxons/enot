@@ -19,9 +19,7 @@ import org.xml.sax.InputSource;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
@@ -57,12 +55,17 @@ public class Markup {
 	 * @param documentTitle XML-markup containing file.
 	 * @throws Throwable is thrown on any possible error.
 	 */
-	public Markup(Context context, String documentTitle)
+	
+	public Markup(Context context, String documentTitle) throws Throwable {
+		this(context, Uri.parse("/sdcard/eNote" + File.separator + documentTitle));
+	}
+	
+	public Markup(Context context, Uri documentFolderUri)
 			throws Throwable {
 		this.context = context;
 
-		manualName = documentTitle;
-		markupDir = "/sdcard/eNote/" + documentTitle;
+		manualName = documentFolderUri.getLastPathSegment();
+		markupDir = documentFolderUri.getPath();
 				
 		// Prepare source to read from
 		FileInputStream in = new FileInputStream(new File(markupDir, "markup.xml"));

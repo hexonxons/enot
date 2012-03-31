@@ -112,24 +112,15 @@ public class PageReaderActivity extends Activity {
     }
 
 	
-	private void savePreferences()
-	{
+	private void savePreferences() {
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
-		if(mManualName.equals("geydman_1_1"))
-			editor.putInt("page1", pageToDisplay);
-		if(mManualName.equals("geydman_1_2"))
-			editor.putInt("page2", pageToDisplay);
+		editor.putInt("last page of " + markup.getManualName(), pageToDisplay);
 		editor.commit();
 	}
 	
-	private void loadPreferences()
-	{
+	private void loadPreferences() {
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		if(mManualName.equals("geydman_1_1"))
-			pageToDisplay = settings.getInt("page1", 1);
-		if(mManualName.equals("geydman_1_2"))
-			pageToDisplay = settings.getInt("page2", 0);
-		
+		pageToDisplay = settings.getInt("last page of " + markup.getManualName(), 1);		
 	}
 }
