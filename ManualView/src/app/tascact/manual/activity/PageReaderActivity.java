@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.Markup;
@@ -27,6 +29,7 @@ public class PageReaderActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		Bundle extras = getIntent().getExtras();
 		mManualName = extras.getString("bookName");
 		try {
@@ -47,8 +50,11 @@ public class PageReaderActivity extends Activity {
 
 		// Setting up page reader.
 		reader = new PageReaderView(this, markup, pageToDisplay);
-		mainLayout.addView(reader, new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1));
-
+		int h = getWindowManager().getDefaultDisplay().getHeight();
+		mainLayout.addView(reader, new LayoutParams(
+				LayoutParams.MATCH_PARENT, h-150));
+		//mainLayout.addView(reader, new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1));
+		mainLayout.setBackgroundColor(Color.WHITE);
 		// Setting up control panel.
 		controlPanel = new ManualControlView(this);		
 

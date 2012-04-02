@@ -13,10 +13,12 @@ package app.tascact.manual.activity;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -99,14 +101,16 @@ public class TaskActivity extends Activity {
 						.setOnTouchListener(mRestartTouchListener);
 
 				// Ориентируем View вертикально
-				mMainLayout.setOrientation(1);
+				mMainLayout.setOrientation(LinearLayout.VERTICAL);
+				mMainLayout.setBackgroundColor(Color.WHITE);
 				// Лочим ориентацию экрана
-				this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+				//this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+				this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 				int h = getWindowManager().getDefaultDisplay().getHeight();
 				mMainLayout.addView(mTaskView, new LayoutParams(
-						LayoutParams.MATCH_PARENT, h - 167));
+						LayoutParams.MATCH_PARENT, h-100));
 				mMainLayout.addView(mTaskControl, new LayoutParams(
-						LayoutParams.MATCH_PARENT, 167));
+						LayoutParams.MATCH_PARENT, 100));
 
 				setContentView(mMainLayout);
 			}
