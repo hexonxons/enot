@@ -205,7 +205,7 @@ public class SetOperatorsTaskView extends TaskView
 		
 		LayoutParams keyboardParams = new LayoutParams(LayoutParams.MATCH_PARENT, 200);
 		keyboardParams.setMargins(0, h - 200, 0, 0);
-		((KeyboardView)this.getChildAt(1)).setLayoutParams(keyboardParams);
+		mKeyboard.setLayoutParams(keyboardParams);
 		
 		mHeight -= 210;
 		int maxHeight = 70;

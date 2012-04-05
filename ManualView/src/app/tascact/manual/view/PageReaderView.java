@@ -3,7 +3,6 @@ package app.tascact.manual.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.GestureDetector;
@@ -14,6 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.PopupWindow;
 import app.tascact.manual.Markup;
+import app.tascact.manual.R;
 
 public class PageReaderView extends HorizontalScrollView {
 	private static final int CAСHE_SIZE = 5;
@@ -76,6 +76,8 @@ public class PageReaderView extends HorizontalScrollView {
 		
 		mLeftControl = new PopupWindow(new PageControlView(this.getContext(), true), 0, 0);
 		mRightControl = new PopupWindow(new PageControlView(this.getContext(), false), 0, 0);
+		mLeftControl.setAnimationStyle(R.style.ControlsAnimation);
+		mRightControl.setAnimationStyle(R.style.ControlsAnimation);
 		mLeftControl.setOutsideTouchable(false);
 		mRightControl.setOutsideTouchable(false);
 		mThread = new ControlAliveThread(mLeftControl, mRightControl);
