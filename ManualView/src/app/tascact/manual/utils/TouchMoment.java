@@ -3,7 +3,6 @@ package app.tascact.manual.utils;
  * Class for history of touches and analyzing it
  * @author Alex Taran
  */
-import android.os.SystemClock;
 
 public class TouchMoment {
 	public float x;

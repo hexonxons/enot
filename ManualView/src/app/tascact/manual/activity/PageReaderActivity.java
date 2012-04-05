@@ -1,9 +1,17 @@
+/*
+ * Page reader activity
+ * 
+ * Copyright 2012 hexonxons
+ * 
+ * :mailto killgamesh666@gmail.com
+ * 
+ */
+
 package app.tascact.manual.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,119 +22,159 @@ import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.Markup;
-import app.tascact.manual.view.ManualControlView;
 import app.tascact.manual.view.PageReaderView;
 
-public class PageReaderActivity extends Activity {
-	private LinearLayout mainLayout;
-	private PageReaderView reader;
-	private ManualControlView controlPanel;
-	private int pageToDisplay;
-	private Markup markup;
-	private long mPrevTouchTime;
+public class PageReaderActivity extends Activity
+{
+	// Main layout for all elements, such as PageReaderView, Popup Windows...
+	private LinearLayout mMainLayout;
+	// View of displayed page
+	private PageReaderView mReader;
+	// Number of page to display
+	private int mPageToDisplay;
+	// Markup for gettin' resources of page
+	private Markup mMarkup;
+	// Name of manual
 	private String mManualName;
-
+	// Time of precious touch event
+	private long mPrevTouchTime = 0;
+	
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
+		// No title display
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		Bundle extras = getIntent().getExtras();
-		mManualName = extras.getString("bookName");
-		try {
-			markup = new Markup(this, mManualName);
-		} catch (Throwable e) {
+		// Get manual name
+		mManualName = getIntent().getExtras().getString("bookName");
+			
+		try
+		{
+			mMarkup = new Markup(this, mManualName);
+		} 
+		catch (Throwable e)
+		{
 			// Stopping activity on failure.
 			// No markup - no pages to read.
 			Log.e("XML", "While creating Page Reader", e);
 			finish();
 			return;
 		}
-
+		
+		// loading page number
 		loadPreferences();
-
-		mainLayout = new LinearLayout(this);
-		mainLayout.setOrientation(LinearLayout.VERTICAL);
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
+		mMainLayout = new LinearLayout(this);
+		//mainLayout.setOrientation(LinearLayout.VERTICAL);
+		//setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		
 		// Setting up page reader.
-		reader = new PageReaderView(this, markup, pageToDisplay);
-		int h = getWindowManager().getDefaultDisplay().getHeight();
-		mainLayout.addView(reader, new LayoutParams(
-				LayoutParams.MATCH_PARENT, h-150));
-		//mainLayout.addView(reader, new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1));
-		mainLayout.setBackgroundColor(Color.WHITE);
-		// Setting up control panel.
-		controlPanel = new ManualControlView(this);		
-
-		controlPanel.mNextButton.setOnTouchListener(new OnTouchListener() {
+		mReader = new PageReaderView(this, mMarkup, mPageToDisplay);
+		mMainLayout.addView(mReader, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		mMainLayout.setBackgroundColor(Color.WHITE);
+		
+		OnTouchListener NextPageListener = new OnTouchListener()
+		{
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if(event.getEventTime() - mPrevTouchTime > 250) {
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				if(event.getEventTime() - mPrevTouchTime > 250)
+				{
 					mPrevTouchTime = event.getEventTime();
-					pageToDisplay = reader.nextPage();
+					mPageToDisplay = mReader.nextPage();
+					mReader.updateTimer();
 					savePreferences();
 			    }
 				return true;
 			}
-		});
-
-		controlPanel.mPrevButton.setOnTouchListener(new OnTouchListener() {
+		};
+		
+		OnTouchListener PrevPageListener = new OnTouchListener()
+		{
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if(event.getEventTime() - mPrevTouchTime > 250) {
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				if(event.getEventTime() - mPrevTouchTime > 250)
+				{
 					mPrevTouchTime = event.getEventTime();					
-					pageToDisplay = reader.prevPage();
+					mPageToDisplay = mReader.prevPage();
+					mReader.updateTimer();
 					savePreferences();
 			    }
 				return true;
 			}
-		});
-
-		controlPanel.mContentsButton.setOnTouchListener(new OnTouchListener() {
+		};
+		
+		OnTouchListener ContentsListener = new OnTouchListener()
+		{
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if(event.getEventTime() - mPrevTouchTime > 250) {
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				if(event.getEventTime() - mPrevTouchTime > 1000)
+				{
 					mPrevTouchTime = event.getEventTime();
 					Intent intent = new Intent(v.getContext(), ContentActivity.class);
-					intent.putExtra("PageCount", markup.getPageNumber());
+					intent.putExtra("PageCount", mMarkup.getPageNumber());
 					startActivityForResult(intent, 0);
 			    }
 				return true;
 			}
-		});
-
-		mainLayout.addView(controlPanel, new LayoutParams(LayoutParams.MATCH_PARENT, 167));
-
+		};
+		
+		mReader.setListeners(NextPageListener, PrevPageListener, ContentsListener);
+		mReader.dismissControls();
+		
 		// Displaying
-		setContentView(mainLayout);
+		setContentView(mMainLayout);
 	}
-
+	
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
 		super.onActivityResult(requestCode, resultCode, data);
-		if(resultCode == RESULT_OK && requestCode == 0)	{
-			pageToDisplay = data.getIntExtra("page", -1);
+		if(resultCode == RESULT_OK && requestCode == 0)
+		{
+			mPageToDisplay = data.getIntExtra("page", -1);
 			savePreferences();
-			reader.setPage(pageToDisplay);
+			mReader.setPage(mPageToDisplay);
 		}
 	}
 
 	@Override
-    protected void onStop() {
+    protected void onStop()
+	{
 		super.onStop();
+		mReader.dismissControls();
 		savePreferences();
     }
+	
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		mReader.dismissControls();
+		savePreferences();
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		mReader.dismissControls();
+		loadPreferences();
+	}
 
 	
-	private void savePreferences() {
+	private void savePreferences()
+	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putInt("last page of " + markup.getManualName(), pageToDisplay);
+		editor.putInt("last page of " + mMarkup.getManualName(), mPageToDisplay);
 		editor.commit();
 	}
 	
-	private void loadPreferences() {
+	private void loadPreferences()
+	{
 		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		pageToDisplay = settings.getInt("last page of " + markup.getManualName(), 1);		
+		mPageToDisplay = settings.getInt("last page of " + mMarkup.getManualName(), 1);		
 	}
 }

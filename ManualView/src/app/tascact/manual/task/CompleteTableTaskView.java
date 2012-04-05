@@ -22,7 +22,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.RelativeLayout.LayoutParams;
 import app.tascact.manual.Markup;
 import app.tascact.manual.R;
 import app.tascact.manual.utils.XMLUtils;

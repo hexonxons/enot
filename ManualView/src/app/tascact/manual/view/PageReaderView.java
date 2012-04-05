@@ -3,6 +3,7 @@ package app.tascact.manual.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.GestureDetector;
@@ -11,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
+import android.widget.PopupWindow;
 import app.tascact.manual.Markup;
 
 public class PageReaderView extends HorizontalScrollView {
@@ -23,13 +25,19 @@ public class PageReaderView extends HorizontalScrollView {
 	private GestureDetector gestureDecoder;
 	private int displayXOffset;
 	private int displayYOffset;
-	private int pageWidth;
-	private int pageHeight;
+	private int pageWidth = 0;
+	private int pageHeight = 0;
 	private int pageToDisplay;
 	private int leftCacheBorder;
 	private int rightCacheBorder;
 	private boolean firstTime = true;
-
+	
+	// Manual Controls
+	private PopupWindow mLeftControl = null;
+	private PopupWindow mRightControl = null;
+	// Thread for control disappear of manual controls
+	private ControlAliveThread mThread = null;
+	
 	/**
 	 * Number of item (0-based) that is brought to front. This one must be
 	 * changed only with changeActiveItem method.
@@ -65,9 +73,12 @@ public class PageReaderView extends HorizontalScrollView {
 
 		gestureDecoder = new GestureDetector(context,
 				new SoftScrollOnGestureListener());
-
-		pageWidth = 600;
-		pageHeight = 800;
+		
+		mLeftControl = new PopupWindow(new PageControlView(this.getContext(), true), 0, 0);
+		mRightControl = new PopupWindow(new PageControlView(this.getContext(), false), 0, 0);
+		mLeftControl.setOutsideTouchable(false);
+		mRightControl.setOutsideTouchable(false);
+		mThread = new ControlAliveThread(mLeftControl, mRightControl);
 
 		
 		setOverScrollMode(OVER_SCROLL_NEVER);
@@ -122,8 +133,24 @@ public class PageReaderView extends HorizontalScrollView {
 		smoothScrollTo(activeItem * pageWidth + displayXOffset, 0);
 		return activeItem + 1;
 	}
-
 	
+	/**
+	 * Stabilize current page
+	 */
+	
+	public void StableCurrPage() 
+	{
+		smoothScrollTo(activeItem * pageWidth, 0);
+	}
+	
+	public void setListeners(OnTouchListener NextPageListener,
+							 OnTouchListener PrevPageListener,
+							 OnTouchListener ContentsListener)
+	{
+		((PageControlView)mLeftControl.getContentView()).setListeners(ContentsListener, PrevPageListener);
+		((PageControlView)mRightControl.getContentView()).setListeners(ContentsListener, NextPageListener);
+	}
+
 	/** 
 	 * Sets specified item as active and updates cached views. If item is out of
 	 * range - sets closest item that is in the range.
@@ -176,21 +203,29 @@ public class PageReaderView extends HorizontalScrollView {
 		//}
 		activeItem = newActiveItem;
 	}
+	
+	public void updateTimer()
+	{
+		mThread.updateTime();
+	}
 
 	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+	protected void onSizeChanged(int w, int h, int oldw, int oldh)
+	{
 		super.onSizeChanged(w, h, oldw, oldh);
-
+		dismissControls();
 		// Evaluating new page size
 		// If screen size is wider
-		if (w * markup.getHeight() >= h * markup.getWidth()) {
-			pageHeight = h;
-			pageWidth = h * markup.getWidth() / markup.getHeight();
-			displayXOffset = -(w - pageWidth) / 2;
+		if (w * markup.getHeight() >= h * markup.getWidth()) 
+		{
+			pageHeight = w * markup.getHeight() / markup.getWidth() ;
+			pageWidth = w;
+			displayXOffset = 0;
 			displayYOffset = 0;
 		}
 		// if screen size is thinner
-		else {
+		else 
+		{
 			pageWidth = w;
 			pageHeight = w * markup.getHeight() / markup.getWidth();
 			displayXOffset = 0;
@@ -200,41 +235,132 @@ public class PageReaderView extends HorizontalScrollView {
 		innerWrapper.setLayoutParams(new LayoutParams(markup.getPageNumber()
 				* pageWidth, pageHeight));
 				
+		mLeftControl.setWidth(80);
+		mLeftControl.setHeight(h);
+		
+		mRightControl.setWidth(80);
+		mRightControl.setHeight(h);
+		
 		// Scrolling to the current active element
 		changeActiveItem(activeItem);
 		scrollTo(pageWidth * activeItem, 0);
 	}
 
+	public class ControlAliveThread extends Thread
+	{
+	    private boolean mRun = false;
+		private long mStartTime;
+		private PopupWindow mLeft = null;
+		private PopupWindow mRight = null;
+		private static final int POPUP_DISMISS_DELAY = 2000;
+		
+	    public ControlAliveThread(PopupWindow left, PopupWindow right)
+	    {
+	    	mLeft = left;
+	    	mRight = right;
+	    }
+	    
+	    public void setRunning(boolean run)
+	    {
+	        mRun = run;
+	    }
+	    
+	    public void updateTime()
+	    {
+	    	mStartTime = System.currentTimeMillis();
+	    }
+	    
+	    @Override
+	    public void run() 
+	    {  
+	        while (mRun) 
+	        {
+	        	if(System.currentTimeMillis() - mStartTime > POPUP_DISMISS_DELAY)
+	        	{
+	        		mRun = false;
+	        		if(mLeft != null && mRight != null)
+	        		{
+	        			mLeft.dismiss();
+	        			mRight.dismiss();
+	        		}
+	        	}
+	        }
+	    }
+	}
+	
+	public void dismissControls()
+	{
+		if(mLeftControl != null && mLeftControl.isShowing())
+			mLeftControl.dismiss();
+		if(mRightControl != null && mRightControl.isShowing())
+			mRightControl.dismiss();
+	}
+
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		if (gestureDecoder.onTouchEvent(event)) {
+	public boolean onTouchEvent(MotionEvent event)
+	{
+		super.onTouchEvent(event);
+		
+		mThread.updateTime();
+		
+		if(!mLeftControl.isShowing() || !mRightControl.isShowing())
+		{
+			mLeftControl.showAtLocation(this, Gravity.LEFT | Gravity.TOP, 0, 0);
+			mRightControl.showAtLocation(this, Gravity.RIGHT | Gravity.TOP, 0, 0);
+			if(mThread.getState().equals(Thread.State.NEW))
+				mThread.start();
+			if(mThread.getState().equals(Thread.State.TERMINATED))
+			{
+				mThread = new ControlAliveThread(mLeftControl, mRightControl);
+				mThread.updateTime();
+				mThread.start();
+			}
+			mThread.setRunning(true);
+		}
+		
+		if (gestureDecoder.onTouchEvent(event))
+		{
 			return true;
 		}
-		if (event.getAction() == MotionEvent.ACTION_UP) {
+		
+		
+		
+		if (event.getAction() == (MotionEvent.ACTION_UP))
+		{
 			int newActiveItem = (getScrollX() + pageWidth / 2) / pageWidth;
 			changeActiveItem(newActiveItem);
 			smoothScrollTo(activeItem * pageWidth + displayXOffset, 0);
 			return true;
 		}
-		return super.onTouchEvent(event);
+		return true;
 	}
 
 
-	class SoftScrollOnGestureListener extends SimpleOnGestureListener {
+	class SoftScrollOnGestureListener extends SimpleOnGestureListener
+	{
 		private final int SWIPE_MIN_SPEED = 500;
-
 		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-				float velocityY) {
-			try {
-				if (velocityX < -SWIPE_MIN_SPEED) {
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,	float velocityY)
+		{
+			try 
+			{
+				if (velocityX < -SWIPE_MIN_SPEED)
+				{
 					nextPage();
 					return true;
-				} else if (velocityX > SWIPE_MIN_SPEED) {
+				}
+				else if (velocityX > SWIPE_MIN_SPEED)
+				{
 					prevPage();
 					return true;
 				}
-			} catch (Exception e) {
+				
+				StableCurrPage();
+				return true;
+
+			} 
+			catch (Exception e) 
+			{
 				Log.e("Fling", "Error processing the Fling event", e);
 			}
 			return false;

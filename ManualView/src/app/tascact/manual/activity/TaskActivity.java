@@ -12,7 +12,6 @@
 package app.tascact.manual.activity;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;

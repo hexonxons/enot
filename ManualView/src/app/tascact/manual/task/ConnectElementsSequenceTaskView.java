@@ -16,7 +16,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.*;
-import android.util.Log;
 import android.view.MotionEvent;
 import app.tascact.manual.Markup;
 import app.tascact.manual.utils.XMLUtils;

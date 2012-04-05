@@ -1,10 +1,12 @@
 /*
- * View задач по решению выражение
+ * View задач по решению выражения
  * 
+ * Copyright 2012 hexonxons
  * 
- * Порядок обработки событий нажатия:
+ * :mailto killgamesh666@gmail.com
  * 
  */
+
 
 package app.tascact.manual.task;
 
