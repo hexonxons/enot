@@ -38,4 +38,12 @@ public class MathUtils {
 		result.y = (sy*st-N*syt)/z;
 		return result;
 	}
+	
+	public static float sqr(float x){
+		return x*x;
+	}
+	
+	public static int sqr(int x){
+		return x*x;
+	}
 }
