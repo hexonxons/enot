@@ -239,22 +239,24 @@ public class Markup {
 					mTaskNumber.setBackgroundResource(R.drawable.notdone);
 				else
 					mTaskNumber.setBackgroundResource(R.drawable.notatask);
-				mTaskNumber.setOnClickListener(taskLauncher);
+				//mTaskNumber.setOnClickListener(taskLauncher);
 				// Tasks are enumerated 1-based 
-				mTaskNumber.setId(i + 1);
+				//mTaskNumber.setId(i + 1);
 				mTaskNumber.setTextSize(33);
 				mTaskNumber.setText(Integer.toString(i + 1));
 				mTaskImage = new ImageView(this.getContext());
 				// Makes it keep the ratio when size changed
 				mTaskImage.setImageURI(resources[i]);
+				mTaskImage.setId(i + 1);
+				mTaskImage.setOnClickListener(taskLauncher);
 				mTaskImage.setAdjustViewBounds(true);
 				// O_O
 				// IDK HOW it works...
 				mTaskImage.setClickable(true);
 				
 				LayoutParams params = new LayoutParams(NUMBER_BUTTON_SIZE, NUMBER_BUTTON_SIZE);
-				params.setMargins(10, 0, 0, 0);
-				TaskElem.addView(mTaskNumber, params);
+				//params.setMargins(10, 0, 0, 0);
+				//TaskElem.addView(mTaskNumber, params);
 				
 				params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				TaskElem.addView(mTaskImage, params);
@@ -263,6 +265,12 @@ public class Markup {
 				this.addView(TaskElem, params);
 			}
 		}	
+		
+		@Override
+		protected void onSizeChanged(int w, int h, int oldw, int oldh)
+		{
+			super.onSizeChanged(w, h, oldw, oldh);
+		}
 
 		private OnClickListener taskLauncher = new OnClickListener()
 		{
