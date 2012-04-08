@@ -9,7 +9,6 @@ import org.w3c.dom.Node;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -22,8 +21,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import app.tascact.manual.Markup;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
@@ -39,7 +36,6 @@ public class ColoringPictureTaskView extends TaskView {
 	private Bitmap picture;
 	private Bitmap borders;
 	private Bitmap zones;
-	private Resources resources;
 	private Paint paint;
 	private List<Zone> splittedZones;
 	private AlertDialog alertDialog;
@@ -49,7 +45,6 @@ public class ColoringPictureTaskView extends TaskView {
 		super(context);
 		this.markup = markup;
 		inputParams = theInputParams;
-		resources = getResources();
 		paint = new Paint();
 		setBackgroundColor(Color.WHITE);
 		alertDialog = new AlertDialog.Builder(context).create();

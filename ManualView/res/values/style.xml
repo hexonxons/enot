@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="ControlsAnimation">
+	    <item name="@android:windowEnterAnimation">@anim/controls_appear</item>
+	    <item name="@android:windowExitAnimation">@anim/controls_disappear</item>
+	</style>
+</resources>

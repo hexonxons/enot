@@ -1,11 +1,12 @@
-/*
- * TaskView класс
+/**
+ * TaskView class
  * 
- * Абстрактный класс для View всех задач
+ * Abstract class for all tasks
  * 
  * Copyright 2012 hexonxons
  * 
  * :mailto killgamesh666@gmail.com
+ * :mailto hexonxons@gmail.com
  * 
  */
 
@@ -16,27 +17,24 @@ import android.widget.RelativeLayout;
 
 public abstract class TaskView extends RelativeLayout
 {
-
 	public TaskView(Context context)
 	{
 		super(context);
 	}
 
-	// функция перезапуска задачи
+	// function for restart task
 	public abstract void RestartTask();
-	// функция проверка задачи
+	// function for check task
 	public abstract void CheckTask();
 	
 	// These 3 procs are needed for tasks with a "game-loop"
-	public void onPause(){
-		
-	}
+	// make abstract and revrite tasks
+	public void onPause(){}
 	
-	public void onResume(){
-		
-	}
+	public void onResume(){}
 	
-	public void onStop(){
-		
-	}
+	public void onStop(){}
+	
+	public void WriteLog(){}
+	public void ReadLog(){}
 }

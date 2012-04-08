@@ -21,7 +21,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import app.tascact.manual.activity.TaskActivity;
@@ -202,7 +204,8 @@ public class Markup {
 		return Integer.parseInt(s);
 	}
 
-	public PageView getPageView(int pageNumber) {
+	public PageView getPageView(int pageNumber)
+	{
 		return new PageView(pageNumber);
 	}
 
@@ -210,37 +213,65 @@ public class Markup {
 	 * This class represents a page of the document.
 	 * @author losik
 	 */
-	private class PageView extends LinearLayout {
-		public PageView(int pageNumber) {
+	private class PageView extends LinearLayout
+	{
+		private int pageNumber;
+		private ImageView mTaskImage = null;
+		private Button mTaskNumber = null;
+		final private int NUMBER_BUTTON_SIZE = 60;
+		
+		public PageView(int pageNumber)
+		{
 			super(context);
 			setBackgroundColor(Color.WHITE);
 			setOrientation(LinearLayout.VERTICAL);
-
+			this.setGravity(Gravity.CENTER_HORIZONTAL);
 			this.pageNumber = pageNumber;
 			Uri resources[] = getPageElementsUri(pageNumber);
 			
-			for(int i = 0; i < resources.length; ++i) {
-				ImageView pageElem = new ImageView(this.getContext());
-				// Tasks are enumerated 1-based 
-				pageElem.setId(i + 1);
-				// Makes it keep the ratio when size changed
-				pageElem.setImageURI(resources[i]);
-				//pageElem.setImageResource(getPageResources(pageNumber)[i]);
-				pageElem.setOnClickListener(taskLauncher);
-				pageElem.setAdjustViewBounds(true);
+			for(int i = 0; i < resources.length; ++i)
+			{
+				LinearLayout TaskElem = new LinearLayout(getContext());
+				TaskElem.setGravity(Gravity.CENTER_VERTICAL);
 				
-				LayoutParams params = new LayoutParams(
-						LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-				this.addView(pageElem, params);
+				mTaskNumber = new Button(this.getContext());
+				if(getTaskType(pageNumber, i + 1) != null)
+					mTaskNumber.setBackgroundResource(R.drawable.notdone);
+				else
+					mTaskNumber.setBackgroundResource(R.drawable.notatask);
+				mTaskNumber.setOnClickListener(taskLauncher);
+				// Tasks are enumerated 1-based 
+				mTaskNumber.setId(i + 1);
+				mTaskNumber.setTextSize(33);
+				mTaskNumber.setText(Integer.toString(i + 1));
+				mTaskImage = new ImageView(this.getContext());
+				// Makes it keep the ratio when size changed
+				mTaskImage.setImageURI(resources[i]);
+				mTaskImage.setAdjustViewBounds(true);
+				// O_O
+				// IDK HOW it works...
+				mTaskImage.setClickable(true);
+				
+				LayoutParams params = new LayoutParams(NUMBER_BUTTON_SIZE, NUMBER_BUTTON_SIZE);
+				params.setMargins(10, 0, 0, 0);
+				TaskElem.addView(mTaskNumber, params);
+				
+				params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				TaskElem.addView(mTaskImage, params);
+				
+				params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				this.addView(TaskElem, params);
 			}
 		}	
 
-		private int pageNumber;
-		private OnClickListener taskLauncher = new OnClickListener() {
+		private OnClickListener taskLauncher = new OnClickListener()
+		{
 			@Override
-			public void onClick(View v) {
+			public void onClick(View v) 
+			{
 				// Indexes are 1-based
-				if(getTaskType(pageNumber, v.getId()) != null) {
+				if(getTaskType(pageNumber, v.getId()) != null)
+				{
 	   				Intent intent = new Intent(v.getContext(), TaskActivity.class);
 	   				intent.putExtra("ManualName", getManualName());
 		   			intent.putExtra("PageNumber", pageNumber);
@@ -252,7 +283,8 @@ public class Markup {
 		};
 	}
 
-	public String getMarkupFileDirectory() {
+	public String getMarkupFileDirectory()
+	{
 		return markupDir;
 	}
 }

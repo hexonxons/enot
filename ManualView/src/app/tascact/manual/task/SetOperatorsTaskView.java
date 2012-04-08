@@ -1,12 +1,16 @@
 /*
- * View задач по решению выражение
+ * View задач по решению выражения
  * 
+ * Copyright 2012 hexonxons
  * 
- * Порядок обработки событий нажатия:
+ * :mailto killgamesh666@gmail.com
  * 
  */
 
+
 package app.tascact.manual.task;
+
+import java.util.Arrays;
 
 import javax.xml.xpath.XPathConstants;
 
@@ -25,26 +29,37 @@ import android.graphics.Paint.Style;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.tascact.manual.utils.XMLUtils;
-import app.tascact.manual.view.AnimationView;
 import app.tascact.manual.view.TaskView;
 
 public class SetOperatorsTaskView extends TaskView
 {
 	private String[] mTaskResources = null;
 	private String[] mTaskAnswers = null;
-	private RelativeLayout mMainLayout = null;
+	private RelativeLayout mExpressionLayout = null;
 	private KeyboardView mKeyboard = null;
 	private ExpressionView mSelectedExpression = null;
+	// 1 == EditControl
+	// 0 == Touch Control
+	private int mControl = 1;
 	private boolean mAnswer = true;
 	private boolean mIsDescSet = false;
 	private AlertDialog mAlertDialog = null;
+	private int mWidth = 0;
+	private int mHeight = 0;
+	
 	// время предыдущего касания
 	private long mPrevTouchTime = 0;
-	private AnimationView mAnswerAnimation = null;
+	
+	public interface OnKeyPressedListener
+	{
+		void OnKeyPress(String label);
+	}
 	
 	public SetOperatorsTaskView(Context context, Markup markup, String ManualName,  int PageNumber, int TaskNumber)
 	{
@@ -57,6 +72,16 @@ public class SetOperatorsTaskView extends TaskView
 		if (taskDescr != null) 
 		{
 			descr = taskDescr.getTextContent();
+		}
+		
+		// Getting description of this task
+		Node taskControl = (Node) XMLUtils.evalXpathExpr(res, "./EditMode", XPathConstants.NODE);
+		if (taskControl != null) 
+		{
+			if(taskControl.getTextContent().equals("EditControl"))
+				mControl = 1;
+			else
+				mControl = 0;
 		}
 		
 		// Getting resources of this task
@@ -75,14 +100,12 @@ public class SetOperatorsTaskView extends TaskView
 			mTaskAnswers[i] = taskAns.item(i).getTextContent();
 		}
 		
-		mMainLayout = new RelativeLayout(context);
-		// клавиатура с размером кнопок 60x60 px
-		mKeyboard = new KeyboardView(context, 60, 60);
+		mExpressionLayout = new RelativeLayout(context);
+		// клавиатура
+		mKeyboard = new KeyboardView(context);
 		// задаем белый фон
-		mMainLayout.setBackgroundColor(Color.WHITE);
+		mExpressionLayout.setBackgroundColor(Color.WHITE);
 		mAlertDialog = new AlertDialog.Builder(context).create();
-		int verticalOffcet = 75;
-		int horizontalOffset = 800;
 
 		if(descr != null)
 		{
@@ -92,13 +115,14 @@ public class SetOperatorsTaskView extends TaskView
 			description.setGravity(Gravity.CENTER_HORIZONTAL);
 			description.setTextSize(30);
 			description.setTextColor(Color.BLACK);
-			mMainLayout.addView(description, params);
+			mExpressionLayout.addView(description, params);
 			mIsDescSet = true;
 		}
 		
 		for(int i = 0; i < mTaskResources.length; ++i)
 		{
-			ExpressionView expression = new ExpressionView(context, mTaskResources[i], 60, 60);
+			ExpressionView expression = new ExpressionView(context, mTaskResources[i]);
+			
 			expression.setOnTouchListener(new OnTouchListener()
 			{
 				@Override
@@ -111,8 +135,10 @@ public class SetOperatorsTaskView extends TaskView
 						if(mSelectedExpression == null)
 						{
 							mSelectedExpression = (ExpressionView) v;
+							mSelectedExpression.setCursor();
 						}
 						else
+						{
 							if(mSelectedExpression == v)
 							{
 								if(mSelectedExpression.getPressedKey() == null)
@@ -122,126 +148,114 @@ public class SetOperatorsTaskView extends TaskView
 							{
 								mSelectedExpression.setSelected(false);
 								mSelectedExpression = (ExpressionView) v;
+								mSelectedExpression.setCursor();
+							}
 							}
 					}
 					return true;
 				}
 			});
 			
-			
-			/*
-		 	* параметры раскладки
-			 * ------------------
-			 * |   Description  |
-			 * |(expr1)	(expr2)	|
-			 * |(expr3)	(expr4)	|
-			 * |(expr5)	(expr6)	|
-			 * \/\/\/\/\//\/\/\/
-			 */
-			LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			
-			// Топорное размещение
-			if(mTaskResources[i].length() * 60 > 400)
-			{
-				horizontalOffset = (800 - mTaskResources[i].length() * 60)/2;
-				if(i != 0)
-					verticalOffcet += 75;
-			}
-			// если этот элемент помещается в 400px - половина ширины экрана
-			else
-			{
-				// если этот элемент не последний
-				if(i != mTaskResources.length - 1)
-				{
-					// если следующий элемент не помещается в 400px
-					if(mTaskResources[i + 1].length() * 60 > 400)
-					{
-						// если смещение предыдущего элемента < 400, то есть текущий элемент - 2й в строчке
-						// то задаем горизонтальное смещение на середину второго блока в 400px
-						// и не делаем сдвига по вертикали
-						if(horizontalOffset < 400)
-						{
-							horizontalOffset = 400 + (400 - mTaskResources[i].length()* 60) / 2;
-						}
-					}
-					// если следующий элемент помещается в 400px
-					else
-					{
-						// если смещение предыдущего элемента < 400, то текущий элемент - 2й в строчке
-						// то задаем горизонтальное смещение на середину второго блока в 400px
-						// и не делаем сдвига по вертикали
-						if(horizontalOffset < 400)
-						{
-							horizontalOffset = 400 + (400 - mTaskResources[i].length()* 60) / 2;
-						}
-						// если смещение предыдущего элемента > 400, то  текущий элемент - 1й в строчке
-						// задаем горизонтальное смещение на середину первого блока в 400px
-						// и делаем сдвиг по вертикали
-						else
-						{
-							horizontalOffset = (400 - mTaskResources[i].length() * 60) / 2;
-							verticalOffcet += 75;
-						}
-					}
-				}
-				// последний элемент помещается в 400px
-				else
-				{
-					if(horizontalOffset < 400)
-					{
-						horizontalOffset = 400 + (400 - mTaskResources[i].length() * 60) / 2;
-					}
-					else
-					{
-						horizontalOffset = (400 - mTaskResources[i].length() * 60) / 2;
-						verticalOffcet += 75;
-					}
-				}
-			}
-		
-			if( mTaskResources.length == 1)
-				horizontalOffset  = (800 - mTaskResources[i].length() * 60)/2;
-			
-			params.setMargins(horizontalOffset, verticalOffcet, 0, 0);
 			// добавляем выражение
-			mMainLayout.addView(expression, params);
+			mExpressionLayout.addView(expression);
 		}
+			
+		this.addView(mExpressionLayout, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			
+		mKeyboard.setOnKeyPressedListener(new OnKeyPressedListener() 
+		{
+			@Override
+			public void OnKeyPress(String label)
+			{
+				if(mSelectedExpression != null)
+				{
+					if(label == "Стереть")
+						mSelectedExpression.delKeyLabel();
+					else
+						if(label == "Ввод")
+						{
+							for(int i = 0; i < mExpressionLayout.getChildCount(); ++i)
+							{
+								if(mExpressionLayout.getChildAt(i) == mSelectedExpression)
+								{
+									if(i < mExpressionLayout.getChildCount() - 1)
+									{
+										mSelectedExpression.setSelected(false);
+										mSelectedExpression = (ExpressionView) mExpressionLayout.getChildAt(i + 1);
+										mSelectedExpression.setCursor();
+										return;
+									}
+								}
+							}
+						}
+						else
+							mSelectedExpression.setKeyLabel(label);
+				}
+			}
+		});
 		
-		this.addView(mMainLayout, new LayoutParams(LayoutParams.MATCH_PARENT, 830));
-		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, 830);
-		params.setMargins(0, 830, 0, 0);
-		this.addView(mKeyboard, params);
-		
-		mAnswerAnimation = new AnimationView(getContext(), 400, 400, 400, 400, "MarioAnimationResources", 60, -3, true, true);
-		mAnswerAnimation.setVisibility(INVISIBLE);
-		this.addView(mAnswerAnimation);
+		this.addView(mKeyboard);
 	}
 	
-	// вставляем значение
 	@Override
-	public boolean onTouchEvent(MotionEvent event)
+	protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
-		mAnswerAnimation.setVisibility(INVISIBLE);
-		if(event.getEventTime() - mPrevTouchTime > 100)
+		mWidth = w;
+		mHeight = h;
+		
+		LayoutParams keyboardParams = new LayoutParams(LayoutParams.MATCH_PARENT, 200);
+		keyboardParams.setMargins(0, h - 200, 0, 0);
+		mKeyboard.setLayoutParams(keyboardParams);
+		
+		mHeight -= 210;
+		int maxHeight = 70;
+		
+		int expressionCount = mExpressionLayout.getChildCount() - (mIsDescSet ? 1 : 0);
+		int offsetW = 10;
+		int offsetH = 20;
+		
+		
+		int expressionWidth = (mWidth - offsetW * 3)/2;
+		int expressionHeight = mHeight / (expressionCount);
+
+		if(expressionHeight > maxHeight)
+			expressionHeight = maxHeight;
+		
+		if(expressionHeight * expressionCount + 20 * (expressionCount + 1) < mHeight)
 		{
-			mPrevTouchTime = event.getEventTime();
-			String key = mKeyboard.getPressedKey();
-			if(key.equals("invalid") || mSelectedExpression == null)
-				return true;
-			
-			mSelectedExpression.setKeyLabel(key);
+			expressionWidth = mWidth - offsetW * 3;
+			for(int i = (mIsDescSet ? 1 : 0); i < mExpressionLayout.getChildCount(); ++i)
+			{
+				ExpressionView expression = (ExpressionView) mExpressionLayout.getChildAt(i);
+				LayoutParams params = new LayoutParams(expressionWidth, expressionHeight);
+				params.setMargins((mWidth - expressionWidth) / 2, (mIsDescSet ? 1 : 0) * 80 + offsetH + (offsetH + expressionHeight) * (i - (mIsDescSet ? 1 : 0)), 0, 0);
+				expression.setLayoutParams(params);
+			}
 		}
-		return super.onTouchEvent(event);
-	}
+		else
+		{
+			for(int i = (mIsDescSet ? 1 : 0); i < mExpressionLayout.getChildCount(); ++i)
+			{
+				ExpressionView expression = (ExpressionView) mExpressionLayout.getChildAt(i);
+				LayoutParams params = new LayoutParams(expressionWidth, expressionHeight);
+				params.setMargins(offsetW + (offsetW + expressionWidth) * ((i - (mIsDescSet ? 1 : 0)) % 2), (mIsDescSet ? 1 : 0) * 80 + offsetH + (20 + expressionHeight) * ((i - (mIsDescSet ? 1 : 0)) / 2), 0, 0);
+				expression.setLayoutParams(params);
+			}
+		}
+			
+		super.onSizeChanged(w, h, oldw, oldh);
+		}
+	
+	
 	
 	public void RestartTask()
     {
 		int i = 0;
 		if(mIsDescSet)
 			i++;
-		for(; i < mMainLayout.getChildCount(); ++i)
+		for(; i < mExpressionLayout.getChildCount(); ++i)
     	{
-    		((ExpressionView)(mMainLayout.getChildAt(i))).clearValues();
+    		((ExpressionView)(mExpressionLayout.getChildAt(i))).clearValues();
     	}
     	mSelectedExpression = null;
     	mAnswer = true;
@@ -255,57 +269,100 @@ public class SetOperatorsTaskView extends TaskView
     	int j = 0;
 		if(mIsDescSet)
 			i++;
-    	for(; i < mMainLayout.getChildCount(); ++i)
+    	for(; i < mExpressionLayout.getChildCount(); ++i)
     	{
-    		if(!((ExpressionView)(mMainLayout.getChildAt(i))).checkValues(mTaskAnswers[j]))
+    		if(!((ExpressionView)(mExpressionLayout.getChildAt(i))).checkValues(mTaskAnswers[j]))
     			mAnswer = false;
     		++j;
     	}
-    	
-    	String weee = mAnswer ? "Прально!" : "Непрально!";
-    	mAnswerAnimation.setVisibility(VISIBLE);
-    	mAnswerAnimation.setTextToDisplay(weee);
-    	//mAnswerAnimation.Animate();
+    	String ans = mAnswer ? "Правильно" : "Неправильно";
+		mAlertDialog.setMessage(ans);
+		mAlertDialog.show();
     }
 	
-	private class ExpressionView extends RelativeLayout
+	private class ExpressionView extends LinearLayout
 	{
-		private int mWidth;
-		private int mHeight;
-		private KeyView mInputs[] = null;
-		private KeyView mPressedKey = null;
+		private int mWidth = 0;
+		private int mHeight = 0;
+		private FieldView mInputs[] = null;
+		private FieldView mPressedKey = null;
 		private long mPrevTouchTime = 0;
-		public ExpressionView(Context context, String expression, int KeyWidth, int KeyHeight)
+		private String mExpression = null;
+		
+		public ExpressionView(Context context, String expression)
 		{
 			super(context);
-			mWidth = KeyWidth;
-			mHeight = KeyHeight;
+			mWidth = 60;
+			mHeight = 60;
 			int inputSz = 0;
 			int inputIndex = 0;
+			mExpression = expression;
 			for(int i = 0; i < expression.length(); ++i)
 			{
 				if(expression.charAt(i) == '?')
 					inputSz++;
 			}
 			
-			mInputs = new KeyView[inputSz];
+			mInputs = new FieldView[inputSz];
+			int offset = 0;
 			
 			// проходим по всем символам выражения
-			for(int i = 0; i < expression.length(); ++i)
+			for(int i = 0; i < expression.length();)
 			{
-				// извлекаем i-й символ и создаем кнопку
-				KeyView key = new KeyView(context, expression.substring(i, i + 1), mWidth, mHeight);
-				// убираем свойство кнопки
-				key.setTouchable(false);
+				String label = "";
+				int capacity = 0;
+				
+				boolean flag = false;
+				
 				if(expression.charAt(i) == '?')
 				{
-					key.setKeyLabel("");
-					key.setSelectable(true);
-					mInputs[inputIndex] = key;
-					inputIndex++;
+					flag = true;
+					++i;
+					capacity = 2;
+				}
+				else
+				{
+					if(expression.charAt(i) == '?')
+					{
+						flag = true;
+						++i;
+						capacity = 2;
+					}
+					else
+					{
+						while(i < expression.length() && expression.charAt(i) != '?')
+						{
+							if(i < expression.length() - 2 && (expression.substring(i, i + 2).matches("[0-9]{2}")))
+							{
+								label += expression.substring(i, i + 2);
+								i += 2;
+								++capacity;
+							}
+							else
+							{
+								label += expression.substring(i, i + 1);
+								++i;
+								++capacity;
+							}
+						} 
+					}
 				}
 				
-				key.setOnTouchListener(new OnTouchListener()
+				int fieldWidth = mWidth * label.length();
+				if(label.length() == 0)
+					fieldWidth = mWidth;
+				
+				// создаем кнопку
+				FieldView field = new FieldView(context, label, capacity);
+				// вешаем обработчики только на нажимаемые клавиши
+				if(flag)
+				{
+					mInputs[inputIndex] = field;
+					inputIndex++;
+					// если контроллим тыкая пальцами
+					if(mControl == 0)
+					{
+						field.setOnTouchListener(new OnTouchListener()
 				{
 					@Override
 					public boolean onTouch(View v, MotionEvent event)
@@ -313,37 +370,76 @@ public class SetOperatorsTaskView extends TaskView
 						if(event.getEventTime() - mPrevTouchTime > 100)
 						{
 							mPrevTouchTime = event.getEventTime();
-							if(!((KeyView) v).isSelectable())
-								return true;
 							if(mPressedKey == null)
 							{
-								mPressedKey = (KeyView) v;
-								mPressedKey.setFocus(false);
+										mPressedKey = (FieldView) v;
+										mPressedKey.setSelected(true);
 							}
 							else
 								if(mPressedKey == v)
+										{
+											mPressedKey.setSelected(false);
 									mPressedKey = null;
+										}
 								else
 								{
 									mPressedKey.setSelected(false);
-									mPressedKey = (KeyView) v;
-									mPressedKey.setFocus(false);
+											mPressedKey = (FieldView) v;
+											mPressedKey.setSelected(true);
 								}
 						}
 						return false;
 					}
 				});
+					}
+				}
 				
 				// задаем размеры mWidth x mHeight
-				LayoutParams params = new LayoutParams(mWidth, mHeight);
+				LayoutParams params = new LayoutParams(fieldWidth, mHeight);
 				/*
 				 * сдвиг по горизонтали
 				 * -----------------
 				 * |(key1)(key2)...|
 				 * -----------------
 				 */
-				params.setMargins(mWidth * i, 0, 0, 0);
-				this.addView(key, params);
+				params.setMargins(offset, 0, 0, 0);
+				offset += fieldWidth;
+				this.addView(field, params);
+			}
+		}
+		
+		@Override
+		protected void onSizeChanged(int w, int h, int oldw, int oldh)
+		{
+			this.mHeight = h;
+			this.mWidth = w / mExpression.length();
+			
+			for(int i = 0; i < this.getChildCount(); ++i)
+			{	 
+				FieldView field = (FieldView)this.getChildAt(i);
+				int width = field.getFieldContent().length() == 0 ? mWidth : mWidth * field.getFieldContent().length();
+				LayoutParams params = new LayoutParams(width, this.mHeight);
+				field.setLayoutParams(params);
+			}
+			
+			super.onSizeChanged(w, h, oldw, oldh);
+		}
+		
+		public void setCursor()
+		{
+			if(mControl == 1)
+			{
+				for(int i = 0; i < mInputs.length; ++i)
+				{
+					if(mInputs[i].getFieldContent() == "")
+					{
+						mPressedKey = mInputs[i];
+						mPressedKey.setSelected(true);
+						return;
+					}
+				}
+				mPressedKey = mInputs[mInputs.length - 1];
+				mPressedKey.setSelected(true);
 			}
 		}
 		
@@ -352,8 +448,35 @@ public class SetOperatorsTaskView extends TaskView
 		public void setKeyLabel(String label)
 		{
 			if(mPressedKey != null)
-				//mPressedKey.setKeyLabel(label);
-				mPressedKey.addSymb(label);
+			{
+				if(mPressedKey.addSymb(label) == 1)
+				{
+					int index = Arrays.asList(mInputs).indexOf(mPressedKey);
+					if(index != mInputs.length - 1)
+					{
+						mPressedKey.setSelected(false);
+						mPressedKey = mInputs[index + 1];
+						mPressedKey.setSelected(true);
+					}
+				}
+			}
+		}
+		
+		public void delKeyLabel()
+		{
+			if(mPressedKey != null)
+			{
+				if(mPressedKey.delSymb() == 1)
+				{
+					int index = Arrays.asList(mInputs).indexOf(mPressedKey);
+					if(index > 0)
+					{
+						mPressedKey.setSelected(false);
+						mPressedKey = mInputs[index - 1];
+						mPressedKey.setSelected(true);
+					}
+				}
+			}
 		}
 		
 		public void setSelected(boolean selected)
@@ -366,7 +489,7 @@ public class SetOperatorsTaskView extends TaskView
 			}
 		}
 		
-		public KeyView getPressedKey()
+		public FieldView getPressedKey()
 		{
 			return mPressedKey;
 		}
@@ -375,11 +498,9 @@ public class SetOperatorsTaskView extends TaskView
 		{
 			for(int i = 0; i < mInputs.length; ++i)
 			{
-				mInputs[i].setKeyLabel("");
-				mInputs[i].setSelectable(true);
+				mInputs[i].setFieldContent("");
 				mInputs[i].setSelected(false);
 				mPressedKey = null;
-				//invalidate();
 			}
 		}
 		
@@ -388,218 +509,263 @@ public class SetOperatorsTaskView extends TaskView
 			String data = "";
 			for(int i = 0; i < this.getChildCount(); ++i)
 			{
-				data += ((KeyView)(this.getChildAt(i))).getKeyLabel();
-				for(int k = 0; k < mInputs.length; ++k)
+				data += ((FieldView)(this.getChildAt(i))).getFieldContent();
+				/*for(int k = 0; k < mInputs.length; ++k)
 					if(mInputs[k].getKeyLabel().length() == 0)
-						return false;
+						return false;*/
 			}
 			
-			if(answer.indexOf(data) < 0)
+			if(answer.indexOf(data) < 0 || data.length() == 0 ||
+			   ((data.length() < answer.length() && answer.charAt(data.length()) != '&') &&
+			   (answer.indexOf(data) + data.length() < answer.length())))
 				return false;
 
 			return true;
 		}
+
+		// класс-view поля
+		private class FieldView extends ImageView
+		{
+			private String mFieldContent = null;
+			private long mCapacity = 0;
+			// является ли выделенной
+			private boolean mSelected = false;
+			
+			private int mWidth = 0;
+			private int mHeight = 0;
+			
+			public FieldView(Context context, String key, int capacity)
+			{
+				super(context);
+				mFieldContent = key;
+				mCapacity = capacity;
+			}
+
+			@Override
+			protected void onDraw(Canvas canvas)
+			{
+				Paint fg = new Paint(Paint.ANTI_ALIAS_FLAG);
+				fg.setStyle(Style.FILL);
+				int textSize = mHeight > mWidth ? mWidth : mHeight;
+				fg.setTextSize((float) (textSize * 0.65));
+				
+				FontMetrics fm = fg.getFontMetrics();
+				
+				// координаты помещения
+				float textY = (mHeight - fm.ascent - fm.descent) / 2;
+				
+				fg.setTextAlign(Paint.Align.CENTER);
+				for(int i = 0; i < mFieldContent.length(); ++i)
+				{
+					String symb = mFieldContent.substring(i,  i + 1);
+					canvas.drawText(symb, (float) ((mWidth / mFieldContent.length() * i) + (mWidth / mFieldContent.length() / 2)), textY, fg);
+				}
+				
+				if(mSelected)
+					this.setBackgroundResource(R.drawable.selected_field);
+				else
+					this.setBackgroundResource(R.drawable.input_field);
+				
+				super.onDraw(canvas);
+			}
+
+			@Override
+			protected void onSizeChanged(int w, int h, int oldw, int oldh)
+			{
+				mWidth = w;
+				mHeight = h;
+				super.onSizeChanged(w, h, oldw, oldh);
+			}
+
+			public String getFieldContent()
+			{
+				return this.mFieldContent;
+			}
+
+			public void setFieldContent(String keyLabel)
+			{
+				this.mFieldContent = keyLabel;
+				invalidate();
+			}
+			
+			// setter
+			public void setSelected(boolean selected)
+			{
+				this.mSelected = selected;
+				invalidate();
+			}
+			
+			public int addSymb(String symb)
+			{
+				if(mCapacity > mFieldContent.length() + 1)
+				{
+					mFieldContent += symb;
+					invalidate();
+					return 0;
+				}
+				else
+					if(mCapacity != mFieldContent.length())
+					{
+						mFieldContent += symb;
+						invalidate();
+						return 1;
+					}
+					else
+						return 1;
+			}
+			
+			public int delSymb()
+			{
+				if(mFieldContent.length() > 0)
+				{
+					mFieldContent = mFieldContent.substring(0, mFieldContent.length() - 1);
+					invalidate();
+					if(mFieldContent.length() == 0)
+						return 1;
+				}
+				
+				if(mFieldContent.length() == 0)
+					return 1;
+				
+				return 0;
+			}
+		}
 	}
 
 	// Класс клавиатуры
-	private class KeyboardView extends RelativeLayout
+	private class KeyboardView extends RelativeLayout implements OnClickListener
 	{
 		private final String mOperatorsSet = "+-*/><=";
-		// последний нажатый символ на клавиатуре
-		private String mPressedKey = "";
-		public KeyboardView(Context context, int keyWidth, int keyHeight)
+		private final String mBackspace = "Стереть";
+		private final String mEnter = "Ввод";
+		
+		protected OnKeyPressedListener mKeyPressedListener = null;
+		
+		public KeyboardView(Context context)
 		{
 			super(context);
-			this.setBackgroundColor(Color.WHITE);
+			this.setBackgroundColor(0xFFF2F2F2);
 			
 			for(int i = 0; i < 10; ++i)
 			{
-				KeyView key = new KeyView(context, Integer.toString(i), keyWidth, keyHeight);
-				LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-				int margin = (800 - 10 * keyWidth) / 11;
-				params.setMargins(margin + i * (keyWidth + margin), keyHeight / 2, 0, 0);
-				key.setOnTouchListener(new OnTouchListener()
-				{
-					// Слушатели кнопок
-					// при нажатии сохраняется значение нажатой кнопки
-					// отдаем дальнейшую обработку родителю (return false)
-					@Override
-					public boolean onTouch(View v, MotionEvent event)
-					{
-						mPressedKey = ((KeyView)v).getKeyLabel();
-						return false;
-					}
-				});
+				Key key = new Key(context, Integer.toString(i));				
+				key.setOnClickListener(this);
 				
-				this.addView(key, params);
+				this.addView(key);
 			}
 			
 			for(int i = 0; i < mOperatorsSet.length(); ++i)
 			{
-				KeyView key = new KeyView(context, mOperatorsSet.substring(i, i + 1), keyWidth, keyHeight);
-				LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-				int margin = (800 - mOperatorsSet.length() * keyWidth) / (mOperatorsSet.length() + 1);
-				params.setMargins(margin + i * (keyWidth + margin), keyHeight * 2, 0, 0);
+				Key key = new Key(context, mOperatorsSet.substring(i, i + 1));				
+				key.setOnClickListener(this);
 				
-				key.setOnTouchListener(new OnTouchListener()
+				this.addView(key);
+			}
+			
+			Key backspace = new Key(context, mBackspace);
+			Key enter = new Key(context, mEnter);
+			
+			backspace.setOnClickListener(this);
+			enter.setOnClickListener(this);
+				
+			this.addView(backspace);
+			this.addView(enter);
+		}
+		
+		public void setOnKeyPressedListener(OnKeyPressedListener l)
+		{
+			this.mKeyPressedListener = l;
+		}
+		
+		@Override
+		public void onClick(View v)
+		{
+			if(mKeyPressedListener != null)
+				mKeyPressedListener.OnKeyPress(((Key)v).getKeyLabel());
+		}
+		
+		@Override
+		protected void onSizeChanged(int w, int h, int oldw, int oldh)
+		{
+			int keyWidth = w / 12;
+			int keyHeight = h / 5;
+			
+			
+			for(int i = 0; i < this.getChildCount(); ++i)
+			{
+				Key key = (Key)this.getChildAt(i);
+				if(i < 10)
 				{
-					// Слушатели кнопок
-					// при нажатии сохраняется значение нажатой кнопки
-					// отдаем дальнейшую обработку родителю (return false)
-					@Override
-					public boolean onTouch(View v, MotionEvent event)
+					int margin = (w - keyWidth * 10) / 11;
+					LayoutParams params = new LayoutParams(keyWidth, keyHeight);
+					params.setMargins(margin + i * (keyWidth + margin), keyHeight / 2, 0, 0);
+					key.setLayoutParams(params);
+				}
+				else
+					if(i < 10 + mOperatorsSet.length())
 					{
-						mPressedKey = ((KeyView)v).getKeyLabel();
-						return false;
+						int margin = (w - keyWidth * mOperatorsSet.length()) / (mOperatorsSet.length() + 1);
+						LayoutParams params = new LayoutParams(keyWidth, keyHeight);
+						params.setMargins(margin + (i - 10) * (keyWidth + margin), keyHeight * 2, 0, 0);
+						key.setLayoutParams(params);
 					}
-				});
+					else
+					{
+						int margin = (w - 2 * keyWidth * 4) / 3;
+						LayoutParams params = new LayoutParams(keyWidth * 4, keyHeight);
+						params.setMargins(margin + (i - 10 - mOperatorsSet.length()) * (keyWidth * 4 + margin), (int)(keyHeight * 3.5), 0, 0);
+						key.setLayoutParams(params);
+					}
+			}
+			
+			super.onSizeChanged(w, h, oldw, oldh);
+		}
+		
+		// класс-view кнопки
+		private class Key extends Button
+		{
+			private String mKeyLabel = null;
+			
+			private int mWidth = 0;
+			private int mHeight = 0;
+			
+			public Key(Context context, String key)
+			{
+				super(context);
+				mKeyLabel = key;
+				this.setBackgroundResource(R.drawable.keyboard_key);
+			}
+			
+			@Override
+			protected void onDraw(Canvas canvas)
+			{
+				Paint fg = new Paint(Paint.ANTI_ALIAS_FLAG);
+				fg.setStyle(Style.FILL);
+				fg.setTextAlign(Paint.Align.CENTER);
+				int textSize = mHeight > mWidth ? mWidth : mHeight;
+				fg.setTextSize((float) (textSize * 0.65));
 				
-				this.addView(key, params);
+				FontMetrics fm = fg.getFontMetrics();
+				// координаты помещения
+				float textX = mWidth / 2;
+				float textY = (mHeight - fm.ascent - fm.descent) / 2;
+				canvas.drawText(mKeyLabel, textX, textY, fg);
+				
+				super.onDraw(canvas);
+			}
+			
+			@Override
+			protected void onSizeChanged(int w, int h, int oldw, int oldh)
+			{
+				mWidth = w;
+				mHeight = h;
+				super.onSizeChanged(w, h, oldw, oldh);
+			}
+
+			public String getKeyLabel()
+			{
+				return this.mKeyLabel;
 			}
 		}
-		
-		public String getPressedKey()
-		{
-			String key = mPressedKey.length() != 0 ? mPressedKey : "invalid";
-			mPressedKey = "";
-			return key;
-		}
-	}
-	
-	// класс-view кнопки
-	private class KeyView extends ImageView
-	{
-		private String mKeyLabel = null;
-			// является ли кнопкой или просто отображает символ
-		private boolean mTouchable = true;
-			// является ли выделяемой для вставки символа
-		private boolean mSelectable = false;
-			// является ли выделенной
-		private boolean mSelected = false;
-		private boolean focus = false;
-		
-			// время предыдущего касания
-		private long mPrevTouchTime = 0;
-		
-		private int mWidth = 0;
-		private int mHeight = 0;
-		
-		public KeyView(Context context, String key, int width, int height)
-		{
-			super(context);
-			mKeyLabel = key;
-			mWidth = width;
-			mHeight = height;
-			this.setBackgroundColor(getResources().getColor(R.color.table_light));
-		}
-		
-		@Override
-		protected void onDraw(Canvas canvas)
-		{
-			Paint fg = new Paint(Paint.ANTI_ALIAS_FLAG);
-			fg.setStyle(Style.FILL);
-			fg.setTextAlign(Paint.Align.CENTER);
-			fg.setTextSize((float) (mHeight * 0.75));
-			
-			FontMetrics fm = fg.getFontMetrics();
-				// координаты помещения
-			float textX = mWidth / 2;
-			float textY = (mHeight - fm.ascent - fm.descent) / 2;
-			canvas.drawText(mKeyLabel, textX, textY, fg);
-			
-			if(mSelected)
-				this.setBackgroundColor(getResources().getColor(R.color.table_selected));
-			else
-				this.setBackgroundColor(getResources().getColor(R.color.table_light));
-			
-			super.onDraw(canvas);
-		}
-
-
-		public String getKeyLabel()
-		{
-			return this.mKeyLabel;
-		}
-
-		public void setKeyLabel(String keyLabel)
-		{
-			this.mKeyLabel = keyLabel;
-			invalidate();
-		}
-		
-			// нажимаема ли кнопка
-		public boolean isTouchable()
-		{
-			return mTouchable;
-		}
-		// setter
-		public void setTouchable(boolean touchable)
-		{
-			this.mTouchable = touchable;
-			this.mSelectable = false;
-			this.mSelected = false;
-		}
-		
-			//выделяема ли кнопка
-		public boolean isSelectable()
-		{
-			return mSelectable;
-		}
-		// setter
-		public void setSelectable(boolean selectable)
-		{
-			this.mSelectable = selectable;
-			this.mTouchable = false;
-		}
-		
-			// выделена ли кнопка
-		public boolean isSelected()
-		{
-			return mSelected;
-		}
-		
-		// setter
-		public void setSelected(boolean selected)
-		{
-			this.mSelected = selected;
-			focus = selected;
-			invalidate();
-		}
-		
-		public void setFocus(boolean focus)
-		{
-			this.focus = focus;
-		}
-		
-		public void addSymb(String symb)
-		{
-			if(!focus)
-				mKeyLabel = symb;
-			else
-				if(mKeyLabel.length() < 2)
-					mKeyLabel += symb;
-			focus = true;
-			invalidate();
-		}
-		
-			// события нажатия на кнопку - если кнопка выделяема - выделяем ее
-			// и отдаем обработку родителю (return false)
-			// соответственно кнопки клавиатуры обрабатывает клавиатура, а кнопки выражения - выражение
-		@Override
-		public boolean onTouchEvent(MotionEvent event)
-		{
-			if(isSelectable())
-			{
-				int eventAction = event.getAction();
-				if (eventAction == MotionEvent.ACTION_DOWN && event.getEventTime() - mPrevTouchTime > 100)
-				{
-					mPrevTouchTime = event.getEventTime();
-					mSelected = mSelected ? false : true;
-					invalidate();
-				}
-				return false;
-			}			
-			return false;
-		}
-	}
+	}	
 }

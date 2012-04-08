@@ -2,19 +2,16 @@ package app.tascact.manual.task;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.SortedSet;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -26,8 +23,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.Log;
-import android.util.Pair;
 import android.view.MotionEvent;
 import app.tascact.manual.Markup;
 import app.tascact.manual.utils.MathUtils;
@@ -448,7 +443,6 @@ public class GroupingElementsTaskView extends TaskView {
 		public Bitmap bitmap;
 		public PointF position;
 		public PointF velocity;
-		public int resourceId;
 		public String resourceName;
 		public float scaleKoeff = 1.0f;
 		public int answerGroup = -1;
