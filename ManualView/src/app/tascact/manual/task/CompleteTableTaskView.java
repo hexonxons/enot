@@ -18,7 +18,6 @@ import android.graphics.Paint.Style;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -26,6 +25,8 @@ import app.tascact.manual.Markup;
 import app.tascact.manual.R;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
+import app.tascact.manual.view.utils.KeyboardView;
+import app.tascact.manual.view.utils.KeyboardView.OnKeyboardKeyPressListener;
 
 public class CompleteTableTaskView extends TaskView
 {
@@ -36,12 +37,11 @@ public class CompleteTableTaskView extends TaskView
 	private Table mFocusedTable = null;
 	private AlertDialog mAlertDialog = null;
 	
-	public CompleteTableTaskView(Context context, Markup markup, int PageNumber, int TaskNumber)
+	public CompleteTableTaskView(Context context, Node resource, Markup markup)
 	{
 		super(context);
 		
 		mAlertDialog = new AlertDialog.Builder(context).create();
-		Node resource = markup.getTaskResources(PageNumber, TaskNumber);
 		
 		// Getting description of this task
 		Node TaskDescription = (Node) XMLUtils.evalXpathExpr(resource, "./TaskDescription", XPathConstants.NODE);
@@ -60,7 +60,7 @@ public class CompleteTableTaskView extends TaskView
 		
 		mMainLayout = new RelativeLayout(context);
 		// клавиатура с размером кнопок 60x60 px
-		mKeyboard = new KeyboardView(context, 60, 60);
+		mKeyboard = new KeyboardView(context);
 		// задаем белый фон
 		mMainLayout.setBackgroundColor(Color.WHITE);
 		
@@ -103,10 +103,10 @@ public class CompleteTableTaskView extends TaskView
 		this.addView(mMainLayout, new LayoutParams(LayoutParams.MATCH_PARENT, 830));
 		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, 830);
 		params.setMargins(0, 730, 0, 0);
-		mKeyboard.setOnKeyPressedListener(new OnKeyPressedListener() 
+		mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener() 
 		{
 			@Override
-			public void OnKeyPress(String label)
+			public void onKeyboardKeyPress(String label)
 			{
 				if(mFocusedTable != null)
 				{
@@ -442,117 +442,5 @@ public class CompleteTableTaskView extends TaskView
 		mAlertDialog.setMessage(ans);
 		mAlertDialog.show();
 		
-	}
-	
-	public interface OnKeyPressedListener
-	{
-		void OnKeyPress(String label);
-	}
-	
-	// Класс клавиатуры
-	private class KeyboardView extends RelativeLayout implements OnClickListener
-	{
-		private final String mOperatorsSet = "+-*/><=";
-		private final String mBackspace = "Стереть";
-		private final String mEnter = "Ввод";
-		
-		protected OnKeyPressedListener mKeyPressedListener = null;
-		
-		public KeyboardView(Context context, int keyWidth, int keyHeight)
-		{
-			super(context);
-			this.setBackgroundColor(0xFFF2F2F2);
-			
-			for(int i = 0; i < 10; ++i)
-			{
-				Key key = new Key(context, Integer.toString(i), keyWidth, keyHeight);
-				LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-				int margin = (800 - 10 * keyWidth) / 11;
-				params.setMargins(margin + i * (keyWidth + margin), keyHeight / 2, 0, 0);
-				
-				key.setOnClickListener(this);
-				
-				this.addView(key, params);
-			}
-			
-			for(int i = 0; i < mOperatorsSet.length(); ++i)
-			{
-				Key key = new Key(context, mOperatorsSet.substring(i, i + 1), keyWidth, keyHeight);
-				LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-				int margin = (800 - mOperatorsSet.length() * keyWidth) / (mOperatorsSet.length() + 1);
-				params.setMargins(margin + i * (keyWidth + margin), keyHeight * 2, 0, 0);
-				
-				key.setOnClickListener(this);
-				
-				this.addView(key, params);
-			}
-			
-			Key backspace = new Key(context, mBackspace, 220, keyHeight);
-			Key enter = new Key(context, mEnter, 220, keyHeight);
-			
-			backspace.setOnClickListener(this);
-			enter.setOnClickListener(this);
-			
-			LayoutParams backspaceParams = new LayoutParams(220, keyHeight);
-			LayoutParams enterParams = new LayoutParams(220, keyHeight);
-			
-			backspaceParams.setMargins(120, keyHeight * 3 + 30, 0, 0);
-			enterParams.setMargins(460, keyHeight * 3 + 30, 0, 0);
-				
-			this.addView(backspace, backspaceParams);
-			this.addView(enter, enterParams);
-		}
-		
-		public void setOnKeyPressedListener(OnKeyPressedListener l)
-		{
-			this.mKeyPressedListener = l;
-		}
-		
-		@Override
-		public void onClick(View v)
-		{
-			if(mKeyPressedListener != null)
-				mKeyPressedListener.OnKeyPress(((Key)v).getKeyLabel());
-		}
-		
-		// класс-view кнопки
-		private class Key extends Button
-		{
-			private String mKeyLabel = null;
-			
-			private int mWidth = 0;
-			private int mHeight = 0;
-			
-			public Key(Context context, String key, int width, int height)
-			{
-				super(context);
-				mKeyLabel = key;
-				mWidth = width;
-				mHeight = height;
-				this.setBackgroundResource(R.drawable.keyboard_key);
-			}
-			
-			@Override
-			protected void onDraw(Canvas canvas)
-			{
-				Paint fg = new Paint(Paint.ANTI_ALIAS_FLAG);
-				fg.setStyle(Style.FILL);
-				fg.setTextAlign(Paint.Align.CENTER);
-				fg.setTextSize((float) (mHeight * 0.75));
-				
-				FontMetrics fm = fg.getFontMetrics();
-				// координаты помещения
-				float textX = mWidth / 2;
-				float textY = (mHeight - fm.ascent - fm.descent) / 2;
-				canvas.drawText(mKeyLabel, textX, textY, fg);
-				
-				super.onDraw(canvas);
-			}
-
-			public String getKeyLabel()
-			{
-				return this.mKeyLabel;
-			}
-		}
 	}
 }

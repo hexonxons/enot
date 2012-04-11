@@ -13,7 +13,8 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import app.tascact.manual.Markup;
 
-public class PageReaderView extends HorizontalScrollView {
+public class PageReaderView extends HorizontalScrollView
+{
 	private static final int CAСHE_SIZE = 5;
 	private static final int CACHE_OFFSET = 2;
 

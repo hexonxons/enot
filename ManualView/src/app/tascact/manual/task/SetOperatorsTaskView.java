@@ -17,8 +17,6 @@ import javax.xml.xpath.XPathConstants;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import app.tascact.manual.Markup;
-import app.tascact.manual.R;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -29,11 +27,13 @@ import android.graphics.Paint.Style;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import app.tascact.manual.Markup;
+import app.tascact.manual.R;
+import app.tascact.manual.utils.LogWriter;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
 
@@ -42,7 +42,6 @@ public class SetOperatorsTaskView extends TaskView
 	private String[] mTaskResources = null;
 	private String[] mTaskAnswers = null;
 	private RelativeLayout mExpressionLayout = null;
-	private KeyboardView mKeyboard = null;
 	private ExpressionView mSelectedExpression = null;
 	// 1 == EditControl
 	// 0 == Touch Control
@@ -55,16 +54,13 @@ public class SetOperatorsTaskView extends TaskView
 	
 	// время предыдущего касания
 	private long mPrevTouchTime = 0;
+	private LogWriter mWriter = null;
 	
-	public interface OnKeyPressedListener
-	{
-		void OnKeyPress(String label);
-	}
-	
-	public SetOperatorsTaskView(Context context, Markup markup, String ManualName,  int PageNumber, int TaskNumber)
+	public SetOperatorsTaskView(Context context, Node res, Markup markup, LogWriter writer)
 	{
 		super(context);
-		Node res = markup.getTaskResources(PageNumber, TaskNumber);
+		
+		mWriter = writer;
 		
 		// Getting description of this task
 		Node taskDescr = (Node) XMLUtils.evalXpathExpr(res, "./TaskDescription", XPathConstants.NODE);
@@ -83,7 +79,6 @@ public class SetOperatorsTaskView extends TaskView
 			else
 				mControl = 0;
 		}
-		
 		// Getting resources of this task
 		NodeList taskRes = (NodeList) XMLUtils.evalXpathExpr(res, "./TaskResources/TaskResource", XPathConstants.NODESET);
 		mTaskResources = new String[taskRes.getLength()];
@@ -101,8 +96,6 @@ public class SetOperatorsTaskView extends TaskView
 		}
 		
 		mExpressionLayout = new RelativeLayout(context);
-		// клавиатура
-		mKeyboard = new KeyboardView(context);
 		// задаем белый фон
 		mExpressionLayout.setBackgroundColor(Color.WHITE);
 		mAlertDialog = new AlertDialog.Builder(context).create();
@@ -130,6 +123,7 @@ public class SetOperatorsTaskView extends TaskView
 				{
 					if(event.getEventTime() - mPrevTouchTime > 100)
 					{
+						mWriter.WriteEvent("Expression select : " + ((RelativeLayout)v.getParent()).indexOfChild(v));
 						mPrevTouchTime = event.getEventTime();
 						
 						if(mSelectedExpression == null)
@@ -150,7 +144,7 @@ public class SetOperatorsTaskView extends TaskView
 								mSelectedExpression = (ExpressionView) v;
 								mSelectedExpression.setCursor();
 							}
-							}
+						}
 					}
 					return true;
 				}
@@ -159,44 +153,38 @@ public class SetOperatorsTaskView extends TaskView
 			// добавляем выражение
 			mExpressionLayout.addView(expression);
 		}
-			
 		this.addView(mExpressionLayout, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-			
-		mKeyboard.setOnKeyPressedListener(new OnKeyPressedListener() 
-		{
-			@Override
-			public void OnKeyPress(String label)
-			{
-				if(mSelectedExpression != null)
-				{
-					if(label == "Стереть")
-						mSelectedExpression.delKeyLabel();
-					else
-						if(label == "Ввод")
-						{
-							for(int i = 0; i < mExpressionLayout.getChildCount(); ++i)
-							{
-								if(mExpressionLayout.getChildAt(i) == mSelectedExpression)
-								{
-									if(i < mExpressionLayout.getChildCount() - 1)
-									{
-										mSelectedExpression.setSelected(false);
-										mSelectedExpression = (ExpressionView) mExpressionLayout.getChildAt(i + 1);
-										mSelectedExpression.setCursor();
-										return;
-									}
-								}
-							}
-						}
-						else
-							mSelectedExpression.setKeyLabel(label);
-				}
-			}
-		});
-		
-		this.addView(mKeyboard);
 	}
 	
+	public void processKeyEvent(String label)
+	{
+		mWriter.WriteEvent("KeyPress : " + label);
+		if(mSelectedExpression != null)
+		{
+			if(label == "Стереть")
+				mSelectedExpression.delKeyLabel();
+			else
+				if(label == "Ввод")
+				{
+					for(int i = 0; i < mExpressionLayout.getChildCount(); ++i)
+					{
+						if(mExpressionLayout.getChildAt(i) == mSelectedExpression)
+						{
+							if(i < mExpressionLayout.getChildCount() - 1)
+							{
+								mSelectedExpression.setSelected(false);
+								mSelectedExpression = (ExpressionView) mExpressionLayout.getChildAt(i + 1);
+								mSelectedExpression.setCursor();
+								return;
+							}
+						}
+					}
+				}
+				else
+					mSelectedExpression.setKeyLabel(label);
+		}
+	}
+
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
@@ -205,9 +193,7 @@ public class SetOperatorsTaskView extends TaskView
 		
 		LayoutParams keyboardParams = new LayoutParams(LayoutParams.MATCH_PARENT, 200);
 		keyboardParams.setMargins(0, h - 200, 0, 0);
-		mKeyboard.setLayoutParams(keyboardParams);
 		
-		mHeight -= 210;
 		int maxHeight = 70;
 		
 		int expressionCount = mExpressionLayout.getChildCount() - (mIsDescSet ? 1 : 0);
@@ -244,12 +230,13 @@ public class SetOperatorsTaskView extends TaskView
 		}
 			
 		super.onSizeChanged(w, h, oldw, oldh);
-		}
+	}
 	
 	
 	
 	public void RestartTask()
     {
+		mWriter.WriteEvent("TaskRestart");
 		int i = 0;
 		if(mIsDescSet)
 			i++;
@@ -264,6 +251,7 @@ public class SetOperatorsTaskView extends TaskView
     
     public void CheckTask()
     {
+    	mWriter.WriteEvent("TaskCheck");
     	mAnswer = true;
     	int i = 0;
     	int j = 0;
@@ -363,34 +351,34 @@ public class SetOperatorsTaskView extends TaskView
 					if(mControl == 0)
 					{
 						field.setOnTouchListener(new OnTouchListener()
-				{
-					@Override
-					public boolean onTouch(View v, MotionEvent event)
-					{
-						if(event.getEventTime() - mPrevTouchTime > 100)
 						{
-							mPrevTouchTime = event.getEventTime();
-							if(mPressedKey == null)
+							@Override
+							public boolean onTouch(View v, MotionEvent event)
 							{
+								if(event.getEventTime() - mPrevTouchTime > 100)
+								{
+									mPrevTouchTime = event.getEventTime();
+									if(mPressedKey == null)
+									{
 										mPressedKey = (FieldView) v;
 										mPressedKey.setSelected(true);
-							}
-							else
-								if(mPressedKey == v)
+									}
+									else
+										if(mPressedKey == v)
 										{
 											mPressedKey.setSelected(false);
-									mPressedKey = null;
+												mPressedKey = null;
 										}
-								else
-								{
-									mPressedKey.setSelected(false);
+										else
+										{
+											mPressedKey.setSelected(false);
 											mPressedKey = (FieldView) v;
 											mPressedKey.setSelected(true);
+										}
 								}
-						}
-						return false;
-					}
-				});
+								return false;
+							}
+						});
 					}
 				}
 				
@@ -628,143 +616,6 @@ public class SetOperatorsTaskView extends TaskView
 					return 1;
 				
 				return 0;
-			}
-		}
-	}
-
-	// Класс клавиатуры
-	private class KeyboardView extends RelativeLayout implements OnClickListener
-	{
-		private final String mOperatorsSet = "+-*/><=";
-		private final String mBackspace = "Стереть";
-		private final String mEnter = "Ввод";
-		
-		protected OnKeyPressedListener mKeyPressedListener = null;
-		
-		public KeyboardView(Context context)
-		{
-			super(context);
-			this.setBackgroundColor(0xFFF2F2F2);
-			
-			for(int i = 0; i < 10; ++i)
-			{
-				Key key = new Key(context, Integer.toString(i));				
-				key.setOnClickListener(this);
-				
-				this.addView(key);
-			}
-			
-			for(int i = 0; i < mOperatorsSet.length(); ++i)
-			{
-				Key key = new Key(context, mOperatorsSet.substring(i, i + 1));				
-				key.setOnClickListener(this);
-				
-				this.addView(key);
-			}
-			
-			Key backspace = new Key(context, mBackspace);
-			Key enter = new Key(context, mEnter);
-			
-			backspace.setOnClickListener(this);
-			enter.setOnClickListener(this);
-				
-			this.addView(backspace);
-			this.addView(enter);
-		}
-		
-		public void setOnKeyPressedListener(OnKeyPressedListener l)
-		{
-			this.mKeyPressedListener = l;
-		}
-		
-		@Override
-		public void onClick(View v)
-		{
-			if(mKeyPressedListener != null)
-				mKeyPressedListener.OnKeyPress(((Key)v).getKeyLabel());
-		}
-		
-		@Override
-		protected void onSizeChanged(int w, int h, int oldw, int oldh)
-		{
-			int keyWidth = w / 12;
-			int keyHeight = h / 5;
-			
-			
-			for(int i = 0; i < this.getChildCount(); ++i)
-			{
-				Key key = (Key)this.getChildAt(i);
-				if(i < 10)
-				{
-					int margin = (w - keyWidth * 10) / 11;
-					LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-					params.setMargins(margin + i * (keyWidth + margin), keyHeight / 2, 0, 0);
-					key.setLayoutParams(params);
-				}
-				else
-					if(i < 10 + mOperatorsSet.length())
-					{
-						int margin = (w - keyWidth * mOperatorsSet.length()) / (mOperatorsSet.length() + 1);
-						LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-						params.setMargins(margin + (i - 10) * (keyWidth + margin), keyHeight * 2, 0, 0);
-						key.setLayoutParams(params);
-					}
-					else
-					{
-						int margin = (w - 2 * keyWidth * 4) / 3;
-						LayoutParams params = new LayoutParams(keyWidth * 4, keyHeight);
-						params.setMargins(margin + (i - 10 - mOperatorsSet.length()) * (keyWidth * 4 + margin), (int)(keyHeight * 3.5), 0, 0);
-						key.setLayoutParams(params);
-					}
-			}
-			
-			super.onSizeChanged(w, h, oldw, oldh);
-		}
-		
-		// класс-view кнопки
-		private class Key extends Button
-		{
-			private String mKeyLabel = null;
-			
-			private int mWidth = 0;
-			private int mHeight = 0;
-			
-			public Key(Context context, String key)
-			{
-				super(context);
-				mKeyLabel = key;
-				this.setBackgroundResource(R.drawable.keyboard_key);
-			}
-			
-			@Override
-			protected void onDraw(Canvas canvas)
-			{
-				Paint fg = new Paint(Paint.ANTI_ALIAS_FLAG);
-				fg.setStyle(Style.FILL);
-				fg.setTextAlign(Paint.Align.CENTER);
-				int textSize = mHeight > mWidth ? mWidth : mHeight;
-				fg.setTextSize((float) (textSize * 0.65));
-				
-				FontMetrics fm = fg.getFontMetrics();
-				// координаты помещения
-				float textX = mWidth / 2;
-				float textY = (mHeight - fm.ascent - fm.descent) / 2;
-				canvas.drawText(mKeyLabel, textX, textY, fg);
-				
-				super.onDraw(canvas);
-			}
-			
-			@Override
-			protected void onSizeChanged(int w, int h, int oldw, int oldh)
-			{
-				mWidth = w;
-				mHeight = h;
-				super.onSizeChanged(w, h, oldw, oldh);
-			}
-
-			public String getKeyLabel()
-			{
-				return this.mKeyLabel;
 			}
 		}
 	}	

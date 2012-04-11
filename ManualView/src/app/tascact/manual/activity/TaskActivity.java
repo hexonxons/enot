@@ -12,19 +12,23 @@
 
 package app.tascact.manual.activity;
 
+import javax.xml.xpath.XPathConstants;
+
+import org.w3c.dom.Node;
+
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
 import android.view.View.OnTouchListener;
-import android.widget.Button;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.PopupWindow;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import app.tascact.manual.Markup;
@@ -34,80 +38,95 @@ import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
+import app.tascact.manual.utils.LogWriter;
+import app.tascact.manual.utils.XMLUtils;
+import app.tascact.manual.view.PageControlView;
 import app.tascact.manual.view.TaskControlView;
 import app.tascact.manual.view.TaskView;
+import app.tascact.manual.view.utils.KeyboardView;
+import app.tascact.manual.view.utils.KeyboardView.OnKeyboardKeyPressListener;
 
 public class TaskActivity extends Activity
 {
 	// View раскладки элементов
-	private RelativeLayout mMainLayout = null;
+	private LinearLayout mMainLayout = null;
 	// View страниц учебника
 	private TaskView mTaskView = null;	
-	private PopupWindow mTaskControlStart = null;
-	private TaskControlView mTaskControl = null;
+	private KeyboardView mKeyboard = null;
+	private LinearLayout mContr = null;
+	private ScrollView mScroll = null;
+	int width = 0;
+	int height = 0;
+	boolean scrollable = false;
+	private LogWriter mWriter = null;
+	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		Bundle extras = getIntent().getExtras();
-
+		mMainLayout = new LinearLayout(this);
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		mMainLayout.setBackgroundColor(Color.WHITE);
+		mKeyboard = new KeyboardView(this);
+		mContr = new LinearLayout(this);
+		mScroll = new ScrollView(this);
+		Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+		// ебаный нахуй пиздец...
+		width = display.getWidth();
+		height = display.getHeight();
+		
 		try
 		{
 			Markup markup = new Markup(this, extras.getString("ManualName"));
-
+			Node task = markup.getTaskResources(extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+			scrollable = ((((Node) XMLUtils.evalXpathExpr(task, "./Scrollable", XPathConstants.NODE)).getTextContent()).compareTo("true") == 0);
+			
+			
 			if (extras != null)
 			{
-				mMainLayout = new RelativeLayout(this);
-
 				switch (extras.getInt("TaskType"))
 				{
 					case 1:
 					{
 						// TODO here markup is passes as argument to almost every task.
 						// should pe replaced with string of current working directory.
-						mTaskView = new ConnectElementsSequenceTaskView(this,
-								markup.getTaskResources(
-										extras.getInt("PageNumber"),
-										extras.getInt("TaskNumber")),
-										markup);
+						mTaskView = new ConnectElementsSequenceTaskView(this, task, markup);
 						break;
 					}
 					
 					case 2:
 					{
-						mTaskView = new CompleteTableTaskView(this, markup,
-								extras.getInt("PageNumber"),
-								extras.getInt("TaskNumber"));
+						mTaskView = new CompleteTableTaskView(this, task, markup);
 						break;
 					}
 					
 					case 3:
 					{
-						mTaskView = new SetOperatorsTaskView(this, markup,
-								extras.getString("ManualName"),
-								extras.getInt("PageNumber"),
-								extras.getInt("TaskNumber"));
+						mWriter = new LogWriter(extras.getString("ManualName"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+						mTaskView = new SetOperatorsTaskView(this, task, markup, mWriter);
+						mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener()
+						{
+							@Override
+							public void onKeyboardKeyPress(String label)
+							{
+								((SetOperatorsTaskView)mTaskView).processKeyEvent(label);
+							}
+						});
+						
 						break;
 					}
 					
 					case 4:
 					{
-						mTaskView = new GroupingElementsTaskView(this,
-								markup.getTaskResources(
-										extras.getInt("PageNumber"),
-										extras.getInt("TaskNumber")),
-										markup);
+						mTaskView = new GroupingElementsTaskView(this, task, markup);
 						break;
 					}
 					
 					case 5: 
 					{
-						mTaskView = new ColoringPictureTaskView(this,
-								markup.getTaskResources(
-										extras.getInt("PageNumber"),
-										extras.getInt("TaskNumber")), 
-								markup);
+						mTaskView = new ColoringPictureTaskView(this, task, markup);
 						break;
 					}
 					
@@ -116,46 +135,43 @@ public class TaskActivity extends Activity
 						break;
 					}
 				}
-
-				Button startTaskControl = new Button(this);
-				startTaskControl.setBackgroundResource(R.drawable.taskattr);
-				startTaskControl.setOnClickListener(new OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{					
-						
-						mTaskControlStart.setWidth(getWindowManager().getDefaultDisplay().getWidth());
-						mTaskControlStart.setHeight(100);
-						mTaskControlStart.showAtLocation(mMainLayout, Gravity.LEFT | Gravity.BOTTOM, 0, 0);		
-						mMainLayout.postDelayed(new Runnable()
-						{							
-							@Override
-							public void run() 
-							{
-								if(mTaskControlStart != null)
-									mTaskControlStart.dismiss();
-							}
-						}, 2000);
-					}
-				});
 				
-				mTaskControl = new TaskControlView(this);
-				// Задаем обработчики касаний
-				mTaskControl.setListeners(mCheckTouchListener, mRestartTouchListener);
-				mTaskControlStart = new PopupWindow(mTaskControl, 0, 0);
-				mTaskControlStart.setAnimationStyle(R.style.ControlsAnimation);
-
-				// Ориентируем View вертикально
-				mMainLayout.setBackgroundColor(Color.WHITE);
-				// Лочим ориентацию экрана
-				//this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-				this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-				mMainLayout.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-				LayoutParams params = new LayoutParams(60, 60);
-				params.setMargins(getWindowManager().getDefaultDisplay().getWidth() - 60, 100, 0, 0);
-				mMainLayout.addView(startTaskControl, params);
-
+				mMainLayout.setOrientation(LinearLayout.VERTICAL);
+				
+				ImageView CheckTask = new ImageView(this);
+				CheckTask.setBackgroundResource(R.drawable.check);
+				CheckTask.setOnTouchListener(mCheckTouchListener);
+				
+				ImageView RestartTask = new ImageView(this);
+				RestartTask.setBackgroundResource(R.drawable.restart);
+				RestartTask.setOnTouchListener(mRestartTouchListener);
+				
+				ImageView Keyboard = new ImageView(this);
+				Keyboard.setBackgroundResource(R.drawable.keyboard);
+				Keyboard.setOnTouchListener(mKeyboardStartListener);
+				
+				TaskControlView BottomControl = new TaskControlView(this);	
+				BottomControl.setIconsFloat(PageControlView.FLOAT_LEFT);
+				BottomControl.setPanelOrientation(PageControlView.ORIENTATION_BOTTOM);
+				
+				BottomControl.addIcon(CheckTask);
+				BottomControl.addIcon(RestartTask);
+				BottomControl.addIcon(Keyboard);
+				
+				if(scrollable)
+				{
+					mScroll.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
+					mMainLayout.addView(mScroll, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
+					mMainLayout.addView(mContr);
+					mMainLayout.addView(BottomControl, new LayoutParams(LayoutParams.MATCH_PARENT, 60));
+				}
+				else
+				{
+					mMainLayout.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
+					mMainLayout.addView(mContr);
+					mMainLayout.addView(BottomControl, new LayoutParams(LayoutParams.MATCH_PARENT, 60));
+				}
+				
 				setContentView(mMainLayout);
 			}
 		} 
@@ -175,14 +191,44 @@ public class TaskActivity extends Activity
 
 			if (eventAction == MotionEvent.ACTION_DOWN)
 			{
-				((ImageView) v).setImageResource(R.drawable.checked);
+				((ImageView) v).setBackgroundResource(R.drawable.checked);
 				return true;
 			}
 
 			if (eventAction == MotionEvent.ACTION_UP)
 			{
-				((ImageView) v).setImageResource(R.drawable.check);
+				((ImageView) v).setBackgroundResource(R.drawable.check);
 				mTaskView.CheckTask();
+				return true;
+			}
+			return true;
+		}
+	};
+	
+	private OnTouchListener mKeyboardStartListener = new OnTouchListener()
+	{
+		private boolean flag = true;
+		
+		@Override
+		public boolean onTouch(View v, MotionEvent event)
+		{
+			int eventAction = event.getAction();
+
+			if (eventAction == MotionEvent.ACTION_DOWN)
+			{
+				if(flag && scrollable)
+				{
+					mContr.addView(mKeyboard, new LayoutParams(LayoutParams.MATCH_PARENT, 200));
+					mScroll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, height - 260));
+					flag = false;
+				}
+				else
+					if(scrollable)
+					{
+						mContr.removeView(mKeyboard);
+						mScroll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
+						flag = true;
+					}
 				return true;
 			}
 			return true;
@@ -198,13 +244,15 @@ public class TaskActivity extends Activity
 
 			if (eventAction == MotionEvent.ACTION_DOWN)
 			{
-				((ImageView) v).setImageResource(R.drawable.restarted);
+				((ImageView) v).setBackgroundResource(R.drawable.restarted);
+				((RelativeLayout) v.getParent()).setBackgroundResource(R.drawable.button_frame_bottom_pushed);
 				return true;
 			}
 
 			if (eventAction == MotionEvent.ACTION_UP)
 			{
-				((ImageView) v).setImageResource(R.drawable.restart);
+				((ImageView) v).setBackgroundResource(R.drawable.restart);
+				((RelativeLayout) v.getParent()).setBackgroundResource(R.drawable.button_frame_bottom);
 				mTaskView.RestartTask();
 				return true;
 			}
@@ -231,6 +279,8 @@ public class TaskActivity extends Activity
 	public void onStop()
 	{
 		super.onStop();
+		if(mWriter != null)
+			mWriter.CloseLog();
 		mTaskView.onStop();
 	}
 }
