@@ -84,12 +84,12 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		for (int i = 0; i < answerNodes.getLength(); ++i) {
 			NodeList names = XMLUtils.evalXpathExprAsNodeList(
 					answerNodes.item(i), "./TaskResource");
-			int first = resources.getIdentifier(names.item(0).getTextContent(),
-					"drawable", context.getPackageName());
-			int second = resources.getIdentifier(
-					names.item(1).getTextContent(), "drawable",
-					context.getPackageName());
-			Answer ans = new Answer(first, second);
+//			int first = resources.getIdentifier(names.item(0).getTextContent(),
+//					"drawable", context.getPackageName());
+//			int second = resources.getIdentifier(
+//					names.item(1).getTextContent(), "drawable",
+//					context.getPackageName());
+			Answer ans = new Answer(names.item(0).getTextContent(), names.item(1).getTextContent());
 			if (isSwapAvailable) {
 				ans.sort();
 			}
@@ -221,8 +221,8 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				userCanvas.drawCircle(x, y, lineWidth * 0.5f, emptyPaint);
 				userCanvas.drawLine(lastTouchedPoint.x, lastTouchedPoint.y, x,
 						y, emptyPaint);
-				Answer ans = new Answer(elementResourceIds[firstImageId],
-						elementResourceIds[secondImageId]);
+				Answer ans = new Answer(elementNames[firstImageId],
+						elementNames[secondImageId]);
 				if (isSwapAvailable) {
 					ans.sort();
 				}
@@ -342,30 +342,26 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	}
 
 	private class Answer implements Comparable<Answer> {
-		public int first;
-		public int second;
+		public String first;
+		public String second;
 
-		public Answer(int theFirst, int theSecond) {
+		public Answer(String theFirst, String theSecond) {
 			first = theFirst;
 			second = theSecond;
 		}
 
 		@Override
 		public int compareTo(Answer another) {
-			if (first < another.first)
-				return -1;
-			if (first > another.first)
-				return 1;
-			if (second < another.second)
-				return -1;
-			if (second > another.second)
-				return 1;
-			return 0;
+			int c = first.compareTo(another.first);
+			if(c!=0){
+				return c;
+			}
+			return second.compareTo(another.second);
 		}
 
 		public void sort() {
-			if (first > second) {
-				int tmp = first;
+			if (first.compareTo(second)<0) {
+				String tmp = first;
 				first = second;
 				second = tmp;
 			}
@@ -373,8 +369,8 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 
 		@Override
 		public String toString() {
-			return "[ " + Integer.toString(first) + " -> "
-					+ Integer.toString(second) + " ]";
+			return "[ " + first + " -> "
+					+ second + " ]";
 		}
 	}
 }

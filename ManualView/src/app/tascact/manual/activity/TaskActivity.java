@@ -33,6 +33,7 @@ import app.tascact.manual.task.ColoringPictureTaskView;
 import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
+import app.tascact.manual.task.LabyrinthTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.view.TaskControlView;
 import app.tascact.manual.view.TaskView;
@@ -104,6 +105,15 @@ public class TaskActivity extends Activity
 					case 5: 
 					{
 						mTaskView = new ColoringPictureTaskView(this,
+								markup.getTaskResources(
+										extras.getInt("PageNumber"),
+										extras.getInt("TaskNumber")), 
+								markup);
+						break;
+					}
+					case 6: 
+					{
+						mTaskView = new LabyrinthTaskView(this,
 								markup.getTaskResources(
 										extras.getInt("PageNumber"),
 										extras.getInt("TaskNumber")), 
