@@ -21,17 +21,16 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.Markup;
 import app.tascact.manual.R;
-import app.tascact.manual.view.PageControlView;
+import app.tascact.manual.view.ControlView;
 import app.tascact.manual.view.PageReaderView;
 
 public class PageReaderActivity extends Activity
 {
-	// Main layout for all elements, such as PageReaderView, Popup Windows...
+	// Main layout for all elements, such as PageReaderView
 	private LinearLayout mMainLayout;
 	// View of displayed page
 	private PageReaderView mReader;
@@ -87,16 +86,9 @@ public class PageReaderActivity extends Activity
 					{
 						case MotionEvent.ACTION_UP:
 						{
-							((ImageView)v).setBackgroundResource(R.drawable.next);
 							mPrevTouchTime = event.getEventTime();
 							mPageToDisplay = mReader.nextPage();
 							savePreferences();
-							break;
-						}
-						
-						case MotionEvent.ACTION_DOWN:
-						{
-							((ImageView)v).setBackgroundResource(R.drawable.next_pressed);
 							break;
 						}
 	
@@ -104,7 +96,7 @@ public class PageReaderActivity extends Activity
 							break;
 					}
 			    }
-				return true;
+				return false;
 			}
 		};
 		
@@ -118,26 +110,19 @@ public class PageReaderActivity extends Activity
 				{
 					switch (event.getAction())
 					{
-					case MotionEvent.ACTION_UP:
-					{
-						((ImageView)v).setBackgroundResource(R.drawable.prev);
-						mPrevTouchTime = event.getEventTime();					
-						mPageToDisplay = mReader.prevPage();
-						savePreferences();
-						break;
-					}
-					
-					case MotionEvent.ACTION_DOWN:
-					{
-						((ImageView)v).setBackgroundResource(R.drawable.prev_pressed);
-						break;
-					}
-
-					default:
-						break;
+						case MotionEvent.ACTION_UP:
+						{
+							mPrevTouchTime = event.getEventTime();				
+							mPageToDisplay = mReader.prevPage();
+							savePreferences();
+							break;
+						}
+	
+						default:
+							break;
 					}
 			    }
-				return true;
+				return false;
 			}
 		};
 		
@@ -148,12 +133,24 @@ public class PageReaderActivity extends Activity
 			{
 				if(event.getEventTime() - mPrevTouchTime > 1000)
 				{
-					mPrevTouchTime = event.getEventTime();
-					Intent intent = new Intent(v.getContext(), ContentActivity.class);
-					intent.putExtra("PageCount", mMarkup.getPageNumber());
-					startActivityForResult(intent, 0);
+					switch (event.getAction())
+					{
+						case MotionEvent.ACTION_UP:
+						{
+							mPrevTouchTime = event.getEventTime();
+							Intent intent = new Intent(v.getContext(), ContentActivity.class);
+							intent.putExtra("PageCount", mMarkup.getPageNumber());
+							startActivityForResult(intent, 0);
+							break;
+						}
+	
+						default:
+							break;
+					}
+					
+					
 			    }
-				return true;
+				return false;
 			}
 		};
 		
@@ -163,31 +160,20 @@ public class PageReaderActivity extends Activity
 			mReader = new PageReaderView(this, mMarkup, mPageToDisplay);
 			mMainLayout.setOrientation(LinearLayout.HORIZONTAL);
 			
-			ImageView NextPageButton = new ImageView(this);
-			NextPageButton.setBackgroundResource(R.drawable.next);
-			NextPageButton.setOnTouchListener(NextPageListener);
+			ControlView LeftControl = new ControlView(this);
+			ControlView RightControl = new ControlView(this);
 			
-			ImageView PrevPageButton = new ImageView(this);
-			PrevPageButton.setBackgroundResource(R.drawable.prev);
-			PrevPageButton.setOnTouchListener(PrevPageListener);
+			LeftControl.setIconsFloat(ControlView.FLOAT_BOTTOM);
+			RightControl.setIconsFloat(ControlView.FLOAT_BOTTOM);
 			
-			ImageView ContentsButton = new ImageView(this);
-			ContentsButton.setBackgroundResource(R.drawable.contents);
-			ContentsButton.setOnTouchListener(ContentsListener);
+			LeftControl.setPanelOrientation(ControlView.ORIENTATION_LEFT);
+			RightControl.setPanelOrientation(ControlView.ORIENTATION_RIGHT);
 			
-			PageControlView LeftControl = new PageControlView(this);
-			PageControlView RightControl = new PageControlView(this);
+			LeftControl.addIcon(getResources().getDrawable(R.drawable.prev), getResources().getDrawable(R.drawable.prev_pressed), PrevPageListener);
+			LeftControl.addIcon(getResources().getDrawable(R.drawable.contents), getResources().getDrawable(R.drawable.contents_pressed), ContentsListener);
 			
-			LeftControl.setIconsFloat(PageControlView.FLOAT_BOTTOM);
-			RightControl.setIconsFloat(PageControlView.FLOAT_BOTTOM);
-			
-			LeftControl.setPanelOrientation(PageControlView.ORIENTATION_LEFT);
-			RightControl.setPanelOrientation(PageControlView.ORIENTATION_RIGHT);
-			
-			LeftControl.addIcon(PrevPageButton);
-			LeftControl.addIcon(ContentsButton);
-			
-			RightControl.addIcon(NextPageButton, 50);
+			RightControl.addIcon(getResources().getDrawable(R.drawable.next), getResources().getDrawable(R.drawable.next_pressed), NextPageListener, 50);
+			//RightControl.addIcon(50);
 			
 			mMainLayout.addView(LeftControl, new LayoutParams(width / 10, LayoutParams.MATCH_PARENT));	
 			mMainLayout.addView(mReader, new LayoutParams((int) (width * 0.8), LayoutParams.MATCH_PARENT));
@@ -199,27 +185,15 @@ public class PageReaderActivity extends Activity
 			mReader = new PageReaderView(this, mMarkup, mPageToDisplay);
 			mMainLayout.setOrientation(LinearLayout.VERTICAL);
 			
-			ImageView NextPageButton = new ImageView(this);
-			NextPageButton.setBackgroundResource(R.drawable.next);
-			NextPageButton.setOnTouchListener(NextPageListener);
+			ControlView BottomControl = new ControlView(this);
 			
-			ImageView PrevPageButton = new ImageView(this);
-			PrevPageButton.setBackgroundResource(R.drawable.prev);
-			PrevPageButton.setOnTouchListener(PrevPageListener);
+			BottomControl.setIconsFloat(ControlView.FLOAT_RIGHT);
 			
-			ImageView ContentsButton = new ImageView(this);
-			ContentsButton.setBackgroundResource(R.drawable.contents);
-			ContentsButton.setOnTouchListener(ContentsListener);
+			BottomControl.setPanelOrientation(ControlView.ORIENTATION_BOTTOM);
 			
-			PageControlView BottomControl = new PageControlView(this);
-			
-			BottomControl.setIconsFloat(PageControlView.FLOAT_RIGHT);
-			
-			BottomControl.setPanelOrientation(PageControlView.ORIENTATION_BOTTOM);
-			
-			BottomControl.addIcon(NextPageButton);
-			BottomControl.addIcon(ContentsButton);
-			BottomControl.addIcon(PrevPageButton);
+			BottomControl.addIcon(getResources().getDrawable(R.drawable.next), getResources().getDrawable(R.drawable.next_pressed), NextPageListener);
+			BottomControl.addIcon(getResources().getDrawable(R.drawable.contents), getResources().getDrawable(R.drawable.contents_pressed), ContentsListener);
+			BottomControl.addIcon(getResources().getDrawable(R.drawable.prev), getResources().getDrawable(R.drawable.prev_pressed), PrevPageListener);
 			
 			mMainLayout.addView(mReader, new LayoutParams(LayoutParams.MATCH_PARENT, (int) (height * 0.9)));
 			mMainLayout.addView(BottomControl, new LayoutParams(LayoutParams.MATCH_PARENT, height / 10));

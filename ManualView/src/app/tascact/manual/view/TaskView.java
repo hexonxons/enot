@@ -37,4 +37,6 @@ public abstract class TaskView extends RelativeLayout
 	
 	public void WriteLog(){}
 	public void ReadLog(){}
+
+	public void replay() {}
 }

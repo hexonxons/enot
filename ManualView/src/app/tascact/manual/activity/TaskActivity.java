@@ -26,11 +26,9 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.RelativeLayout;
 import app.tascact.manual.Markup;
 import app.tascact.manual.R;
 import app.tascact.manual.task.ColoringPictureTaskView;
@@ -38,10 +36,10 @@ import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
+import app.tascact.manual.task.WriteExpressionTaskView;
 import app.tascact.manual.utils.LogWriter;
 import app.tascact.manual.utils.XMLUtils;
-import app.tascact.manual.view.PageControlView;
-import app.tascact.manual.view.TaskControlView;
+import app.tascact.manual.view.ControlView;
 import app.tascact.manual.view.TaskView;
 import app.tascact.manual.view.utils.KeyboardView;
 import app.tascact.manual.view.utils.KeyboardView.OnKeyboardKeyPressListener;
@@ -59,6 +57,7 @@ public class TaskActivity extends Activity
 	int height = 0;
 	boolean scrollable = false;
 	private LogWriter mWriter = null;
+	private long mPrevTouchTime = 0;
 	
 	
 	@Override
@@ -98,7 +97,16 @@ public class TaskActivity extends Activity
 					
 					case 2:
 					{
-						mTaskView = new CompleteTableTaskView(this, task, markup);
+						mWriter = new LogWriter(extras.getString("ManualName"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+						mTaskView = new CompleteTableTaskView(this, task, markup, mWriter);
+						mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener()
+						{
+							@Override
+							public void onKeyboardKeyPress(String label)
+							{
+								((CompleteTableTaskView)mTaskView).processKeyEvent(label);
+							}
+						});
 						break;
 					}
 					
@@ -130,6 +138,22 @@ public class TaskActivity extends Activity
 						break;
 					}
 					
+					case 6:
+					{
+						mWriter = new LogWriter(extras.getString("ManualName"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+						mTaskView = new WriteExpressionTaskView(this, task, markup, mWriter);
+						mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener()
+						{
+							@Override
+							public void onKeyboardKeyPress(String label)
+							{
+								((WriteExpressionTaskView)mTaskView).processKeyEvent(label);
+							}
+						});
+						
+						break;
+					}
+					
 					default:
 					{
 						break;
@@ -138,37 +162,26 @@ public class TaskActivity extends Activity
 				
 				mMainLayout.setOrientation(LinearLayout.VERTICAL);
 				
-				ImageView CheckTask = new ImageView(this);
-				CheckTask.setBackgroundResource(R.drawable.check);
-				CheckTask.setOnTouchListener(mCheckTouchListener);
+				ControlView BottomControl = new ControlView(this);	
+				BottomControl.setIconsFloat(ControlView.FLOAT_LEFT);
+				BottomControl.setPanelOrientation(ControlView.ORIENTATION_BOTTOM);
 				
-				ImageView RestartTask = new ImageView(this);
-				RestartTask.setBackgroundResource(R.drawable.restart);
-				RestartTask.setOnTouchListener(mRestartTouchListener);
-				
-				ImageView Keyboard = new ImageView(this);
-				Keyboard.setBackgroundResource(R.drawable.keyboard);
-				Keyboard.setOnTouchListener(mKeyboardStartListener);
-				
-				TaskControlView BottomControl = new TaskControlView(this);	
-				BottomControl.setIconsFloat(PageControlView.FLOAT_LEFT);
-				BottomControl.setPanelOrientation(PageControlView.ORIENTATION_BOTTOM);
-				
-				BottomControl.addIcon(CheckTask);
-				BottomControl.addIcon(RestartTask);
-				BottomControl.addIcon(Keyboard);
+				BottomControl.addIcon(getResources().getDrawable(R.drawable.play), getResources().getDrawable(R.drawable.play_pressed), mRunReplayTouchListener);
+				BottomControl.addIcon(getResources().getDrawable(R.drawable.check), getResources().getDrawable(R.drawable.checked), mCheckTouchListener);
+				BottomControl.addIcon(getResources().getDrawable(R.drawable.restart), getResources().getDrawable(R.drawable.restarted), mRestartTouchListener);
+				BottomControl.addIcon(getResources().getDrawable(R.drawable.keyboard), getResources().getDrawable(R.drawable.keyboard_pressed), mKeyboardStartListener);
 				
 				if(scrollable)
 				{
 					mScroll.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
-					mMainLayout.addView(mScroll, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
-					mMainLayout.addView(mContr);
+					mMainLayout.addView(mScroll, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+					mMainLayout.addView(mContr, new LayoutParams(LayoutParams.MATCH_PARENT, 0));
+					mContr.addView(mKeyboard, new LayoutParams(LayoutParams.MATCH_PARENT, 200));
 					mMainLayout.addView(BottomControl, new LayoutParams(LayoutParams.MATCH_PARENT, 60));
 				}
 				else
 				{
 					mMainLayout.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
-					mMainLayout.addView(mContr);
 					mMainLayout.addView(BottomControl, new LayoutParams(LayoutParams.MATCH_PARENT, 60));
 				}
 				
@@ -187,21 +200,27 @@ public class TaskActivity extends Activity
 		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
-			int eventAction = event.getAction();
+			mPrevTouchTime = System.currentTimeMillis();
 
-			if (eventAction == MotionEvent.ACTION_DOWN)
+			if (event.getAction() == MotionEvent.ACTION_UP)
 			{
-				((ImageView) v).setBackgroundResource(R.drawable.checked);
-				return true;
-			}
-
-			if (eventAction == MotionEvent.ACTION_UP)
-			{
-				((ImageView) v).setBackgroundResource(R.drawable.check);
 				mTaskView.CheckTask();
-				return true;
 			}
-			return true;
+			return false;
+		}
+	};
+	
+	private OnTouchListener mRunReplayTouchListener = new OnTouchListener()
+	{
+		@Override
+		public boolean onTouch(View v, MotionEvent event)
+		{
+			if(System.currentTimeMillis() - mPrevTouchTime > 250)
+			{
+				mPrevTouchTime = System.currentTimeMillis();
+				mTaskView.replay();
+			}
+			return false;
 		}
 	};
 	
@@ -212,26 +231,29 @@ public class TaskActivity extends Activity
 		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
-			int eventAction = event.getAction();
-
-			if (eventAction == MotionEvent.ACTION_DOWN)
+			if(System.currentTimeMillis() - mPrevTouchTime > 250)
 			{
-				if(flag && scrollable)
+				mPrevTouchTime = System.currentTimeMillis();
+				int eventAction = event.getAction();
+	
+				if (eventAction == MotionEvent.ACTION_DOWN)
 				{
-					mContr.addView(mKeyboard, new LayoutParams(LayoutParams.MATCH_PARENT, 200));
-					mScroll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, height - 260));
-					flag = false;
-				}
-				else
-					if(scrollable)
+					if(flag && scrollable)
 					{
-						mContr.removeView(mKeyboard);
-						mScroll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
-						flag = true;
+						mScroll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, height - 260));
+						mContr.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 200));
+						flag = false;
 					}
-				return true;
+					else
+						if(scrollable)
+						{
+							mScroll.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
+							mContr.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 0));
+							flag = true;
+						}
+				}
 			}
-			return true;
+			return false;
 		}
 	};
 
@@ -240,24 +262,18 @@ public class TaskActivity extends Activity
 		@Override
 		public boolean onTouch(View v, MotionEvent event)
 		{
+			mPrevTouchTime = System.currentTimeMillis();
 			int eventAction = event.getAction();
 
-			if (eventAction == MotionEvent.ACTION_DOWN)
-			{
-				((ImageView) v).setBackgroundResource(R.drawable.restarted);
-				((RelativeLayout) v.getParent()).setBackgroundResource(R.drawable.button_frame_bottom_pushed);
-				return true;
-			}
-
 			if (eventAction == MotionEvent.ACTION_UP)
-			{
-				((ImageView) v).setBackgroundResource(R.drawable.restart);
-				((RelativeLayout) v.getParent()).setBackgroundResource(R.drawable.button_frame_bottom);
+			{				
+				if(mWriter != null)
+					mWriter.WriteEvent("TaskRestart", "");
+				
 				mTaskView.RestartTask();
-				return true;
 			}
 
-			return true;
+			return false;
 		}
 	};
 	

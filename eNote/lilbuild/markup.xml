@@ -79,7 +79,6 @@
             <Task number="3" tasktype="3">
                 <TaskDescription>Выполни действия:</TaskDescription>
                 <Scrollable>true</Scrollable>
-                <EditMode>EditControl</EditMode>
                 <TaskResources>
                     <TaskResource>2+7=?</TaskResource>
                     <TaskResource>8-4=?</TaskResource>
@@ -150,10 +149,9 @@
                     </Answer>
                 </TaskAnswer>
             </Task>
-            <Task number="5" tasktype="3">
+            <Task number="5" tasktype="6">
                 <Scrollable>true</Scrollable>
                 <TaskDescription>У Оли 7 кукол, а у Маши на 3 куклы больше.&#10;Сколько кукол у Маши?</TaskDescription>
-                <EditMode>EditControl</EditMode>
                 <TaskResources>
                     <TaskResource>?????</TaskResource>
                 </TaskResources>        
@@ -164,7 +162,6 @@
             <Task number="6" tasktype="3">
                 <Scrollable>true</Scrollable>
                 <TaskDescription>Вставь пропущенные знаки действий:</TaskDescription>
-                <EditMode>TouchControl</EditMode>
                 <TaskResources>
                     <TaskResource>5?4?3?2?1=1</TaskResource>
                 </TaskResources>        
@@ -224,7 +221,7 @@
                     <Answer>3+3-3=3</Answer>
                 </TaskAnswer>
             </Task>
-            <Task number="3" tasktype="3">
+            <Task number="3" tasktype="6">
                 <Scrollable>true</Scrollable>
                 <TaskDescription>В коробке лежало 10 игрушек. Митя взял 4 из них.&#10;Сколько игрушек осталось в коробке?</TaskDescription>
                 <TaskResources>
@@ -281,7 +278,7 @@
                     </Answer>
                 </TaskAnswer>
             </Task>
-            <Task number="5" tasktype="3">
+            <Task number="5" tasktype="6">
                 <Scrollable>true</Scrollable>
                 <TaskDescription>У кролика было 10 пакетиков с семенами моркови. Для посадки он использовал 6 пакетиков семян.&#10;Сколько пакетиков с семенами осталось у кролика?</TaskDescription>
                 <TaskResources>
@@ -377,7 +374,7 @@
                     </Answer>
                 </TaskAnswer>
             </Task>
-            <Task number="2" tasktype="3">
+            <Task number="2" tasktype="6">
                 <Scrollable>true</Scrollable>
                 <TaskDescription>Петя и Митя играли в шашки. У пети осталось на доске 5 шашек, а у Мити - 3.&#10;Сколько всего шашек осталось на доске?</TaskDescription>
                 <TaskResources>

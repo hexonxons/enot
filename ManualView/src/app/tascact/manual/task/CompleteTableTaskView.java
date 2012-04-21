@@ -10,38 +10,36 @@ import org.w3c.dom.NodeList;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.FontMetrics;
-import android.graphics.Paint.Style;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import app.tascact.manual.Markup;
-import app.tascact.manual.R;
+import app.tascact.manual.utils.LogWriter;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
-import app.tascact.manual.view.utils.KeyboardView;
-import app.tascact.manual.view.utils.KeyboardView.OnKeyboardKeyPressListener;
+import app.tascact.manual.view.utils.FieldView;
 
 public class CompleteTableTaskView extends TaskView
 {
 	private Table mTables[];
 	private String mTaskDescription = "";
-	private RelativeLayout mMainLayout = null;
-	private KeyboardView mKeyboard = null;
+	private LinearLayout mMainLayout = null;
+	private TableLayout mTableLayout = null;
 	private Table mFocusedTable = null;
 	private AlertDialog mAlertDialog = null;
+	private LogWriter mWriter = null;
+	private PlayThread mThread = null;
 	
-	public CompleteTableTaskView(Context context, Node resource, Markup markup)
+	public CompleteTableTaskView(Context context, Node resource, Markup markup, LogWriter writer)
 	{
 		super(context);
 		
 		mAlertDialog = new AlertDialog.Builder(context).create();
+		mWriter = writer;
 		
 		// Getting description of this task
 		Node TaskDescription = (Node) XMLUtils.evalXpathExpr(resource, "./TaskDescription", XPathConstants.NODE);
@@ -55,30 +53,28 @@ public class CompleteTableTaskView extends TaskView
 		mTables = new Table[Tables.getLength()];
 		for (int i = 0; i < Tables.getLength(); ++i) 
 		{
-			mTables[i] = new Table(context, Tables.item(i), 250, 700);
+			mTables[i] = new Table(context, Tables.item(i));
 		}
 		
-		mMainLayout = new RelativeLayout(context);
-		// клавиатура с размером кнопок 60x60 px
-		mKeyboard = new KeyboardView(context);
+		mTableLayout = new TableLayout(context);
+		mTableLayout.setOrientation(LinearLayout.VERTICAL);
 		// задаем белый фон
-		mMainLayout.setBackgroundColor(Color.WHITE);
+		mTableLayout.setBackgroundColor(Color.WHITE);
+		mMainLayout = new LinearLayout(context);
+		mMainLayout.setOrientation(LinearLayout.VERTICAL);
 		
 		if(mTaskDescription != null)
 		{
-			LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 			TextView description = new TextView(context);
 			description.setText(mTaskDescription);
 			description.setGravity(Gravity.CENTER_HORIZONTAL);
 			description.setTextSize(30);
 			description.setTextColor(Color.BLACK);
-			mMainLayout.addView(description, params);
+			mMainLayout.addView(description, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		}
 			
 		for(int i = 0; i < mTables.length; ++i)
 		{
-			LayoutParams params = new LayoutParams(700, 300);
-			params.setMargins(50, i * 320 + 70, 0, 0);
 			mTables[i].setOnTouchListener(new OnTouchListener()
 			{
 				@Override
@@ -97,45 +93,231 @@ public class CompleteTableTaskView extends TaskView
 					return false;
 				}
 			});
-			mMainLayout.addView(mTables[i], params);
+			mTableLayout.addView(mTables[i], new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		}
-		
-		this.addView(mMainLayout, new LayoutParams(LayoutParams.MATCH_PARENT, 830));
-		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, 830);
-		params.setMargins(0, 730, 0, 0);
-		mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener() 
-		{
-			@Override
-			public void onKeyboardKeyPress(String label)
-			{
-				if(mFocusedTable != null)
-				{
-					mFocusedTable.setKeyPress(label);
-				}
-			}
-		});
-		
-		this.addView(mKeyboard, params);
+		mMainLayout.addView(mTableLayout, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		this.addView(mMainLayout, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		LoadProgress();
 	}
 	
-	private class Table extends RelativeLayout
+	private void LoadProgress()
+	{
+		Node act = mWriter.GetLastAct();
+		if(act == null)
+			return;
+		
+		NodeList TimeStamps = act.getChildNodes();
+		Table activeTable = null;
+				
+		for(int i = 0; i < TimeStamps.getLength(); ++i)
+		{	
+			//				   Event  		   LocalTime, Time, event
+			Node event = TimeStamps.item(i).getFirstChild().getChildNodes().item(2);
+			String eventName = event.getNodeName();
+			String eventValue = event.getTextContent();
+			
+			if(eventName.compareTo("Table") == 0)
+			{
+				activeTable = (Table) mTableLayout.getChildAt(Integer.parseInt(eventValue));
+				continue;
+			}
+			
+			if(eventName.compareTo("Input") == 0)
+			{
+				activeTable.setInput(Integer.parseInt(eventValue));
+				continue;
+			}
+			
+			if(eventName.compareTo("KeyPress") == 0)
+			{
+				if(activeTable != null)
+					activeTable.setKeyPress(eventValue);
+				continue;
+			}
+		}
+	}
+	
+	public void replay()
+	{
+		Node act = mWriter.GetLastAct();
+		if(act == null)
+			return;
+		
+		if( mThread != null && mThread.isAlive())
+		{
+			mThread.setRunning(false);
+			LoadProgress();
+		}
+		else
+		{
+			RestartTask();
+			mThread = new PlayThread(act);
+			mThread.setRunning(true);
+			mThread.start();
+		}
+	}
+	
+	public void stopReplay()
+	{
+		Log.d("Thread", "Try Stop");
+		if( mThread != null && mThread.isAlive())
+		{
+			mThread.setRunning(false);
+			LoadProgress();
+			Log.d("Thread", "Stopped");
+		}
+	}
+	
+	private class PlayThread extends Thread 
+	{
+	    private boolean mRun = false;
+	    private NodeList mTimeStamps = null;
+	    private long startTime = 0;
+	    private long nextTime = -1;
+	    private long timing = 0;
+	    private int index = 0;
+	    private Table activeTable = null;
+		
+	    public PlayThread(Node act)
+	    {   	
+	    	mTimeStamps = act.getChildNodes();
+	    	String time = mTimeStamps.item(0).getFirstChild().getChildNodes().item(1).getTextContent();
+	    	if(time != null)		    		
+		    	nextTime = Long.parseLong(time);
+	    }
+	    
+	    public void setRunning(boolean run)
+	    {
+	    	if(nextTime != -1)
+	    		mRun = run;
+	    }
+	    
+	    @Override
+	    public void run() 
+	    {  
+	        while (mRun) 
+	        {
+	        	long currentTime = System.currentTimeMillis();
+	        	
+	        	if(currentTime - timing > nextTime - startTime)
+	        	{
+	        		timing = currentTime;
+	        		NodeList event = mTimeStamps.item(index).getFirstChild().getChildNodes();
+	        		startTime = nextTime;
+	        		nextTime = Long.parseLong(event.item(1).getTextContent());
+	        		index++;
+	        		if(index >= mTimeStamps.getLength())
+	        			mRun = false;
+	        		String eventName = event.item(2).getNodeName();
+	    			String eventValue = event.item(2).getTextContent();
+	    			
+	    			if(eventName.compareTo("Table") == 0)
+	    			{
+	    				activeTable = (Table) mTableLayout.getChildAt(Integer.parseInt(eventValue));
+	    				continue;
+	    			}
+	    			
+	    			if(eventName.compareTo("Input") == 0)
+	    			{
+	    				activeTable.setInput(Integer.parseInt(eventValue));
+	    				continue;
+	    			}
+	    			
+	    			if(eventName.compareTo("KeyPress") == 0)
+	    			{
+	    				if(activeTable != null)
+	    					activeTable.setKeyPress(eventValue);
+	    				continue;
+	    			}
+	        	}
+	        }
+	    }
+	}
+	
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh)
+	{
+		super.onSizeChanged(w, h, oldw, oldh);
+	}
+
+	@Override
+	public void RestartTask()
+	{
+		for(int i = 0; i < mTables.length; ++i)
+			mTables[i].RestartTask();
+	}
+
+	@Override
+	public void CheckTask()
+	{
+		boolean mAnswer = true;
+    	for(int i = 0; i < mTables.length; ++i)
+    		if(mTables[i].CheckTask() == false)
+    			mAnswer = false;
+    	String ans = mAnswer ? "Правильно" : "Неправильно";
+		mAlertDialog.setMessage(ans);
+		mAlertDialog.show();
+		
+	}	
+	
+	public void processKeyEvent(String label)
+	{
+		if(mFocusedTable != null)
+		{
+			mWriter.WriteEvent("KeyPress", label);
+			mFocusedTable.setKeyPress(label);
+		}
+	}
+	
+	private class TableLayout extends LinearLayout
+	{
+
+		public TableLayout(Context context) {
+			super(context);
+		}
+		
+		@Override
+		protected void onSizeChanged(int w, int h, int oldw, int oldh)
+		{
+			int childWidth = 0;
+			for(int i = 0; i < this.getChildCount(); ++i)
+			{
+				childWidth += this.getChildAt(i).getMeasuredWidth();
+			}
+			
+			if (childWidth < this.getMeasuredWidth())
+				this.setOrientation(LinearLayout.HORIZONTAL);
+			else
+				this.setOrientation(LinearLayout.VERTICAL);
+			
+			this.setGravity(Gravity.CENTER_HORIZONTAL);
+			super.onSizeChanged(w, h, oldw, oldh);
+		}
+	}
+	
+	private class Table extends LinearLayout
 	{
 		private int mRowsNum = 0;
 		private int mColumnsNum = 0;
 		
-		private String[] mVerticalHeaders = null;
+		// min dimension of cell
+		private static final int MIN_SIZE = 60;
+		private static final int MAX_SIZE = 80;
 		
+		private String[] mVerticalHeaders = null;
 		private String[][] mValues;
 		private String[][] mAnswers;
 		
 		private FieldView mPressedKey;
+		private LinearLayout mTable = null;
+		
 		private String mDescription = null;
 		
 		private List<FieldView> mInputs = new ArrayList<FieldView>();
 		
 		long mPrevTouchTime = 0;
 		
-		public Table(Context context, Node table, int height, int width)
+		public Table(Context context, Node table)
 		{
 			super(context);
 			
@@ -147,19 +329,6 @@ public class CompleteTableTaskView extends TaskView
 			NodeList Rows = (NodeList) XMLUtils.evalXpathExpr(table, "./Rows/Row", XPathConstants.NODESET);
 			NodeList Answers = (NodeList) XMLUtils.evalXpathExpr(table, "./Answers/Row", XPathConstants.NODESET);
 			
-			if(TableDescription != null)
-			{
-				mDescription = TableDescription.getTextContent();
-				LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-				TextView description = new TextView(context);
-				description.setText(mDescription);
-				description.setGravity(Gravity.CENTER_HORIZONTAL);
-				description.setTextSize(30);
-				description.setTextColor(Color.BLACK);
-				this.addView(description, params);
-			}
-			
-			// VerticalHeaders			
 			if(VerticalHeaders.getLength() != 0)
 			{
 				mVerticalHeaders = new String[mRowsNum];
@@ -181,49 +350,37 @@ public class CompleteTableTaskView extends TaskView
 				mAnswers[i] = Answers.item(i).getTextContent().split("\\,");
 			}
 			
-			int RowHeight = height / mRowsNum - 10;
-			int ColumnWidth = 0;
+			mTable = new LinearLayout(context);
+			mTable.setOrientation(LinearLayout.VERTICAL);
+			this.setOrientation(LinearLayout.VERTICAL);
 			
-			if(mVerticalHeaders != null)
+			if(TableDescription != null)
 			{
-				for(int i = 0; i < mRowsNum; ++i)
-				{
-					LayoutParams params = new LayoutParams(300, RowHeight);
-					if(TableDescription != null)
-						params.setMargins(0, 60 + i * RowHeight, 0, 0);
-					else
-						params.setMargins(0, i * RowHeight, 0, 0);
-					this.addView(new FieldView(context, mVerticalHeaders[i], 300, RowHeight, 10), params);
-				}
-				ColumnWidth = (width - 300) / mColumnsNum;
-			}
-			else
-				ColumnWidth = width / mColumnsNum;
+				mDescription = TableDescription.getTextContent();
+				TextView description = new TextView(context);
+				description.setText(mDescription);
+				description.setGravity(Gravity.CENTER_HORIZONTAL);
+				description.setTextSize(30);
+				description.setTextColor(Color.BLACK);
+				this.addView(description, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			}			
 			
-			
-			
+			// fillin row-by-row
 			for(int i = 0; i < mRowsNum; ++i)
 			{
+				LinearLayout row = new LinearLayout(context);
+				
+				if(mVerticalHeaders != null)
+				{
+					row.addView(new FieldView(context, mVerticalHeaders[i], 10), new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+				}
+				
 				for(int j = 0; j < mColumnsNum; ++j)
 				{
-					LayoutParams params = new LayoutParams(ColumnWidth, RowHeight);
-					if(mVerticalHeaders != null)
-					{
-						if(TableDescription != null)
-							params.setMargins(ColumnWidth * j + 300, 60 + i * RowHeight, 0, 0);
-						else
-							params.setMargins(ColumnWidth * j + 300, i * RowHeight, 0, 0);
-					}
-					else
-					{
-						if(TableDescription != null)
-							params.setMargins(ColumnWidth * j, 60 + i * RowHeight, 0, 0);
-						else
-							params.setMargins(ColumnWidth * j, i * RowHeight, 0, 0);
-					}
 					if(mValues[i][j].charAt(0) == '?')
 					{
-						FieldView view = new FieldView(context, "", ColumnWidth, RowHeight, 2);
+						FieldView view = new FieldView(context, "", 2);
+						view.setSelectable(true);
 						mInputs.add(view);
 						view.setOnTouchListener(new OnTouchListener()
 						{
@@ -250,27 +407,91 @@ public class CompleteTableTaskView extends TaskView
 											mPressedKey = (FieldView) v;
 											mPressedKey.setSelected(true);
 										}
+									
+									mWriter.WriteEvent("Table", Integer.toString(mTableLayout.indexOfChild((Table)mPressedKey.getParent().getParent().getParent())));
+									mWriter.WriteEvent("Input", Integer.toString(mInputs.indexOf(mPressedKey)));
 								}
 								return false;
 							}
 						});
 						
-						this.addView(view, params);
+						row.addView(view);
 					}
 					else
-						this.addView(new FieldView(context, mValues[i][j], ColumnWidth, RowHeight, 2), params);
+						row.addView(new FieldView(context, mValues[i][j], 2));
+				}
+				mTable.addView(row, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+			}
+			this.setGravity(Gravity.CENTER_HORIZONTAL);
+			LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			params.setMargins(5, 20, 5, 20);
+			this.addView(mTable, params);
+		}
+		
+		@Override
+		protected void onSizeChanged(int w, int h, int oldw, int oldh)
+		{	
+			int cellSz = 0;
+
+			int descriptionWidth = 0;
+			
+			if(mVerticalHeaders != null)
+			{
+				// maximum length of header
+				int maxLen = 0;
+				for(int i = 0; i < mRowsNum; ++i)
+				{
+					int len = mVerticalHeaders[i].length();
+					maxLen = len > maxLen ? len : maxLen;
+				}
+				
+				descriptionWidth = maxLen * 25;
+				cellSz = (w - descriptionWidth) / mColumnsNum;
+			}
+			else
+			{
+				cellSz = w / mColumnsNum;
+			}
+			
+			if(cellSz > MAX_SIZE)
+				cellSz = MAX_SIZE;
+			if(cellSz < MIN_SIZE)
+				cellSz = MIN_SIZE;
+			
+			for(int i = 0; i < mRowsNum; ++i)
+			{
+				
+				LinearLayout row = (LinearLayout) mTable.getChildAt(i);
+				
+				if(mVerticalHeaders != null)
+				{
+					row.getChildAt(0).setLayoutParams(new LayoutParams(descriptionWidth, cellSz));
+					
+					for(int j = 1; j < row.getChildCount(); ++j)
+					{
+						row.getChildAt(j).setLayoutParams(new LayoutParams(cellSz, cellSz));
+					}
+				}
+				else
+				{
+					for(int j = 0; j < row.getChildCount(); ++j)
+					{
+						row.getChildAt(j).setLayoutParams(new LayoutParams(cellSz, cellSz));
+						row.getChildAt(j).requestLayout();
+					}
 				}
 			}
+			super.onSizeChanged(w, h, oldw, oldh);
 		}
 		
 		public void setKeyPress(String label)
 		{
 			if(mPressedKey != null)
 			{
-				if(label == "Стереть")
+				if(label.compareTo("Стереть") == 0)
 					mPressedKey.delSymb();
 				else
-					if(label == "Ввод")
+					if(label.compareTo("Ввод") == 0)
 					{
 						mPressedKey.setSelected(false);
 						int curIndex = mInputs.indexOf(mPressedKey);
@@ -292,6 +513,14 @@ public class CompleteTableTaskView extends TaskView
 			}
 		}
 		
+		public void setInput(int input)
+		{
+			if(mPressedKey != null)
+				mPressedKey.setSelected(false);
+			mPressedKey = mInputs.get(input);
+			mPressedKey.setSelected(true);
+		}
+		
 		public void setUnselected()
 		{
 			if(mPressedKey != null)
@@ -301,118 +530,33 @@ public class CompleteTableTaskView extends TaskView
 			}
 		}
 
-		// класс-view поля
-		private class FieldView extends ImageView
-		{
-			private String mFieldContent = null;
-			private long mCapacity = 0;
-			// является ли выделенной
-			private boolean mSelected = false;
-			
-			private int mWidth = 0;
-			private int mHeight = 0;
-			
-			public FieldView(Context context, String key, int width, int height, int capacity)
-			{
-				super(context);
-				mFieldContent = key;
-				mWidth = width;
-				mHeight = height;
-				mCapacity = capacity;
-			}
-
-			@Override
-			protected void onDraw(Canvas canvas)
-			{
-				Paint fg = new Paint(Paint.ANTI_ALIAS_FLAG);
-				fg.setStyle(Style.FILL);
-				fg.setTextSize((float) (mHeight * 0.55));
-				
-				FontMetrics fm = fg.getFontMetrics();
-				
-				// координаты помещения
-				float textY = (mHeight - fm.ascent - fm.descent) / 2;
-				
-				fg.setTextAlign(Paint.Align.CENTER);
-				canvas.drawText(mFieldContent, mWidth / 2, textY, fg);
-				
-				if(mSelected)
-					this.setBackgroundResource(R.drawable.selected_field);
-				else
-					this.setBackgroundResource(R.drawable.input_field);
-				
-				super.onDraw(canvas);
-			}
-			
-			public String getFieldContent()
-			{
-				return this.mFieldContent;
-			}
-
-			public void setFieldContent(String keyLabel)
-			{
-				this.mFieldContent = keyLabel;
-				invalidate();
-			}
-			
-			// setter
-			public void setSelected(boolean selected)
-			{
-				this.mSelected = selected;
-				invalidate();
-			}
-			
-			public int addSymb(String symb)
-			{
-				if(mCapacity > mFieldContent.length() + 1)
-				{
-					mFieldContent += symb;
-					invalidate();
-					return 0;
-				}
-				else
-					if(mCapacity != mFieldContent.length())
-					{
-						mFieldContent += symb;
-						invalidate();
-						return 1;
-					}
-					else
-						return 1;
-			}
-			
-			public int delSymb()
-			{
-				if(mFieldContent.length() > 0)
-				{
-					mFieldContent = mFieldContent.substring(0, mFieldContent.length() - 1);
-					invalidate();
-					if(mFieldContent.length() == 0)
-						return 1;
-				}
-				
-				if(mFieldContent.length() == 0)
-					return 1;
-				
-				return 0;
-			}
-		}
-
 		public boolean CheckTask()
 		{
-			int offset = 0;
-			if(mDescription != null)
-				offset ++;
-			if(mVerticalHeaders != null)
-				offset += mVerticalHeaders.length;
-			for(int i = 0; i + 3 < this.getChildCount(); ++i)
+			boolean answer = true;
+			mWriter.WriteEvent("CheckTask", "");
+			for(int i = 0; i < mTable.getChildCount(); ++i)
 			{
-				if(((FieldView)this.getChildAt(i + offset)).getFieldContent().compareTo(mAnswers[i / mColumnsNum][i % mColumnsNum]) != 0)
+				for(int j = 0; j < mColumnsNum; ++j)
 				{
-					return false;
+					FieldView field = null;
+					
+					if(mVerticalHeaders != null)
+						field = (FieldView)((LinearLayout)mTable.getChildAt(i)).getChildAt(j + 1);
+					else
+						field = (FieldView)((LinearLayout)mTable.getChildAt(i)).getChildAt(j);
+					
+					if(field.getFieldContent().compareTo(mAnswers[i][j]) != 0)
+					{
+						field.Check(false);
+						answer = false;
+					}
+					else
+					{
+						field.Check(true);
+					}
 				}
 			}
-			return true;
+			return answer;
 		}
 
 		public void RestartTask() 
@@ -422,25 +566,6 @@ public class CompleteTableTaskView extends TaskView
 				mInputs.get(i).setFieldContent("");
 			}	
 		}
-	}
 
-	@Override
-	public void RestartTask()
-	{
-		for(int i = 0; i < mTables.length; ++i)
-			mTables[i].RestartTask();
-	}
-
-	@Override
-	public void CheckTask()
-	{
-		boolean mAnswer = true;
-    	for(int i = 0; i < mTables.length; ++i)
-    		if(mTables[i].CheckTask() == false)
-    			mAnswer = false;
-    	String ans = mAnswer ? "Правильно" : "Неправильно";
-		mAlertDialog.setMessage(ans);
-		mAlertDialog.show();
-		
 	}
 }

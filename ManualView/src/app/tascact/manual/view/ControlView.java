@@ -1,68 +1,313 @@
-/**
- * Control View class
- * 
- * Class of view to control pages or tasks
- * 
- * Copyright 2012 hexonxons
- * 
- * :mailto killgamesh666@gmail.com
- * 
- */
-
 package app.tascact.manual.view;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.Context;
-import android.graphics.Color;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import app.tascact.manual.R;
 
-public class ControlView extends LinearLayout
-{	
-	public final int FLOAT_TOP = 0;
-	public final int FLOAT_BOTTOM = 1;
-	public final int FLOAT_LEFT = 2;
-	public final int FLOAT_RIGHT = 3;
+public class ControlView extends RelativeLayout
+{
+	public final static int FLOAT_TOP = 0;
+	public final static int FLOAT_BOTTOM = 1;
+	public final static int FLOAT_LEFT = 2;
+	public final static int FLOAT_RIGHT = 3;
 	
-	public final int VERTICAL = 0;
-	public final int HORIZONTAL = 1;
+	public final static int ORIENTATION_TOP = 0;
+	public final static int ORIENTATION_BOTTOM = 1;
+	public final static int ORIENTATION_LEFT = 2;
+	public final static int ORIENTATION_RIGHT = 3;
+	
+	public final static int SIZE_FILL = 0;
+	public final static int SIZE_SET = 1;
+	public final static int SIZE_UNSPECIFIED = 2;
 	
 	private int mFloat = 0;
 	private int mOrientation = 0;
+	private int mSize = 0;
+	
+	private Map<String, String> mPercentage = new HashMap<String,String>();
 	
 	public ControlView(Context context)
 	{
-		super(context);	
+		super(context);
+	}
+	
+	public void setIconsFloat(int iconsFloat)
+	{
+		mFloat = iconsFloat;
+	}
+	
+	public void setIconsSize(int iconsSize)
+	{
+		mSize = iconsSize;
+	}
+	
+	public void setPanelOrientation(int panelOrientation)
+	{
+		mOrientation = panelOrientation;
 	}
 	
 	/**
-	 * Set transparancy for this view
+	 * Add icon to the panel
 	 * 
-	 * @param alpha
+	 * If IconsSize set as SIZE_SET, this function does nothing.
+	 * Use addIcon(ImageView child, int percentage) instead.
+	 * 
+	 * TODO make throw exeption;
+	 * 
+	 * @param child ImageView representing an icon.
 	 */
-	public void setAlpha(float alpha)
+	public void addIcon(Drawable icon, Drawable iconPressed, OnTouchListener l)
 	{
-		//setBackgroundColor(Color.TRANSPARENT);
+		if(mSize == SIZE_SET)
+		{
+			return;
+		}
+		
+		ControlButton child = new ControlButton(this.getContext(), icon, iconPressed);
+		child.setOnTouchListener(l);
+		this.addView(child);
 	}
-	
-	public void setIconsFloat(int iconsfloat)
+
+	/**
+	 * Add icon to the panel.
+	 * 
+	 * Setting IconsSize to SIZE_SET.
+	 * 
+	 * @param child ImageView representing an icon.
+	 * @param percentage Long side of button have size = percentage / 100 * long side of panel size.
+	 */
+	public void addIcon(Drawable icon, Drawable iconPressed, OnTouchListener l, int percentage)
 	{
-		this.mFloat = iconsfloat;
+		mSize = SIZE_SET;
+		mPercentage.put(Integer.toString(this.getChildCount()), Integer.toString(percentage));
+		
+		ControlButton child = new ControlButton(this.getContext(), icon, iconPressed);
+		child.setOnTouchListener(l);
+		this.addView(child);
 	}
-	
+
+
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{	
-		int minDimension = w > h ? h : w;
+		int offset = 0;
 		
-		this.setLayoutParams(new LayoutParams(w, h));
+		/*
+		 * Dimension of button in long side and short side
+		 */
+		int shortSize = w > h ? h : w;
+		int longSize = w > h ? w : h;
 		
 		for(int i = 0; i < this.getChildCount(); ++i)
 		{
-			ImageView child = (ImageView)this.getChildAt(i);
-			child.setLayoutParams(new LayoutParams(minDimension, minDimension));
+			ControlButton icon = (ControlButton) this.getChildAt(i);
+			LayoutParams params = new LayoutParams(shortSize, shortSize);
+			params.addRule(CENTER_IN_PARENT);	
+			icon.setLayoutParams(params);
+			
+			switch (mSize) 
+			{
+				case SIZE_FILL:
+				{
+					if(shortSize == w)
+					{
+						longSize = h / this.getChildCount();
+						params = new LayoutParams(shortSize, h / this.getChildCount());
+					}
+					else
+					{
+						longSize = w / this.getChildCount();
+						params = new LayoutParams(w / this.getChildCount(), shortSize);
+					}
+					
+					break;
+				}
+				
+				case SIZE_SET:
+				{
+					
+					if(shortSize == w)
+					{
+						longSize = Integer.decode(mPercentage.get(String.valueOf(i))) * h / 100;
+						params = new LayoutParams(shortSize, longSize);
+
+					}
+					else
+					{
+						longSize = Integer.decode(mPercentage.get(String.valueOf(i))) * w / 100;
+						params = new LayoutParams(longSize, shortSize);
+					}
+					
+					break;
+				}
+	
+				default:
+				{
+					longSize = shortSize;
+					params = new LayoutParams(longSize, longSize);
+					break;
+				}
+			}			
+			
+			switch (mFloat)
+			{
+				case FLOAT_TOP:
+				{
+					params.setMargins(0, offset , 0, 0);
+					offset += longSize;
+					break;
+				}
+				
+				case FLOAT_BOTTOM:
+				{
+					offset += longSize;
+					params.setMargins(0, h - offset, 0, 0);
+					break;
+				}
+				
+				case FLOAT_LEFT:
+				{
+					params.setMargins(offset, 0 , 0, 0);
+					offset += longSize;
+					break;
+				}
+				
+				case FLOAT_RIGHT:
+				{
+					offset += longSize;
+					params.setMargins(w - offset, 0 , 0, 0);
+					break;
+				}
+	
+				default:
+					break;
+			}
+			
+			switch (mOrientation)
+			{
+				case ORIENTATION_TOP:
+				{
+					icon.setBackgroundResource(R.drawable.button_frame_top);
+					break;
+				}
+				
+				case ORIENTATION_BOTTOM:
+				{
+					icon.setBackgroundResource(R.drawable.button_frame_bottom);
+					break;
+				}
+				
+				case ORIENTATION_LEFT:
+				{
+					icon.setBackgroundResource(R.drawable.button_frame_left);
+					break;
+				}
+				
+				case ORIENTATION_RIGHT:
+				{
+					icon.setBackgroundResource(R.drawable.button_frame_right);
+					break;
+				}
+				default:
+					break;
+			}
+			
+			icon.setLayoutParams(params);
 		}
 		
 		super.onSizeChanged(w, h, oldw, oldh);
+	}
+	
+	public class ControlButton extends ImageButton
+	{
+		private Drawable mPressedIcon = null;
+		private Drawable mUnpressedIcon = null;
+		
+		private Drawable mBackground = null;
+		
+		
+		public ControlButton(Context context, Drawable unpressed, Drawable pressed)
+		{
+			super(context);
+			
+			mUnpressedIcon = unpressed;
+			mPressedIcon = pressed;
+		}		
+		
+		@Override
+		public boolean onTouchEvent(MotionEvent event)
+		{
+			switch (event.getAction())
+			{
+				case (MotionEvent.ACTION_DOWN):
+				{
+					this.setBackgroundDrawable(mPressedIcon);
+					break;
+				}
+				
+				case (MotionEvent.ACTION_UP):
+				{
+					this.setBackgroundDrawable(mUnpressedIcon);
+					break;
+				}
+				default:
+					break;
+			}
+			return super.onTouchEvent(event);
+		}
+		
+		@Override
+		public void setBackgroundResource(int resid)
+		{
+			Log.e("setBackgroundResource","");
+			mBackground = getResources().getDrawable(resid);
+			super.setBackgroundResource(resid);
+		}
+		
+		private Drawable ScaleAndMergeDrawables(Drawable button, Drawable backgroung, int w, int h)
+		{
+			int minSz = w > h ? h : w;
+			
+			BitmapDrawable buttonBitmap = new BitmapDrawable(Bitmap.createScaledBitmap(((BitmapDrawable)button).getBitmap(), minSz, minSz, true));
+			BitmapDrawable bgBitmap =  new BitmapDrawable(Bitmap.createScaledBitmap(((BitmapDrawable)backgroung).getBitmap(), w, h, true));
+			
+			
+			int buttonH = buttonBitmap.getBitmap().getHeight();
+			int buttonW = buttonBitmap.getBitmap().getWidth();
+			
+			int bgH = bgBitmap.getBitmap().getHeight();
+			int bgW = bgBitmap.getBitmap().getWidth();
+			
+			Bitmap result = Bitmap.createBitmap(bgW, bgH, Bitmap.Config.ARGB_8888);
+			
+		    Canvas comboCanvas = new Canvas(result);
+
+		    comboCanvas.drawBitmap(bgBitmap.getBitmap(), 0, 0, null);
+		    comboCanvas.drawBitmap(buttonBitmap.getBitmap(), (bgW - buttonW) / 2, (bgH - buttonH) / 2, null);
+		    comboCanvas.save();
+		    
+		    return new BitmapDrawable(result);
+		}
+		
+		@Override
+		protected void onSizeChanged(int w, int h, int oldw, int oldh)
+		{			
+			mPressedIcon = ScaleAndMergeDrawables(mPressedIcon, mBackground, w, h);
+			mUnpressedIcon = ScaleAndMergeDrawables(mUnpressedIcon, mBackground, w, h);
+			
+			this.setBackgroundDrawable(mUnpressedIcon);
+			
+			super.onSizeChanged(w, h, oldw, oldh);
+		}
 	}
 }

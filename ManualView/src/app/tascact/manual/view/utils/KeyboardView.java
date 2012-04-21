@@ -7,7 +7,7 @@ import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import app.tascact.manual.R;
 
@@ -34,7 +34,6 @@ public class KeyboardView extends RelativeLayout implements OnClickListener
 		{
 			Key key = new Key(context, Integer.toString(i));				
 			key.setOnClickListener(this);
-			
 			this.addView(key);
 		}
 		
@@ -74,7 +73,6 @@ public class KeyboardView extends RelativeLayout implements OnClickListener
 		int keyWidth = w / 12;
 		int keyHeight = h / 5;
 		
-		
 		for(int i = 0; i < this.getChildCount(); ++i)
 		{
 			Key key = (Key)this.getChildAt(i);
@@ -100,13 +98,14 @@ public class KeyboardView extends RelativeLayout implements OnClickListener
 					params.setMargins(margin + (i - 10 - mOperatorsSet.length()) * (keyWidth * 4 + margin), (int)(keyHeight * 3.5), 0, 0);
 					key.setLayoutParams(params);
 				}
+			key.invalidate();
 		}
 		
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
 	
 	// класс-view кнопки
-	private class Key extends Button
+	private class Key extends ImageButton
 	{
 		private String mKeyLabel = null;
 		
