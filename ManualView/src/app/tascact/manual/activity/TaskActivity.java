@@ -32,9 +32,9 @@ import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.Markup;
 import app.tascact.manual.R;
 import app.tascact.manual.task.ColoringPictureTaskView;
-import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
+import app.tascact.manual.task.NewCompleteTableTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.task.WriteExpressionTaskView;
 import app.tascact.manual.utils.LogWriter;
@@ -98,13 +98,13 @@ public class TaskActivity extends Activity
 					case 2:
 					{
 						mWriter = new LogWriter(extras.getString("ManualName"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
-						mTaskView = new CompleteTableTaskView(this, task, markup, mWriter);
+						mTaskView = new NewCompleteTableTaskView(this, task, markup, mWriter);
 						mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener()
 						{
 							@Override
 							public void onKeyboardKeyPress(String label)
 							{
-								((CompleteTableTaskView)mTaskView).processKeyEvent(label);
+								((NewCompleteTableTaskView)mTaskView).processKeyEvent(label);
 							}
 						});
 						break;
@@ -174,7 +174,7 @@ public class TaskActivity extends Activity
 				if(scrollable)
 				{
 					mScroll.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
-					mMainLayout.addView(mScroll, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+					mMainLayout.addView(mScroll, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
 					mMainLayout.addView(mContr, new LayoutParams(LayoutParams.MATCH_PARENT, 0));
 					mContr.addView(mKeyboard, new LayoutParams(LayoutParams.MATCH_PARENT, 200));
 					mMainLayout.addView(BottomControl, new LayoutParams(LayoutParams.MATCH_PARENT, 60));

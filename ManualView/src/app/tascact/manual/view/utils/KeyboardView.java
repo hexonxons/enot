@@ -15,8 +15,6 @@ import app.tascact.manual.R;
 public class KeyboardView extends RelativeLayout implements OnClickListener
 {
 	private final String mOperatorsSet = "+-*/><=";
-	private final String mBackspace = "Стереть";
-	private final String mEnter = "Ввод";
 	
 	public interface OnKeyboardKeyPressListener
 	{
@@ -45,14 +43,10 @@ public class KeyboardView extends RelativeLayout implements OnClickListener
 			this.addView(key);
 		}
 		
-		Key backspace = new Key(context, mBackspace);
-		Key enter = new Key(context, mEnter);
+		Key key = new Key(context, "Del");				
+		key.setOnClickListener(this);
 		
-		backspace.setOnClickListener(this);
-		enter.setOnClickListener(this);
-			
-		this.addView(backspace);
-		this.addView(enter);
+		this.addView(key);
 	}
 	
 	public void setOnKeyPressedListener(OnKeyboardKeyPressListener l)
@@ -71,7 +65,7 @@ public class KeyboardView extends RelativeLayout implements OnClickListener
 	protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
 		int keyWidth = w / 12;
-		int keyHeight = h / 5;
+		int keyHeight = h / 4;
 		
 		for(int i = 0; i < this.getChildCount(); ++i)
 		{
@@ -86,19 +80,18 @@ public class KeyboardView extends RelativeLayout implements OnClickListener
 			else
 				if(i < 10 + mOperatorsSet.length())
 				{
-					int margin = (w - keyWidth * mOperatorsSet.length()) / (mOperatorsSet.length() + 1);
+					int margin = (w - keyWidth * (mOperatorsSet.length() + 1)) / (mOperatorsSet.length() + 2);
 					LayoutParams params = new LayoutParams(keyWidth, keyHeight);
 					params.setMargins(margin + (i - 10) * (keyWidth + margin), keyHeight * 2, 0, 0);
 					key.setLayoutParams(params);
 				}
 				else
 				{
-					int margin = (w - 2 * keyWidth * 4) / 3;
-					LayoutParams params = new LayoutParams(keyWidth * 4, keyHeight);
-					params.setMargins(margin + (i - 10 - mOperatorsSet.length()) * (keyWidth * 4 + margin), (int)(keyHeight * 3.5), 0, 0);
+					int margin = (w - keyWidth * (mOperatorsSet.length() + 1)) / (mOperatorsSet.length() + 2);
+					LayoutParams params = new LayoutParams(keyWidth, keyHeight);
+					params.setMargins(margin + (i - 10) * (keyWidth + margin), keyHeight * 2, 0, 0);
 					key.setLayoutParams(params);
 				}
-			key.invalidate();
 		}
 		
 		super.onSizeChanged(w, h, oldw, oldh);

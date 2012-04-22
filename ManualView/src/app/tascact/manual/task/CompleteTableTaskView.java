@@ -118,6 +118,8 @@ public class CompleteTableTaskView extends TaskView
 			
 			if(eventName.compareTo("Table") == 0)
 			{
+				if(activeTable != null)
+					activeTable.setUnselected();
 				activeTable = (Table) mTableLayout.getChildAt(Integer.parseInt(eventValue));
 				continue;
 			}
@@ -135,6 +137,9 @@ public class CompleteTableTaskView extends TaskView
 				continue;
 			}
 		}
+		
+		if(activeTable != null)
+			activeTable.setUnselected();
 	}
 	
 	public void replay()
@@ -407,9 +412,11 @@ public class CompleteTableTaskView extends TaskView
 											mPressedKey = (FieldView) v;
 											mPressedKey.setSelected(true);
 										}
-									
-									mWriter.WriteEvent("Table", Integer.toString(mTableLayout.indexOfChild((Table)mPressedKey.getParent().getParent().getParent())));
-									mWriter.WriteEvent("Input", Integer.toString(mInputs.indexOf(mPressedKey)));
+									if(mPressedKey != null)
+									{
+										mWriter.WriteEvent("Table", Integer.toString(mTableLayout.indexOfChild((Table)mPressedKey.getParent().getParent().getParent())));
+										mWriter.WriteEvent("Input", Integer.toString(mInputs.indexOf(mPressedKey)));
+									}
 								}
 								return false;
 							}
