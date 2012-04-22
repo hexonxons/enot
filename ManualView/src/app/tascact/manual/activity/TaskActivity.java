@@ -35,6 +35,7 @@ import app.tascact.manual.task.ColoringPictureTaskView;
 import app.tascact.manual.task.CompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
+import app.tascact.manual.task.LabyrinthTaskView;
 import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.task.WriteExpressionTaskView;
 import app.tascact.manual.utils.LogWriter;
@@ -151,6 +152,15 @@ public class TaskActivity extends Activity
 							}
 						});
 						
+						break;
+					}
+					case 6: 
+					{
+						mTaskView = new LabyrinthTaskView(this,
+								markup.getTaskResources(
+										extras.getInt("PageNumber"),
+										extras.getInt("TaskNumber")), 
+								markup);
 						break;
 					}
 					

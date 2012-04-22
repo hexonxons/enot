@@ -139,4 +139,13 @@ public final class XMLUtils {
 			return defaultValue;
 		}
 	}
+	
+	public static String getStringProperty(Node node, String path, String defaultValue){
+		Node nd = evalXpathExprAsNode(node, path);
+		if (nd != null) {
+			return nd.getTextContent();
+		} else {
+			return defaultValue;
+		}
+	}
 }
