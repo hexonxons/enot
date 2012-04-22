@@ -46,4 +46,14 @@ public class MathUtils {
 	public static int sqr(int x){
 		return x*x;
 	}
+	
+	public static int clamp(int x,int minx,int maxx){
+		if(x<minx){
+			return minx;
+		}
+		if(x>maxx){
+			return maxx;
+		}
+		return x;
+	}
 }

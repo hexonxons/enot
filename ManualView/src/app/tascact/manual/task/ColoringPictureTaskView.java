@@ -17,6 +17,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
@@ -27,8 +28,10 @@ import android.graphics.Xfermode;
 import android.util.Log;
 import android.view.MotionEvent;
 import app.tascact.manual.Markup;
+import app.tascact.manual.utils.MathUtils;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
+import app.tascact.manual.view.utils.ColorCircleGenerator;
 import app.tascact.manual.view.utils.ColorKeyboard;
 import app.tascact.manual.view.utils.ColorPicker;
 import app.tascact.manual.view.utils.ColorPicker.ColorPickerListener;
@@ -43,6 +46,7 @@ public class ColoringPictureTaskView extends TaskView {
 	private Bitmap picture;
 	private Bitmap borders;
 	private Bitmap zones;
+	private Bitmap brush;
 	private Paint paint;
 	private List<Zone> splittedZones;
 	private AlertDialog alertDialog;
@@ -50,6 +54,7 @@ public class ColoringPictureTaskView extends TaskView {
 	private int currentColor;
 	private boolean currentModeFill;
 	private Zone currentZonePainting=null;
+	private PointF prevTouchPoint;
 	
 	public ColoringPictureTaskView(Context context, Node theInputParams, Markup markup) {
 		super(context);
@@ -81,6 +86,11 @@ public class ColoringPictureTaskView extends TaskView {
 			@Override
 			public void onModeChanged(boolean isCurrentModeFill) {
 				currentModeFill = isCurrentModeFill;
+			}
+
+			@Override
+			public void onBrushSizeChanged(float sz) {
+				brush = ColorCircleGenerator.generateBrush((int)(30+sz*90));
 			}
 		});
 		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT,
@@ -117,6 +127,8 @@ public class ColoringPictureTaskView extends TaskView {
 		borders = fitBitmap(borders);
 		zones = fitBitmap(zones);
 		splittedZones = splitZones(zones);
+		
+		
 		// root layout
 		// mainLayout = new RelativeLayout(context);
 		// mainLayout.addView(imageView);
@@ -251,16 +263,8 @@ public class ColoringPictureTaskView extends TaskView {
 		float h = height * (1.0f - keyboardHeightKoef);
 		paint.setColor(Color.WHITE);
 		canvas.drawRect(0, 0, w, h, paint);
-		//paint.setColor(Color.GREEN);
-		// canvas.drawBitmap(zones, 0, 0, paint);
 		for (Zone z : splittedZones) {
-			//float[] mat = new float[] { Color.red(z.color) / 255.0f, 0, 0, 0,
-			//		0, 0, Color.green(z.color) / 255.0f, 0, 0, 0, 0, 0,
-			//		Color.blue(z.color) / 255.0f, 0, 0, 0, 0, 0, 1.0f, 0 };
-			//ColorMatrixColorFilter filter = new ColorMatrixColorFilter(mat);
-			//paint.setColorFilter(filter);
 			canvas.drawBitmap(z.bitmap, z.offsetX, z.offsetY, paint);
-			//paint.setColorFilter(null);
 		}
 		canvas.drawBitmap(borders, 0, 0, paint);
 	}
@@ -289,16 +293,7 @@ public class ColoringPictureTaskView extends TaskView {
 		if(zn==null){
 			return true;
 		}
-		//PorterDuff.Mode mode = Mode.MULTIPLY;
-		Xfermode xferMode = new PorterDuffXfermode(Mode.SRC_ATOP);
-		//currentColor &=0x00FFFFFF;
 		
-		int currCol = currentColor & Color.argb((int)(m.getPressure()*255.0f), 255,255,255);
-		//int col = currentColor& Color.argb((int)(m.getPressure()*255.0f), 255,255,255);
-		//Log.d("COLORPICKER", "Pressure: "+m.getPressure());
-		
-		//col |= 0xFF000000;
-		//col &= 0x00FFFFFF;
 		
 		if (m.getActionMasked() == MotionEvent.ACTION_DOWN) {
 			if(currentModeFill){
@@ -312,44 +307,53 @@ public class ColoringPictureTaskView extends TaskView {
 				zn.canvas.drawBitmap(zn.backup, 0.0f, 0.0f, paint);
 				paint.setColorFilter(null);
 			}else{
-				paint.setColor(currCol);
-				//PorterDuffColorFilter filter = new PorterDuffColorFilter(col,mode);
-				//paint.setColorFilter(filter);
-				paint.setXfermode(xferMode);
-				zn.canvas.drawCircle(relx, rely, 35.0f, paint);
-				paint.setXfermode(null);
-				//paint.setColorFilter(null);
+				doBrushAction(x,y,m,zn);
+				prevTouchPoint = new PointF(m.getX(),m.getY());
 				currentZonePainting = zn;
 			}
 			invalidate();
 		}
-		if (m.getActionMasked() == MotionEvent.ACTION_MOVE) {
+		if (m.getActionMasked() == MotionEvent.ACTION_MOVE || m.getActionMasked() == MotionEvent.ACTION_UP) {
 			if(!currentModeFill && currentZonePainting==zn){
-				paint.setColor(currCol);
-				//PorterDuffColorFilter filter = new PorterDuffColorFilter(col,mode);
-				//paint.setColorFilter(filter);
-				paint.setXfermode(xferMode);
-				zn.canvas.drawCircle(relx, rely, 35.0f, paint);
-				//paint.setColorFilter(null);
-				paint.setXfermode(null);
+				float deltaLen = (float)Math.sqrt(MathUtils.sqr(prevTouchPoint.x-m.getX())+MathUtils.sqr(prevTouchPoint.y-m.getY()));
+				float maxDelta = (brush.getWidth()+brush.getHeight())*0.125f; // radius/2 (!!!)
+				int kk = 1;
+				float dL = deltaLen;
+				while(dL>maxDelta){
+					float nx=prevTouchPoint.x+(m.getX()-prevTouchPoint.x)/deltaLen*maxDelta*kk;
+					float ny=prevTouchPoint.y+(m.getY()-prevTouchPoint.y)/deltaLen*maxDelta*kk;
+					doBrushAction((int)nx,(int)ny,m, zn);
+					dL-=maxDelta;
+					kk++;
+				}
+				doBrushAction(x,y,m, zn);
+				prevTouchPoint.x = m.getX();
+				prevTouchPoint.y = m.getY();
 				invalidate();
 			}
-		}
-		if (m.getActionMasked() == MotionEvent.ACTION_UP) {
-			if(!currentModeFill && currentZonePainting==zn){
-				paint.setColor(currCol);
-				//PorterDuffColorFilter filter = new PorterDuffColorFilter(col,mode);
-				//paint.setColorFilter(filter);
-				paint.setXfermode(xferMode);
-				zn.canvas.drawCircle(relx, rely, 35.0f, paint);
-				//paint.setColorFilter(null);
-				paint.setXfermode(null);
+			if(m.getActionMasked() == MotionEvent.ACTION_UP){
 				currentZonePainting = null;
-				invalidate();
 			}
 		}
 		
 		return true;
+	}
+	
+	private void doBrushAction(int x,int y,MotionEvent m,Zone zn){
+		int relx = x- zn.offsetX;
+		int rely = y- zn.offsetY;
+		Xfermode xferMode = new PorterDuffXfermode(Mode.SRC_ATOP);
+		int currCol = currentColor & Color.argb((int)(m.getPressure()*255.0f), 255,255,255);
+		paint.setColor(currCol);
+		paint.setXfermode(xferMode);
+		float[] mat = new float[] { Color.red(currCol) / 255.0f, 0, 0, 0,
+				0, 0, Color.green(currCol) / 255.0f, 0, 0, 0, 0, 0,
+			Color.blue(currCol) / 255.0f, 0, 0, 0, 0, 0, 1.0f, 0 };
+		ColorMatrixColorFilter filter = new ColorMatrixColorFilter(mat);
+		paint.setColorFilter(filter);
+		zn.canvas.drawBitmap(brush, relx-brush.getWidth()/2, rely-brush.getHeight()/2, paint);
+		paint.setColorFilter(null);
+		paint.setXfermode(null);
 	}
 
 	@Override
