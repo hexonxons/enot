@@ -21,7 +21,7 @@ public class NewCompleteTableTaskView extends TaskView
 	public NewCompleteTableTaskView(Context context, Node resource, Markup markup, LogWriter writer)
 	{
 		super(context);
-		mMainLayout = new NoteLayout(context);
+		mMainLayout = new NoteLayout(context, writer);
 		
 		// Getting description of this task
 		Node TaskDescription = (Node) XMLUtils.evalXpathExpr(resource, "./TaskDescription", XPathConstants.NODE);

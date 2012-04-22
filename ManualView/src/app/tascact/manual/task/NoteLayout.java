@@ -3,6 +3,9 @@ package app.tascact.manual.task;
  import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -15,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import app.tascact.manual.R;
+import app.tascact.manual.utils.LogWriter;
 
 public class NoteLayout extends ViewGroup
 {
@@ -24,14 +28,16 @@ public class NoteLayout extends ViewGroup
 	private int mRowsNum = -1;	
 	
 	private int mTableColumnsNumber = 0;
-	private int mTableRowsNumber = 0;
 	private int mMaxRowsNum = 0;
+	
+	private LogWriter mWriter = null;
 	
 	private TableActiveArea mActiveArea = null;
 	
-	public NoteLayout(Context context)
+	public NoteLayout(Context context, LogWriter writer)
 	{
 		super(context);
+		mWriter = writer;
 	}
 	
 	@Override
@@ -58,7 +64,6 @@ public class NoteLayout extends ViewGroup
 		LayoutParams params = new LayoutParams((expr.mWidthCells) * CELL_SIZE, (expr.mHeightCells) * CELL_SIZE);
 		mMaxRowsNum += 1 + expr.mHeightCells;
 		mTableColumnsNumber = expr.mWidthCells;
-		mTableRowsNumber = expr.mHeightCells;
 		super.addView(child, params);
 	}
 	
@@ -164,8 +169,50 @@ public class NoteLayout extends ViewGroup
 				area.setLayoutParams(params);
 			}
 		}
-		
+		LoadProgress();
 		super.onSizeChanged(w, h, oldw, oldh);
+	}
+	
+	private void LoadProgress()
+	{
+		Node act = mWriter.GetLastAct();
+		if(act == null)
+			return;
+		
+		NodeList TimeStamps = act.getChildNodes();
+		TableActiveArea activeTable = null;
+				
+		for(int i = 0; i < TimeStamps.getLength(); ++i)
+		{	
+			//				   Event  		   LocalTime, Time, event
+			Node event = TimeStamps.item(i).getFirstChild().getChildNodes().item(2);
+			String eventName = event.getNodeName();
+			String eventValue = event.getTextContent();
+			
+			if(eventName.compareTo("Table") == 0)
+			{
+				if(activeTable != null)
+					activeTable.unselect();
+				activeTable = (TableActiveArea) this.getChildAt(Integer.parseInt(eventValue));
+				continue;
+			}
+			
+			if(eventName.compareTo("Input") == 0)
+			{
+				activeTable.setInput(Integer.parseInt(eventValue));
+				continue;
+			}
+			
+			if(eventName.compareTo("KeyPress") == 0)
+			{
+				if(activeTable != null)
+					activeTable.setText(eventValue);
+				continue;
+			}
+		}
+		
+		if(activeTable != null)
+			activeTable.unselect();
 	}
 
 	private class TableCell extends View
@@ -306,6 +353,11 @@ public class NoteLayout extends ViewGroup
 			this.setOrientation(LinearLayout.VERTICAL);
 		}
 		
+		public void setInput(int index)
+		{
+			mActiveCell = mActiveCells.get(index);			
+		}
+
 		public void unselect()
 		{
 			if(mActiveCell != null)
@@ -354,6 +406,10 @@ public class NoteLayout extends ViewGroup
 							mActiveCell = (TableCell)v;
 							mActiveCell.setAnswer(0);
 							mActiveCell.setSelect();
+							
+							mWriter.WriteEvent("Table", Integer.toString(((ViewGroup) v.getParent().getParent().getParent()).indexOfChild((View) v.getParent().getParent())));
+							mWriter.WriteEvent("Input", Integer.toString(mActiveCells.indexOf(mActiveCell)));
+							
 							return false;
 						}
 					});
@@ -455,11 +511,15 @@ public class NoteLayout extends ViewGroup
 	public void processKeyEvent(String label)
 	{
 		if(mActiveArea != null)
+		{
+			mWriter.WriteEvent("KeyPress", label);
 			mActiveArea.setText(label);
+		}
 	}
 	
 	public void CheckTask()
 	{
+		mWriter.WriteEvent("CheckTask", "");
 		for(int i = 0; i < this.getChildCount(); ++i)
 		{
 			((TableActiveArea)this.getChildAt(i)).CheckTask();
@@ -468,6 +528,7 @@ public class NoteLayout extends ViewGroup
 	
 	public void RestartTask()
 	{
+		mWriter.WriteEvent("RestartTask", "");
 		for(int i = 0; i < this.getChildCount(); ++i)
 		{
 			((TableActiveArea)this.getChildAt(i)).RestartTask();
