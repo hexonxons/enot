@@ -32,7 +32,7 @@ import android.widget.LinearLayout.LayoutParams;
 import app.tascact.manual.Markup;
 import app.tascact.manual.R;
 import app.tascact.manual.task.ColoringPictureTaskView;
-import app.tascact.manual.task.CompleteTableTaskView;
+import app.tascact.manual.task.NewCompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
 import app.tascact.manual.task.LabyrinthTaskView;
@@ -99,31 +99,25 @@ public class TaskActivity extends Activity
 					case 2:
 					{
 						mWriter = new LogWriter(extras.getString("ManualName"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
-						mTaskView = new CompleteTableTaskView(this, task, markup, mWriter);
+						mTaskView = new NewCompleteTableTaskView(this, task, markup, mWriter);
 						mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener()
 						{
 							@Override
 							public void onKeyboardKeyPress(String label)
 							{
-								((CompleteTableTaskView)mTaskView).processKeyEvent(label);
+								((NewCompleteTableTaskView)mTaskView).processKeyEvent(label);
 							}
 						});
 						break;
 					}
-					
-					case 3:
+
+					case 3: 
 					{
-						mWriter = new LogWriter(extras.getString("ManualName"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
-						mTaskView = new SetOperatorsTaskView(this, task, markup, mWriter);
-						mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener()
-						{
-							@Override
-							public void onKeyboardKeyPress(String label)
-							{
-								((SetOperatorsTaskView)mTaskView).processKeyEvent(label);
-							}
-						});
-						
+						mTaskView = new LabyrinthTaskView(this,
+								markup.getTaskResources(
+										extras.getInt("PageNumber"),
+										extras.getInt("TaskNumber")), 
+								markup);
 						break;
 					}
 					
@@ -152,15 +146,6 @@ public class TaskActivity extends Activity
 							}
 						});
 						
-						break;
-					}
-					case 6: 
-					{
-						mTaskView = new LabyrinthTaskView(this,
-								markup.getTaskResources(
-										extras.getInt("PageNumber"),
-										extras.getInt("TaskNumber")), 
-								markup);
 						break;
 					}
 					

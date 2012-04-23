@@ -97,6 +97,7 @@ public class FieldView extends ImageView
 	public void setSelected(boolean selected)
 	{
 		this.mSelected = selected;
+		isChecked = false;
 		postInvalidate();
 	}
 	

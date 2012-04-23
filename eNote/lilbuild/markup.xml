@@ -34,6 +34,7 @@
             </Task>
             <Task number="2" tasktype="2">
                 <Scrollable>true</Scrollable>
+                <Type>Table</Type>
                 <Table>
                     <RowsNum>3</RowsNum>
                     <ColumnsNum>5</ColumnsNum>
@@ -76,36 +77,37 @@
                     </Answers>
                 </Table>
             </Task>
-            <Task number="3" tasktype="3">
+            <Task number="3" tasktype="2">
                 <TaskDescription>Выполни действия:</TaskDescription>
+                <Type>Operators</Type>
                 <Scrollable>true</Scrollable>
                 <TaskResources>
-                    <TaskResource>2+7=?</TaskResource>
-                    <TaskResource>8-4=?</TaskResource>
-                    <TaskResource>3+6=?</TaskResource>
-                    <TaskResource>10-6=?</TaskResource>
-                    <TaskResource>9+1=?</TaskResource>
-                    <TaskResource>6-3=?</TaskResource>
-                    <TaskResource>2+8=?</TaskResource>
-                    <TaskResource>7-5=?</TaskResource>
-                    <TaskResource>3+3=?</TaskResource>
-                    <TaskResource>10-7=?</TaskResource>
-                    <TaskResource>4+5=?</TaskResource>
-                    <TaskResource>6-2=?</TaskResource>
+                    <TaskResource>2,+,7,=,?</TaskResource>
+                    <TaskResource>8,-,4,=,?</TaskResource>
+                    <TaskResource>3,+,6,=,?</TaskResource>
+                    <TaskResource>10,-,6,=,?</TaskResource>
+                    <TaskResource>9,+,1,=,?</TaskResource>
+                    <TaskResource>6,-,3,=,?</TaskResource>
+                    <TaskResource>2,+,8,=,?</TaskResource>
+                    <TaskResource>7,-,5,=,?</TaskResource>
+                    <TaskResource>3,+,3,=,?</TaskResource>
+                    <TaskResource>10,-,7,=,?</TaskResource>
+                    <TaskResource>4,+,5,=,?</TaskResource>
+                    <TaskResource>6,-,2,=,?</TaskResource>
                 </TaskResources>        
                 <TaskAnswer>
-                    <Answer>2+7=9</Answer>
-                    <Answer>8-4=4</Answer>
-                    <Answer>3+6=9</Answer>
-                    <Answer>10-6=4</Answer>
-                    <Answer>9+1=10</Answer>
-                    <Answer>6-3=3</Answer>
-                    <Answer>2+8=10</Answer>
-                    <Answer>7-5=2</Answer>
-                    <Answer>3+3=6</Answer>
-                    <Answer>10-7=3</Answer>
-                    <Answer>4+5=9</Answer>
-                    <Answer>6-2=4</Answer>
+                    <Answer>2,+,7,=,9</Answer>
+                    <Answer>8,-,4,=,4</Answer>
+                    <Answer>3,+,6,=,9</Answer>
+                    <Answer>10,-,6,=,4</Answer>
+                    <Answer>9,+,1,=,10</Answer>
+                    <Answer>6,-,3,=,3</Answer>
+                    <Answer>2,+,8,=,10</Answer>
+                    <Answer>7,-,5,=,2</Answer>
+                    <Answer>3,+,3,=,6</Answer>
+                    <Answer>10,-,7,=,3</Answer>
+                    <Answer>4,+,5,=,9</Answer>
+                    <Answer>6,-,2,=,4</Answer>
                 </TaskAnswer>
             </Task>
             <Task number="4" tasktype="1">
@@ -159,14 +161,15 @@
                     <Answer>7+3=10&#38;3+7=10</Answer>
                 </TaskAnswer>
             </Task>
-            <Task number="6" tasktype="3">
+            <Task number="6" tasktype="2">
                 <Scrollable>true</Scrollable>
+                <Type>Operators</Type>
                 <TaskDescription>Вставь пропущенные знаки действий:</TaskDescription>
                 <TaskResources>
-                    <TaskResource>5?4?3?2?1=1</TaskResource>
+                    <TaskResource>5,?,4,?,3,?,2,?,1,=,1</TaskResource>
                 </TaskResources>        
                 <TaskAnswer>
-                    <Answer>5-4+3-2-1=1&#38;5-4-3+2+1=1</Answer>
+                    <Answer>5,-,4,+,3,-,2,-,1,=,1</Answer>
                 </TaskAnswer>
             </Task>
         </Tasks>
@@ -181,44 +184,46 @@
             <PageResource>manual_1_1_pg23_1</PageResource>
         </PageResources>
         <Tasks>
-            <Task number="1" tasktype="3">
+            <Task number="1" tasktype="2">
                 <Scrollable>true</Scrollable>
+                <Type>Operators</Type>
                 <TaskDescription>Сравни выражения, не вычисляя их значений:</TaskDescription>
                 <TaskResources>
-                    <TaskResource>5+4?4+5</TaskResource>
-                    <TaskResource>7+3?3+7</TaskResource>
-                    <TaskResource>4+2?4+3</TaskResource>
-                    <TaskResource>3+5?2+5</TaskResource>
-                    <TaskResource>7-3?7-2</TaskResource>
-                    <TaskResource>9-4?8-4</TaskResource>
+                    <TaskResource>5,+,4,?,4,+,5</TaskResource>
+                    <TaskResource>7,+,3,?,3,+,7</TaskResource>
+                    <TaskResource>4,+,2,?,4,+,3</TaskResource>
+                    <TaskResource>3,+,5,?,2,+,5</TaskResource>
+                    <TaskResource>7,-,3,?,7,-,2</TaskResource>
+                    <TaskResource>9,-,4,?,8,-,4</TaskResource>
                 </TaskResources>        
                 <TaskAnswer>
-                    <Answer>5+4=4+5</Answer>
-                    <Answer>7+3=3+7</Answer>
-                    <Answer>4+2&#60;4+3</Answer>
-                    <Answer>3+5&#62;2+5</Answer>
-                    <Answer>7-3&#60;7-2</Answer>
-                    <Answer>9-4&#62;8-4</Answer>
+                    <Answer>5,+,4,=,4,+,5</Answer>
+                    <Answer>7,+,3,=,3,+,7</Answer>
+                    <Answer>4,+,2,&#60;,4,+,3</Answer>
+                    <Answer>3,+,5,&#62;,2,+,5</Answer>
+                    <Answer>7,-,3,&#60;,7,-,2</Answer>
+                    <Answer>9,-,4,&#62;,8,-,4</Answer>
                 </TaskAnswer>
             </Task>
-            <Task number="2" tasktype="3">
+            <Task number="2" tasktype="2">
                 <Scrollable>true</Scrollable>
+                <Type>Operators</Type>
                 <TaskDescription>Найди значения выражений:</TaskDescription>
                 <TaskResources>
-                    <TaskResource>3+2-5=?</TaskResource>
-                    <TaskResource>7+3-4=?</TaskResource>
-                    <TaskResource>9-8+9=?</TaskResource>
-                    <TaskResource>6+3-5=?</TaskResource>
-                    <TaskResource>7-7+7=?</TaskResource>
-                    <TaskResource>3+3-3=?</TaskResource>
+                    <TaskResource>3,+,2,-,5,=,?</TaskResource>
+                    <TaskResource>7,+,3,-,4,=,?</TaskResource>
+                    <TaskResource>9,-,8,+,9,=,?</TaskResource>
+                    <TaskResource>6,+,3,-,5,=,?</TaskResource>
+                    <TaskResource>7,-,7,+,7,=,?</TaskResource>
+                    <TaskResource>3,+,3,-,3,=,?</TaskResource>
                 </TaskResources>        
                 <TaskAnswer>
-                    <Answer>3+2-5=0</Answer>
-                    <Answer>7+3-4=6</Answer>
-                    <Answer>9-8+9=10</Answer>
-                    <Answer>6+3-5=4</Answer>
-                    <Answer>7-7+7=7</Answer>
-                    <Answer>3+3-3=3</Answer>
+                    <Answer>3,+,2,-,5,=,0</Answer>
+                    <Answer>7,+,3,-,4,=,6</Answer>
+                    <Answer>9,-,8,+,9,=,10</Answer>
+                    <Answer>6,+,3,-,5,=,4</Answer>
+                    <Answer>7,-,7,+,7,=,7</Answer>
+                    <Answer>3,+,3,-,3,=,3</Answer>
                 </TaskAnswer>
             </Task>
             <Task number="3" tasktype="6">
@@ -384,28 +389,30 @@
                     <Answer>5+3=8&#38;3+5=8</Answer>
                 </TaskAnswer>
             </Task>
-            <Task number="3" tasktype="3">
+            <Task number="3" tasktype="2">
                 <Scrollable>true</Scrollable>
+                <Type>Operators</Type>
                 <TaskDescription>Найди значения выражений:</TaskDescription>
                 <TaskResources>
-                    <TaskResource>10-6-4=?</TaskResource>
-                    <TaskResource>8+2-5=?</TaskResource>
-                    <TaskResource>7-6+5=?</TaskResource>
-                    <TaskResource>2+4+3=?</TaskResource>
-                    <TaskResource>3+6+1=?</TaskResource>
-                    <TaskResource>9-2-6=?</TaskResource>
+                    <TaskResource>10,-,6,-,4,=,?</TaskResource>
+                    <TaskResource>8,+,2,-,5,=,?</TaskResource>
+                    <TaskResource>7,-,6,+,5,=,?</TaskResource>
+                    <TaskResource>2,+,4,+,3,=,?</TaskResource>
+                    <TaskResource>3,+,6,+,1,=,?</TaskResource>
+                    <TaskResource>9,-,2,-,6,=,?</TaskResource>
                 </TaskResources>        
                 <TaskAnswer>
-                    <Answer>10-6-4=0</Answer>
-                    <Answer>8+2-5=5</Answer>
-                    <Answer>7-6+5=6</Answer>
-                    <Answer>2+4+3=9</Answer>
-                    <Answer>3+6+1=10</Answer>
-                    <Answer>9-2-6=1</Answer>
+                    <Answer>10,-,6,-,4,=,0</Answer>
+                    <Answer>8,+,2,-,5,=,5</Answer>
+                    <Answer>7,-,6,+,5,=,6</Answer>
+                    <Answer>2,+,4,+,3,=,9</Answer>
+                    <Answer>3,+,6,+,1,=,10</Answer>
+                    <Answer>9,-,2,-,6,=,1</Answer>
                 </TaskAnswer>
             </Task>
             <Task number="4" tasktype="2">
                 <Scrollable>true</Scrollable>
+                <Type>Table</Type>
                 <TaskDescription>Вставь в пустые клетки числа так, чтобы сумма чисел вдоль каждой стороны квадрата равнялась 10</TaskDescription>
                 <Table>
                     <RowsNum>3</RowsNum>
@@ -444,6 +451,7 @@
             </Task>
             <Task number="5" tasktype="2">
                 <Scrollable>true</Scrollable>
+                <Type>Table</Type>
                 <Table>
                     <TableDescription>Увеличь на 5:</TableDescription>
                     <RowsNum>2</RowsNum>
