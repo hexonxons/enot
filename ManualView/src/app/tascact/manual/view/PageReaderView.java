@@ -1,6 +1,7 @@
 package app.tascact.manual.view;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.Log;
@@ -185,6 +186,7 @@ public class PageReaderView extends HorizontalScrollView
 		rightCacheBorder = newRightCacheBorder;
 		
 		activeItem = newActiveItem;
+		savePreferences();
 	}
 	
 	@Override
@@ -238,6 +240,14 @@ public class PageReaderView extends HorizontalScrollView
 			return true;
 		}
 		return true;
+	}
+	
+	private void savePreferences()
+	{
+		SharedPreferences settings = getContext().getSharedPreferences("ManualPrefs", 0);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putInt("last page of " + markup.getManualName(), activeItem + 1);
+		editor.commit();
 	}
 
 

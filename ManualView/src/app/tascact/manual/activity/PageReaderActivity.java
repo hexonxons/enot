@@ -88,7 +88,6 @@ public class PageReaderActivity extends Activity
 						{
 							mPrevTouchTime = event.getEventTime();
 							mPageToDisplay = mReader.nextPage();
-							savePreferences();
 							break;
 						}
 	
@@ -114,7 +113,6 @@ public class PageReaderActivity extends Activity
 						{
 							mPrevTouchTime = event.getEventTime();				
 							mPageToDisplay = mReader.prevPage();
-							savePreferences();
 							break;
 						}
 	
@@ -210,7 +208,6 @@ public class PageReaderActivity extends Activity
 		if(resultCode == RESULT_OK && requestCode == 0)
 		{
 			mPageToDisplay = data.getIntExtra("page", -1);
-			savePreferences();
 			mReader.setPage(mPageToDisplay);
 		}
 	}
@@ -219,14 +216,12 @@ public class PageReaderActivity extends Activity
     protected void onStop()
 	{
 		super.onStop();
-		savePreferences();
     }
 	
 	@Override
 	protected void onPause()
 	{
 		super.onPause();
-		savePreferences();
 	}
 	
 	@Override
@@ -234,15 +229,6 @@ public class PageReaderActivity extends Activity
 	{
 		super.onResume();
 		loadPreferences();
-	}
-
-	
-	private void savePreferences()
-	{
-		SharedPreferences settings = getSharedPreferences("ManualPrefs", 0);
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putInt("last page of " + mMarkup.getManualName(), mPageToDisplay);
-		editor.commit();
 	}
 	
 	private void loadPreferences()

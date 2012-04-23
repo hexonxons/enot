@@ -375,6 +375,8 @@ public class NoteLayout extends ViewGroup
 		
 		public void setText(String text)
 		{
+			if(mActiveCell == null)
+				return;
 			if(text.compareTo("Del") != 0)
 				mActiveCell.addText(text);
 			else

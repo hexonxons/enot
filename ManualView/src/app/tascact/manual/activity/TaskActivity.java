@@ -36,7 +36,6 @@ import app.tascact.manual.task.NewCompleteTableTaskView;
 import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
 import app.tascact.manual.task.LabyrinthTaskView;
-import app.tascact.manual.task.SetOperatorsTaskView;
 import app.tascact.manual.task.WriteExpressionTaskView;
 import app.tascact.manual.utils.LogWriter;
 import app.tascact.manual.utils.XMLUtils;

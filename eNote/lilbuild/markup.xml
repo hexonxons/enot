@@ -296,6 +296,10 @@
             <Task number="6" tasktype="4">
                 <Scrollable>false</Scrollable>
                 <TaskResources>
+                    <TextSize>0.05</TextSize>
+                    <Text>Объедини в группы</Text>
+                    <Text>фигуры одной и той же формы</Text>
+                    <FrictionKoef>3.2</FrictionKoef>
                     <TaskResource>manual_1_1_pg23_1_task_1</TaskResource>
                     <TaskResource>manual_1_1_pg23_1_task_2</TaskResource>
                     <TaskResource>manual_1_1_pg23_1_task_3</TaskResource>
@@ -317,10 +321,10 @@
                         <TaskResource>manual_1_1_pg23_1_task_4</TaskResource>
                         <TaskResource>manual_1_1_pg23_1_task_5</TaskResource>
                         <TaskResource>manual_1_1_pg23_1_task_6</TaskResource>
-                        <TaskResource>manual_1_1_pg23_1_task_8</TaskResource>
                     </Answer>
                     <Answer>
                         <TaskResource>manual_1_1_pg23_1_task_7</TaskResource>
+                        <TaskResource>manual_1_1_pg23_1_task_8</TaskResource>
                         <TaskResource>manual_1_1_pg23_1_task_9</TaskResource>
                         <TaskResource>manual_1_1_pg23_1_task_10</TaskResource>
                     </Answer>
@@ -482,5 +486,61 @@
                 </Table>
             </Task>
         </Tasks>
+    </page>
+    <page>
+        <PageResources>
+            <PageResource>manual_1_1_pg9_2</PageResource>
+            <PageResource>manual_1_1_pg9_3</PageResource>
+        </PageResources>
+        <Tasks>
+            <Task number="1" tasktype="5">
+                <Scrollable>false</Scrollable>
+                <Image>manual_1_1_pg9_2_img</Image>
+                <Borders>manual_1_1_pg9_2_borders</Borders>
+                <Zones>manual_1_1_pg9_2_zones</Zones>
+                <Keyboard height="0.2">
+                    <Rows>2</Rows>
+                    <Columns>6</Columns>
+                    <BackgroundColor R="127" G="63" B="0" />
+                    <SelectionColor R="255" G="127" B="0" />
+                    <Color row="0" column="0" R="255" G="255" B="255" />
+                    <Color row="0" column="1" R="127" G="127" B="127" />
+                    <Color row="0" column="2" R="255" G="0" B="0" />
+                    <Color row="0" column="3" R="0" G="255" B="0" />
+                    <Color row="0" column="4" R="0" G="0" B="255" />
+                    <Color row="0" column="5" R="0" G="127" B="255" />
+                    <Color row="1" column="0" R="63" G="63" B="63" />
+                    <Color row="1" column="1" R="191" G="191" B="191" />
+                    <Color row="1" column="2" R="0" G="255" B="255" />
+                    <Color row="1" column="3" R="255" G="0" B="255" />
+                    <Color row="1" column="4" R="255" G="255" B="0" />
+                    <Color row="1" column="5" R="0" G="255" B="127" />
+                </Keyboard>
+            </Task>
+            <Task number="2" tasktype="5">
+                <Scrollable>false</Scrollable>
+                <Image>manual_1_1_pg9_3_img</Image>
+                <Borders>manual_1_1_pg9_3_borders</Borders>
+                <Zones>manual_1_1_pg9_3_zones</Zones>
+                <Keyboard height="0.2">
+                    <Rows>2</Rows>
+                    <Columns>6</Columns>
+                    <BackgroundColor R="127" G="63" B="0" />
+                    <SelectionColor R="255" G="127" B="0" />
+                    <Color row="0" column="0" R="255" G="255" B="255" />
+                    <Color row="0" column="1" R="127" G="127" B="127" />
+                    <Color row="0" column="2" R="255" G="0" B="0" />
+                    <Color row="0" column="3" R="0" G="255" B="0" />
+                    <Color row="0" column="4" R="0" G="0" B="255" />
+                    <Color row="0" column="5" R="0" G="127" B="255" />
+                    <Color row="1" column="0" R="63" G="63" B="63" />
+                    <Color row="1" column="1" R="191" G="191" B="191" />
+                    <Color row="1" column="2" R="0" G="255" B="255" />
+                    <Color row="1" column="3" R="255" G="0" B="255" />
+                    <Color row="1" column="4" R="255" G="255" B="0" />
+                    <Color row="1" column="5" R="0" G="255" B="127" />
+                </Keyboard>
+            </Task>
+       </Tasks>
     </page>
 </book>
