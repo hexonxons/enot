@@ -78,7 +78,7 @@ public class NoteLayout extends ViewGroup
 		
 		if(mColumnsNum / 2 > mTableColumnsNumber)
 		{
-			if(mMaxRowsNum > mRowsNum)
+			if(mMaxRowsNum / 2 > mRowsNum)
 			{
 				sizeHeight = (mMaxRowsNum  / 2) * CELL_SIZE > sizeHeight ? (mMaxRowsNum  / 2) * CELL_SIZE : sizeHeight;
 			}

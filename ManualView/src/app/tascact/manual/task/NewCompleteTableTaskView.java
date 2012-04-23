@@ -85,9 +85,7 @@ public class NewCompleteTableTaskView extends TaskView
 				mMainLayout.addView(expr);
 			}
 		}
-		
-		
-		
+
 		this.addView(mMainLayout);
 	}
 

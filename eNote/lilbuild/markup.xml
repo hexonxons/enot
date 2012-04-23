@@ -491,6 +491,7 @@
         <PageResources>
             <PageResource>manual_1_1_pg9_2</PageResource>
             <PageResource>manual_1_1_pg9_3</PageResource>
+            <PageResource>manual_1_1_pg25_2</PageResource>
         </PageResources>
         <Tasks>
             <Task number="1" tasktype="5">
@@ -540,6 +541,11 @@
                     <Color row="1" column="4" R="255" G="255" B="0" />
                     <Color row="1" column="5" R="0" G="255" B="127" />
                 </Keyboard>
+            </Task>
+            <Task number="3" tasktype="3">
+                <Scrollable>false</Scrollable>
+                <Picture>manual_1_1_pg25_2_task</Picture>
+                <Mask>manual_1_1_pg25_2_taskMask</Mask>
             </Task>
        </Tasks>
     </page>

@@ -168,7 +168,7 @@ public class TaskActivity extends Activity
 				if(scrollable)
 				{
 					mScroll.addView(mTaskView, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
-					mMainLayout.addView(mScroll, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+					mMainLayout.addView(mScroll, new LayoutParams(LayoutParams.MATCH_PARENT, height - 60));
 					mMainLayout.addView(mContr, new LayoutParams(LayoutParams.MATCH_PARENT, 0));
 					mContr.addView(mKeyboard, new LayoutParams(LayoutParams.MATCH_PARENT, 200));
 					mMainLayout.addView(BottomControl, new LayoutParams(LayoutParams.MATCH_PARENT, 60));
