@@ -1,6 +1,7 @@
 package app.tascact.manual.view.utils;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
@@ -8,13 +9,16 @@ import android.graphics.Paint.Style;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import app.tascact.manual.R;
 
 //Класс клавиатуры
-public class KeyboardView extends RelativeLayout implements OnClickListener
+public class KeyboardView extends LinearLayout implements OnClickListener
 {
-	private final String mOperatorsSet = "+-*/><=";
+	private static final String[] DigitalRow = {"0", "1","2","3","4","5","6","7","8","9"};
+	private static final String[] OperatorsRow = {"+","-","*","/",">","<","=", "Del"};
+	
+	private LinearLayout[] mKeyboardRows = null;
 	
 	public interface OnKeyboardKeyPressListener
 	{
@@ -27,26 +31,59 @@ public class KeyboardView extends RelativeLayout implements OnClickListener
 	{
 		super(context);
 		this.setBackgroundColor(0xFFF2F2F2);
+		this.setOrientation(LinearLayout.VERTICAL);
 		
-		for(int i = 0; i < 10; ++i)
+		// if width < height
+		if(getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
 		{
-			Key key = new Key(context, Integer.toString(i));				
-			key.setOnClickListener(this);
-			this.addView(key);
-		}
-		
-		for(int i = 0; i < mOperatorsSet.length(); ++i)
-		{
-			Key key = new Key(context, mOperatorsSet.substring(i, i + 1));				
-			key.setOnClickListener(this);
+			mKeyboardRows = new LinearLayout[3];
 			
-			this.addView(key);
+			for(int i = 0; i < mKeyboardRows.length; ++i)
+			{
+				mKeyboardRows[i] = new LinearLayout(context);
+				this.addView(mKeyboardRows[i]);
+			}	
+			
+			// 5 digits in a row 
+			for(int i = 0; i < DigitalRow.length; ++i)
+			{
+				Key key = new Key(context, DigitalRow[i]);
+				key.setOnClickListener(this);
+				mKeyboardRows[i / 5].addView(key);
+			}
+			
+			for(int i = 0; i < OperatorsRow.length; ++i)
+			{
+				Key key = new Key(context, OperatorsRow[i]);
+				key.setOnClickListener(this);
+				mKeyboardRows[2].addView(key);
+			}
 		}
-		
-		Key key = new Key(context, "Del");				
-		key.setOnClickListener(this);
-		
-		this.addView(key);
+		else
+		{
+			mKeyboardRows = new LinearLayout[2];
+			
+			for(int i = 0; i < mKeyboardRows.length; ++i)
+			{
+				mKeyboardRows[i] = new LinearLayout(context);
+				this.addView(mKeyboardRows[i]);
+			}	
+			
+			// 10 digits in a row 
+			for(int i = 0; i < DigitalRow.length; ++i)
+			{
+				Key key = new Key(context, DigitalRow[i]);
+				key.setOnClickListener(this);
+				mKeyboardRows[0].addView(key);
+			}
+			
+			for(int i = 0; i < OperatorsRow.length; ++i)
+			{
+				Key key = new Key(context, OperatorsRow[i]);
+				key.setOnClickListener(this);
+				mKeyboardRows[1].addView(key);
+			}
+		}
 	}
 	
 	public void setOnKeyPressedListener(OnKeyboardKeyPressListener l)
@@ -64,36 +101,28 @@ public class KeyboardView extends RelativeLayout implements OnClickListener
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
-		int keyWidth = w / 12;
-		int keyHeight = h / 4;
+		// distance between rows and keys
+		final int MARGIN = 5;
+		final int ROW_COUNT = mKeyboardRows.length;
+		final int BUTTON_HEIGHT = (h - (ROW_COUNT + 1) * MARGIN) / ROW_COUNT;
 		
-		for(int i = 0; i < this.getChildCount(); ++i)
+		for(int i = 0; i < mKeyboardRows.length; ++i)
 		{
-			Key key = (Key)this.getChildAt(i);
-			if(i < 10)
+			int BUTTON_COUNT = mKeyboardRows[i].getChildCount();
+			int BUTTON_WIDTH = (w - MARGIN * (BUTTON_COUNT + 1)) / BUTTON_COUNT;
+			
+			LayoutParams rowParams = new LayoutParams(LayoutParams.MATCH_PARENT, BUTTON_HEIGHT);
+			rowParams.setMargins(0, MARGIN, 0, 0);
+			mKeyboardRows[i].setLayoutParams(rowParams);
+				
+			for(int j = 0; j < mKeyboardRows[i].getChildCount(); ++j)
 			{
-				int margin = (w - keyWidth * 10) / 11;
-				LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-				params.setMargins(margin + i * (keyWidth + margin), keyHeight / 2, 0, 0);
+				Key key = (Key)mKeyboardRows[i].getChildAt(j);
+				LayoutParams params = new LayoutParams(BUTTON_WIDTH, BUTTON_HEIGHT);
+				params.setMargins(MARGIN, 0, 0, 0);
 				key.setLayoutParams(params);
 			}
-			else
-				if(i < 10 + mOperatorsSet.length())
-				{
-					int margin = (w - keyWidth * (mOperatorsSet.length() + 1)) / (mOperatorsSet.length() + 2);
-					LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-					params.setMargins(margin + (i - 10) * (keyWidth + margin), keyHeight * 2, 0, 0);
-					key.setLayoutParams(params);
-				}
-				else
-				{
-					int margin = (w - keyWidth * (mOperatorsSet.length() + 1)) / (mOperatorsSet.length() + 2);
-					LayoutParams params = new LayoutParams(keyWidth, keyHeight);
-					params.setMargins(margin + (i - 10) * (keyWidth + margin), keyHeight * 2, 0, 0);
-					key.setLayoutParams(params);
-				}
-		}
-		
+		}	
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
 	

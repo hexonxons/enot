@@ -246,6 +246,9 @@ public class Markup {
 				
 				params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				this.addView(TaskElem, params);
+				ImageView separator = new ImageView(getContext());
+				separator.setBackgroundResource(R.drawable.separator);
+				this.addView(separator, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			}
 		}	
 		

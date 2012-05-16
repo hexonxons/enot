@@ -10,9 +10,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +34,11 @@ public class NoteLayout extends ViewGroup
 	
 	private LogWriter mWriter = null;
 	
-	private TableActiveArea mActiveArea = null;
+	private NoteView mActiveArea = null;
+	
+	private PlayThread mThread = null;
+	
+	private NoteLayout thisLayout = this;
 	
 	public NoteLayout(Context context, LogWriter writer)
 	{
@@ -43,27 +49,27 @@ public class NoteLayout extends ViewGroup
 	@Override
 	public void addView(View child)
 	{
-		TableActiveArea expr = (TableActiveArea) child;
+		NoteView expr = (NoteView) child;
 		child.setOnTouchListener(new OnTouchListener()
 		{
 			@Override
 			public boolean onTouch(View v, MotionEvent event)
 			{
-				if(mActiveArea != null && mActiveArea != (TableActiveArea)v)
+				if(mActiveArea != null && mActiveArea != (NoteView)v)
 				{
 					mActiveArea.unselect();
-					mActiveArea = (TableActiveArea)v;
+					mActiveArea = (NoteView)v;
 				}
 				else
 				{
-					mActiveArea = (TableActiveArea)v;
+					mActiveArea = (NoteView)v;
 				}
 				return false;
 			}
 		});
-		LayoutParams params = new LayoutParams((expr.mWidthCells) * CELL_SIZE, (expr.mHeightCells) * CELL_SIZE);
-		mMaxRowsNum += 1 + expr.mHeightCells;
-		mTableColumnsNumber = expr.mWidthCells;
+		LayoutParams params = new LayoutParams((expr.getWidthInCells()) * CELL_SIZE, (expr.getHeightInCells()) * CELL_SIZE);
+		mMaxRowsNum += 1 + expr.getHeightInCells();
+		mTableColumnsNumber = expr.getWidthInCells();
 		super.addView(child, params);
 	}
 	
@@ -134,9 +140,9 @@ public class NoteLayout extends ViewGroup
 			
 		    Canvas bgCanvas = new Canvas(bg);
 
-			for(int i = 0; i < mColumnsNum + 1; ++i)
+			for(int i = 0; i < w / CELL_SIZE + 1; ++i)
 			{
-				for(int j = 0; j < mRowsNum + 1; ++j)
+				for(int j = 0; j < h / CELL_SIZE + 1; ++j)
 				{
 					bgCanvas.drawBitmap(cellBg, i * CELL_SIZE, j * CELL_SIZE, null);
 				}
@@ -147,10 +153,10 @@ public class NoteLayout extends ViewGroup
 		
 		for(int areaindex = 0; areaindex < this.getChildCount(); ++areaindex)
 		{
-			TableActiveArea area = (TableActiveArea) this.getChildAt(areaindex);
+			NoteView area = (NoteView) this.getChildAt(areaindex);
 			
-			int width = area.mWidthCells;
-			int height = area.mHeightCells;
+			int width = area.getWidthInCells();
+			int height = area.getHeightInCells();
 			
 			if(mColumnsNum / 2 > width)
 			{
@@ -173,6 +179,36 @@ public class NoteLayout extends ViewGroup
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
 	
+	public void processKeyEvent(String label)
+	{
+		stopReplay();
+		if(mActiveArea != null)
+		{
+			mWriter.WriteEvent("KeyPress", label);
+			mActiveArea.setText(label);
+		}
+	}
+	
+	public void CheckTask()
+	{
+		stopReplay();
+		mWriter.WriteEvent("CheckTask", "");
+		for(int i = 0; i < this.getChildCount(); ++i)
+		{
+			((NoteView)this.getChildAt(i)).CheckTask();
+		}
+	}
+	
+	public void RestartTask()
+	{
+		stopReplay();
+		mWriter.WriteEvent("RestartTask", "");
+		for(int i = 0; i < this.getChildCount(); ++i)
+		{
+			((NoteView)this.getChildAt(i)).RestartTask();
+		}
+	}
+
 	private void LoadProgress()
 	{
 		Node act = mWriter.GetLastAct();
@@ -180,7 +216,7 @@ public class NoteLayout extends ViewGroup
 			return;
 		
 		NodeList TimeStamps = act.getChildNodes();
-		TableActiveArea activeTable = null;
+		NoteView activeTable = null;
 				
 		for(int i = 0; i < TimeStamps.getLength(); ++i)
 		{	
@@ -193,7 +229,7 @@ public class NoteLayout extends ViewGroup
 			{
 				if(activeTable != null)
 					activeTable.unselect();
-				activeTable = (TableActiveArea) this.getChildAt(Integer.parseInt(eventValue));
+				activeTable = (NoteView) this.getChildAt(Integer.parseInt(eventValue));
 				continue;
 			}
 			
@@ -215,6 +251,105 @@ public class NoteLayout extends ViewGroup
 			activeTable.unselect();
 	}
 
+	public void replay()
+	{
+		Node act = mWriter.GetLastAct();
+		if(act == null)
+			return;
+
+		if(mThread != null && mThread.isAlive())
+		{
+			mThread.setRunning(false);
+			LoadProgress();
+		}
+		else
+		{
+			RestartTask();
+			mThread = new PlayThread(act);
+			mThread.setRunning(true);
+			mThread.start();
+		}
+	}
+
+	public void stopReplay()
+	{
+		Log.d("Thread", "Try Stop");
+		if( mThread != null && mThread.isAlive())
+		{
+			mThread.setRunning(false);
+			LoadProgress();
+			Log.d("Thread", "Stopped");
+		}
+	}
+	
+	private class PlayThread extends Thread 
+	{
+	    private boolean mRun = false;
+	    private NodeList mTimeStamps = null;
+	    private long startTime = 0;
+	    private long nextTime = -1;
+	    private long timing = 0;
+	    private int index = 0;
+	    private NoteView activeTable = null;
+
+	    public PlayThread(Node act)
+	    {   	
+	    	mTimeStamps = act.getChildNodes();
+	    	String time = mTimeStamps.item(0).getFirstChild().getChildNodes().item(1).getTextContent();
+	    	if(time != null)		    		
+		    	nextTime = Long.parseLong(time);
+	    }
+
+	    public void setRunning(boolean run)
+	    {
+	    	if(nextTime != -1)
+	    		mRun = run;
+	    }
+
+	    @Override
+	    public void run() 
+	    {  
+	        while (mRun) 
+	        {
+	        	long currentTime = System.currentTimeMillis();
+
+	        	if(currentTime - timing > nextTime - startTime)
+	        	{
+	        		timing = currentTime;
+	        		NodeList event = mTimeStamps.item(index).getFirstChild().getChildNodes();
+	        		startTime = nextTime;
+	        		nextTime = Long.parseLong(event.item(1).getTextContent());
+	        		index++;
+	        		if(index >= mTimeStamps.getLength())
+	        			mRun = false;
+	        		String eventName = event.item(2).getNodeName();
+	    			String eventValue = event.item(2).getTextContent();
+
+	    			if(eventName.compareTo("Table") == 0)
+	    			{
+	    				if(activeTable != null)
+	    					activeTable.unselect();
+	    				activeTable = (NoteView) thisLayout.getChildAt(Integer.parseInt(eventValue));
+	    				continue;
+	    			}
+	    			
+	    			if(eventName.compareTo("Input") == 0)
+	    			{
+	    				activeTable.setInput(Integer.parseInt(eventValue));
+	    				continue;
+	    			}
+	    			
+	    			if(eventName.compareTo("KeyPress") == 0)
+	    			{
+	    				if(activeTable != null)
+	    					activeTable.setText(eventValue);
+	    				continue;
+	    			}
+	        	}
+	        }
+	    }
+	}
+
 	private class TableCell extends View
 	{
 		private String mText = "";
@@ -223,11 +358,17 @@ public class NoteLayout extends ViewGroup
 		private boolean mActive = false;
 		private int mCapacity = 2;
 		private int mAnswer = 0;
+		private Align mTextAlign = Paint.Align.CENTER;
 		
 		public TableCell(Context context)
 		{
 			super(context);
 			this.setBackgroundResource(R.drawable.cell_active);
+		}
+		
+		public void setTextAlign(Align align)
+		{
+			mTextAlign = align;
 		}
 		
 		public void addText(String text)
@@ -257,7 +398,7 @@ public class NoteLayout extends ViewGroup
 			// координаты помещения
 			float textY = (CELL_SIZE - fm.ascent - fm.descent) / 2;
 			
-			fg.setTextAlign(Paint.Align.CENTER);
+			fg.setTextAlign(mTextAlign);
 			
 			if(mText.length() != 0)
 				canvas.drawText(mText, (float) (CELL_SIZE  / 2), textY, fg);
@@ -333,12 +474,142 @@ public class NoteLayout extends ViewGroup
 		}
 	}
 	
-	public class TableActiveArea extends LinearLayout
+	private abstract class NoteView extends LinearLayout
 	{
-		public int mWidthCells = -1;
-		public int mHeightCells = -1;
-		public int mTopCell = -1;
-		public int mLeftCell = -1;
+		public NoteView(Context context)
+		{
+			super(context);
+		}
+		
+		abstract void setInput(int index);
+		abstract void CheckTask();
+		abstract void RestartTask();
+		abstract int getWidthInCells();
+		abstract int getHeightInCells();
+		abstract void unselect();
+		abstract void setText(String text);
+		
+	}
+	
+	public class EditInput extends NoteView
+	{
+
+		private int mWidthCells = -1;
+		private int mHeightCells = -1;
+		
+		private TableCell mActiveCell = null;
+		
+		private String mAnswer = null;
+		
+		public EditInput(Context context, int width, int height, int capacity)
+		{
+			super(context);
+			
+			mWidthCells = width;
+			mHeightCells = height;
+			
+			TableCell expression = new TableCell(context);
+			expression.setCapacity(capacity);
+			expression.setTextAlign(Paint.Align.LEFT);
+			expression.setActive(true);
+			
+			expression.setOnTouchListener(new OnTouchListener()
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent argevent1)
+				{
+					if(mActiveCell != null)
+					{
+						mActiveCell.setFocus(false);
+						mActiveCell.setSelect();
+						mActiveCell = null;
+					}
+					else
+					{
+						mActiveCell = (TableCell)v;
+						mActiveCell.setAnswer(0);
+						mActiveCell.setSelect();
+					}
+					
+					mWriter.WriteEvent("Table", Integer.toString(((ViewGroup) v.getParent().getParent()).indexOfChild((View) v.getParent())));
+					mWriter.WriteEvent("Input", "0");
+					
+					return false;
+				}
+			});
+			this.addView(expression, new LayoutParams(CELL_SIZE * mWidthCells, CELL_SIZE));
+		}
+		
+		public void setText(String text)
+		{
+			if(mActiveCell == null)
+				return;
+			if(text.compareTo("Del") != 0)
+				mActiveCell.addText(text);
+			else
+				mActiveCell.delSymb();
+		}
+		
+		public void setRowAnswer(String rowData)
+		{
+			mAnswer = rowData;
+		}
+		
+		public void CheckTask()
+		{
+			if(mActiveCell == null)
+				return;
+			String data = mActiveCell.getText();
+			
+			if(mAnswer.indexOf(data) < 0 || data.length() == 0 ||
+			   ((data.length() < mAnswer.length() && mAnswer.charAt(data.length()) != '&') &&
+			   (mAnswer.indexOf(data) + data.length() < mAnswer.length())))
+				mActiveCell.setAnswer(-1);
+			else
+				mActiveCell.setAnswer(1);
+		}
+
+		public void RestartTask()
+		{
+			TableCell cell = (TableCell) this.getChildAt(0);
+			cell.setFocus(false);
+			cell.addText("");
+		}
+
+		@Override
+		int getWidthInCells() 
+		{
+			return mWidthCells;
+		}
+
+		@Override
+		int getHeightInCells()
+		{
+			return mHeightCells;
+		}
+
+		@Override
+		void unselect()
+		{
+			if(mActiveCell != null)
+			{
+				mActiveCell.setSelect(false);
+				mActiveCell.setFocus(false);
+				mActiveCell = null;
+			}
+		}
+
+		@Override
+		void setInput(int index)
+		{
+			mActiveCell = (TableCell) this.getChildAt(index);
+		}
+	}
+	
+	public class TableInput extends NoteView
+	{
+		private int mWidthCells = 0;
+		private int mHeightCells = 0;
 		
 		private List<TableCell> mActiveCells = new ArrayList<NoteLayout.TableCell>();
 		private TableCell mActiveCell = null;
@@ -347,7 +618,9 @@ public class NoteLayout extends ViewGroup
 		
 		private int mCellNumbers = -1;
 		
-		TableActiveArea(Context context)
+		private String mTableHeader = null;
+		
+		TableInput(Context context)
 		{
 			super(context);
 			this.setOrientation(LinearLayout.VERTICAL);
@@ -385,7 +658,7 @@ public class NoteLayout extends ViewGroup
 		
 		public void setRow(String rowData, int index)
 		{
-			LinearLayout tableRow = (LinearLayout) this.getChildAt(index);
+			LinearLayout tableRow = (LinearLayout) this.getChildAt(index + (mTableHeader == null ? 0 : 1));
 			String values[] = rowData.split("\\,");
 			for(int i = 0; i < mWidthCells; ++i)
 			{
@@ -422,10 +695,23 @@ public class NoteLayout extends ViewGroup
 			}
 		}
 		
+		public void setTableHeader(String header)
+		{
+			mTableHeader = header;
+			mHeightCells += 1;
+			
+			LinearLayout headerRow = new LinearLayout(getContext());
+			TableCell cell = new TableCell(getContext());
+			cell.setTextAlign(Paint.Align.LEFT);
+			cell.addText(header);
+			headerRow.addView(cell);
+			this.addView(headerRow);
+		}
+		
 		public void setParameters(int w, int h)
 		{
-			mWidthCells = w;
-			mHeightCells = h;		
+			mWidthCells += w;
+			mHeightCells += h;		
 			mCellNumbers = w * h;
 			
 			mAnswers = new String[mHeightCells][];
@@ -441,9 +727,8 @@ public class NoteLayout extends ViewGroup
 			}
 		}
 
-		public boolean CheckTask()
+		public void CheckTask()
 		{
-			boolean mAnswer = true;
 			for(int i = 0; i < this.getChildCount(); ++i)
 			{
 				LinearLayout tableRow = (LinearLayout) this.getChildAt(i);
@@ -460,19 +745,27 @@ public class NoteLayout extends ViewGroup
 					}
 				}				
 			}
-			return mAnswer;
 		}
 		
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh)
 		{
-			for(int i = 0; i < this.getChildCount(); ++i)
+			int index = (mTableHeader == null ? 0 : 1);
+			
+			if(index == 1)
 			{
-				LinearLayout row = (LinearLayout) this.getChildAt(i);
+				int widthCells = ((LinearLayout) this.getChildAt(index)).getChildCount() * CELL_SIZE;
+				((LinearLayout) this.getChildAt(0)).getChildAt(0).setLayoutParams(new LayoutParams(widthCells, CELL_SIZE));
+			}
+			
+			for(; index < this.getChildCount(); ++index)
+			{
+				LinearLayout row = (LinearLayout) this.getChildAt(index);
 				for(int j = 0; j < row.getChildCount(); ++j)
 				{
 					row.getChildAt(j).setLayoutParams(new LayoutParams(CELL_SIZE, CELL_SIZE));
 				}
+				row.setLayoutParams(new LayoutParams(CELL_SIZE * row.getChildCount(), CELL_SIZE));
 				
 			}
 			super.onSizeChanged(w, h, oldw, oldh);
@@ -490,6 +783,18 @@ public class NoteLayout extends ViewGroup
 		public void setRowAnswer(String rowData, int index)
 		{
 			mAnswers[index] = rowData.split("\\,");
+		}
+
+		@Override
+		int getWidthInCells()
+		{
+			return mWidthCells;
+		}
+
+		@Override
+		int getHeightInCells() 
+		{
+			return mHeightCells;
 		}
 	}
 	
@@ -509,32 +814,4 @@ public class NoteLayout extends ViewGroup
 		}
 		
 	}
-
-	public void processKeyEvent(String label)
-	{
-		if(mActiveArea != null)
-		{
-			mWriter.WriteEvent("KeyPress", label);
-			mActiveArea.setText(label);
-		}
-	}
-	
-	public void CheckTask()
-	{
-		mWriter.WriteEvent("CheckTask", "");
-		for(int i = 0; i < this.getChildCount(); ++i)
-		{
-			((TableActiveArea)this.getChildAt(i)).CheckTask();
-		}
-	}
-	
-	public void RestartTask()
-	{
-		mWriter.WriteEvent("RestartTask", "");
-		for(int i = 0; i < this.getChildCount(); ++i)
-		{
-			((TableActiveArea)this.getChildAt(i)).RestartTask();
-		}
-	}
-
 }

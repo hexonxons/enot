@@ -13,9 +13,9 @@
 package app.tascact.manual.view;
 
 import android.content.Context;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 
-public abstract class TaskView extends RelativeLayout
+public abstract class TaskView extends LinearLayout
 {
 	public TaskView(Context context)
 	{
