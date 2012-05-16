@@ -268,7 +268,8 @@ public class GroupingElementsTaskView extends TaskView {
 		for (TaskElement elem : taskElements) {
 			elem.velocity.x = elem.velocity.y = 0.0f;
 		}
-		alertDialog.setMessage(Boolean.toString(res));
+		String msg=res?"Правильно!":"Неправильно!";
+		alertDialog.setMessage(msg);
 		alertDialog.show();
 	}
 
