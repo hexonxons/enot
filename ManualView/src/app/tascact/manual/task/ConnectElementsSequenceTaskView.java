@@ -167,8 +167,8 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 				}
 			}
 		}
-
-		alertDialog.setMessage(Boolean.toString(result));
+		String msg = result?"Правильно!":"Неправильно!";
+		alertDialog.setMessage(msg);
 		alertDialog.show();
 	}
 

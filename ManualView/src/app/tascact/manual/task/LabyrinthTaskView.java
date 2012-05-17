@@ -115,7 +115,7 @@ public class LabyrinthTaskView extends TaskView {
 			fingerPos.x = x;
 			fingerPos.y = y;
 			if(! (isFuckingGreen(color) || isFuckingBlue(color) || isFuckingRed(color))){
-				alertDialog.setMessage("false");
+				alertDialog.setMessage("Попробуй ещё раз!");
 				alertDialog.show();
 				isTouched = false;
 			}
@@ -129,10 +129,10 @@ public class LabyrinthTaskView extends TaskView {
 				break;
 			}
 			if(isFuckingRed(color)){
-				alertDialog.setMessage("trueъ");
+				alertDialog.setMessage("Молодец!");
 				alertDialog.show();
 			}else if(!isFuckingGreen(color)){
-				alertDialog.setMessage("false");
+				alertDialog.setMessage("Попробуй ещё раз!");
 				alertDialog.show();
 			}
 			isTouched = false;
