@@ -211,18 +211,6 @@ public class PageReaderActivity extends Activity
 			mReader.setPage(mPageToDisplay);
 		}
 	}
-
-	@Override
-    protected void onStop()
-	{
-		super.onStop();
-    }
-	
-	@Override
-	protected void onPause()
-	{
-		super.onPause();
-	}
 	
 	@Override
 	protected void onResume()

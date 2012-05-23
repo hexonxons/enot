@@ -12,26 +12,30 @@ import java.util.List;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.view.MotionEvent;
 import app.tascact.manual.Markup;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
+import app.tascact.manual.view.utils.AnswerCheckDialog;
 
 public class ConnectElementsSequenceTaskView extends TaskView {
 	private Node inputParams;
-	private Resources resources;
-	private int[] elementResourceIds;
 	private Bitmap[] taskElements;
 	private PointF[] elementPositions;
 	private String[] elementNames;
 	private Bitmap userBitmap; // user-drawn lines
 	private Bitmap oldUserBitmap;
 	private Canvas userCanvas;
-	private AlertDialog alertDialog;
+	private AnswerCheckDialog alertDialog;
 	private int width, height;
 	private boolean isLineDrawing;
 	private PointF lastTouchedPoint;
@@ -49,7 +53,6 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	public ConnectElementsSequenceTaskView(Context context, Node theInputParams, Markup markup) {
 		super(context);
 		inputParams = theInputParams;
-		resources = context.getResources();
 
 		isConsequentnessImportant = XMLUtils.getBooleanProperty(inputParams,
 				"./ConsequentnessImportant", false);
@@ -66,7 +69,6 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		taskElements = new Bitmap[N];
 		elementPositions = new PointF[N];
 		elementNames = new String[N];
-		elementResourceIds = new int[N];
 
 		for (int i = 0; i < N; ++i) {
 			elementNames[i] = nodes.item(i).getTextContent();
@@ -107,8 +109,6 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 		emptyPaint.setAntiAlias(true);
 		emptyPaint.setARGB(255, 25, 155, 25);
 		emptyPaint.setStrokeWidth(lineWidth);
-
-		alertDialog = new AlertDialog.Builder(context).create();
 	}
 
 	@Override
@@ -153,22 +153,31 @@ public class ConnectElementsSequenceTaskView extends TaskView {
 	}
 
 	@Override
-	public void CheckTask() {
-		if (!isConsequentnessImportant) {
+	public void CheckTask()
+	{
+		boolean result = true;
+		if (!isConsequentnessImportant)
+		{
 			Collections.sort(givenAnswers);
 		}
-		boolean result = true;
-		if (trueAnswers.size() != givenAnswers.size()) {
+		
+		if (trueAnswers.size() != givenAnswers.size())
+		{
 			result = false;
-		} else {
-			for (int i = 0; i < trueAnswers.size(); ++i) {
-				if (trueAnswers.get(i).compareTo(givenAnswers.get(i)) != 0) {
+		} 
+		else
+		{
+			for (int i = 0; i < trueAnswers.size(); ++i) 
+			{
+				if (trueAnswers.get(i).compareTo(givenAnswers.get(i)) != 0) 
+				{
 					result = false;
 				}
 			}
 		}
-		String msg = result?"Правильно!":"Неправильно!";
-		alertDialog.setMessage(msg);
+
+		alertDialog = new AnswerCheckDialog(getContext());
+		alertDialog.setAnswer(result);
 		alertDialog.show();
 	}
 

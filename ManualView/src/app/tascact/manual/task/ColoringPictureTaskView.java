@@ -7,7 +7,6 @@ import java.util.Queue;
 
 import org.w3c.dom.Node;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -18,9 +17,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -31,8 +28,8 @@ import app.tascact.manual.Markup;
 import app.tascact.manual.utils.MathUtils;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
+import app.tascact.manual.view.utils.AnswerCheckDialog;
 import app.tascact.manual.view.utils.ColorCircleGenerator;
-import app.tascact.manual.view.utils.ColorKeyboard;
 import app.tascact.manual.view.utils.ColorPicker;
 import app.tascact.manual.view.utils.ColorPicker.ColorPickerListener;
 
@@ -49,7 +46,7 @@ public class ColoringPictureTaskView extends TaskView {
 	private Bitmap brush;
 	private Paint paint;
 	private List<Zone> splittedZones;
-	private AlertDialog alertDialog;
+	private AnswerCheckDialog alertDialog;
 	private Markup markup;
 	private int currentColor;
 	private boolean currentModeFill;
@@ -62,7 +59,6 @@ public class ColoringPictureTaskView extends TaskView {
 		inputParams = theInputParams;
 		paint = new Paint();
 		setBackgroundColor(Color.WHITE);
-		alertDialog = new AlertDialog.Builder(context).create();
 	}
 
 	@Override
@@ -377,7 +373,12 @@ public class ColoringPictureTaskView extends TaskView {
 		}else{
 			message = "Нѣ всё раскрасилъ :(";
 		}
-		alertDialog.setMessage(message);
+		
+		alertDialog = new AnswerCheckDialog(getContext());
+		alertDialog.setAnswer(flag);
+		alertDialog.show();
+		
+		//alertDialog.setMessage(message);
 		alertDialog.show();
 		invalidate();
 	}

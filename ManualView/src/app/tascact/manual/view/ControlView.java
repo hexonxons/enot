@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -197,25 +196,25 @@ public class ControlView extends RelativeLayout
 			{
 				case ORIENTATION_TOP:
 				{
-					icon.setBackgroundResource(R.drawable.button_frame_top);
+					icon.setBackground(R.drawable.button_frame_top, R.drawable.button_frame_top_pushed);
 					break;
 				}
 				
 				case ORIENTATION_BOTTOM:
 				{
-					icon.setBackgroundResource(R.drawable.button_frame_bottom);
+					icon.setBackground(R.drawable.button_frame_bottom, R.drawable.button_frame_bottom_pushed);
 					break;
 				}
 				
 				case ORIENTATION_LEFT:
 				{
-					icon.setBackgroundResource(R.drawable.button_frame_left);
+					icon.setBackground(R.drawable.button_frame_left, R.drawable.button_frame_left_pushed);
 					break;
 				}
 				
 				case ORIENTATION_RIGHT:
 				{
-					icon.setBackgroundResource(R.drawable.button_frame_right);
+					icon.setBackground(R.drawable.button_frame_right, R.drawable.button_frame_right_pushed);
 					break;
 				}
 				default:
@@ -233,7 +232,8 @@ public class ControlView extends RelativeLayout
 		private Drawable mPressedIcon = null;
 		private Drawable mUnpressedIcon = null;
 		
-		private Drawable mBackground = null;
+		private Drawable mPressedBackground = null;
+		private Drawable mUnpressedBackground = null;
 		
 		
 		public ControlButton(Context context, Drawable unpressed, Drawable pressed)
@@ -266,21 +266,22 @@ public class ControlView extends RelativeLayout
 			return super.onTouchEvent(event);
 		}
 		
-		@Override
-		public void setBackgroundResource(int resid)
+		public void setBackground(int unpressedResId, int pressedResId)
 		{
-			Log.e("setBackgroundResource","");
-			mBackground = getResources().getDrawable(resid);
-			super.setBackgroundResource(resid);
+			mPressedBackground = getResources().getDrawable(pressedResId);
+			mUnpressedBackground = getResources().getDrawable(unpressedResId);
+			this.setBackgroundResource(unpressedResId);
 		}
 		
 		private Drawable ScaleAndMergeDrawables(Drawable button, Drawable backgroung, int w, int h)
 		{
-			int minSz = w > h ? h : w;
+			double factor = (double) w / button.getMinimumWidth() > (double) h / button.getMinimumHeight() ? 
+					(double) h / button.getMinimumHeight() : (double) w / button.getMinimumWidth();
+			double scaleWidth = button.getMinimumWidth() * factor;
+			double scaleHeight = button.getMinimumHeight() * factor;
 			
-			BitmapDrawable buttonBitmap = new BitmapDrawable(Bitmap.createScaledBitmap(((BitmapDrawable)button).getBitmap(), minSz, minSz, true));
+			BitmapDrawable buttonBitmap = new BitmapDrawable(Bitmap.createScaledBitmap(((BitmapDrawable)button).getBitmap(), (int)scaleWidth, (int)scaleHeight, true));
 			BitmapDrawable bgBitmap =  new BitmapDrawable(Bitmap.createScaledBitmap(((BitmapDrawable)backgroung).getBitmap(), w, h, true));
-			
 			
 			int buttonH = buttonBitmap.getBitmap().getHeight();
 			int buttonW = buttonBitmap.getBitmap().getWidth();
@@ -302,8 +303,8 @@ public class ControlView extends RelativeLayout
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh)
 		{			
-			mPressedIcon = ScaleAndMergeDrawables(mPressedIcon, mBackground, w, h);
-			mUnpressedIcon = ScaleAndMergeDrawables(mUnpressedIcon, mBackground, w, h);
+			mPressedIcon = ScaleAndMergeDrawables(mPressedIcon, mPressedBackground, w, h);
+			mUnpressedIcon = ScaleAndMergeDrawables(mUnpressedIcon, mUnpressedBackground, w, h);
 			
 			this.setBackgroundDrawable(mUnpressedIcon);
 			

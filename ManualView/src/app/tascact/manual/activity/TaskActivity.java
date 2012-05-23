@@ -113,7 +113,7 @@ public class TaskActivity extends Activity
 					
 					case 2:
 					{
-						mWriter = new LogWriter(extras.getString("ManualName"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
+						mWriter = new LogWriter(this, extras.getString("ManualName"), extras.getInt("PageNumber"), extras.getInt("TaskNumber"));
 						mTaskLayout = new CompleteTableTaskView(this, task, markup, mWriter);
 						mKeyboard.setOnKeyPressedListener(new OnKeyboardKeyPressListener()
 						{
@@ -168,9 +168,9 @@ public class TaskActivity extends Activity
 				mBottomControl.setPanelOrientation(ControlView.ORIENTATION_BOTTOM);
 				
 				mBottomControl.addIcon(getResources().getDrawable(R.drawable.play), getResources().getDrawable(R.drawable.play_pressed), mRunReplayTouchListener);
-				mBottomControl.addIcon(getResources().getDrawable(R.drawable.check), getResources().getDrawable(R.drawable.checked), mCheckTouchListener);
-				mBottomControl.addIcon(getResources().getDrawable(R.drawable.restart), getResources().getDrawable(R.drawable.restarted), mRestartTouchListener);
-				mBottomControl.addIcon(getResources().getDrawable(R.drawable.keyboard), getResources().getDrawable(R.drawable.keyboard_pressed), mKeyboardStartListener);
+				mBottomControl.addIcon(getResources().getDrawable(R.drawable.button_check), getResources().getDrawable(R.drawable.button_check), mCheckTouchListener);
+				mBottomControl.addIcon(getResources().getDrawable(R.drawable.button_delete), getResources().getDrawable(R.drawable.button_delete), mRestartTouchListener);
+				mBottomControl.addIcon(getResources().getDrawable(R.drawable.button_type), getResources().getDrawable(R.drawable.button_type), mKeyboardStartListener);
 				
 				if(scrollable)
 				{

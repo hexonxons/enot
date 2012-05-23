@@ -14,7 +14,6 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -273,12 +272,10 @@ public class NoteLayout extends ViewGroup
 
 	public void stopReplay()
 	{
-		Log.d("Thread", "Try Stop");
 		if( mThread != null && mThread.isAlive())
 		{
 			mThread.setRunning(false);
 			LoadProgress();
-			Log.d("Thread", "Stopped");
 		}
 	}
 	

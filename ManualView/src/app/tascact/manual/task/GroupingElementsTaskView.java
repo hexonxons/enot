@@ -29,6 +29,7 @@ import app.tascact.manual.utils.MathUtils;
 import app.tascact.manual.utils.TouchMoment;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.TaskView;
+import app.tascact.manual.view.utils.AnswerCheckDialog;
 
 public class GroupingElementsTaskView extends TaskView {
 	private float frictionKoef = 4.9f;
@@ -41,7 +42,7 @@ public class GroupingElementsTaskView extends TaskView {
 	private PointF lastTouchedPoint;
 	private long lastTouchStart;
 	private String[][] trueAnswers;
-	private AlertDialog alertDialog;
+	private AnswerCheckDialog alertDialog;
 	private float instrictionsTextSize = 0.0f;
 	private String[] instructions;
 	Markup markup;
@@ -173,8 +174,6 @@ public class GroupingElementsTaskView extends TaskView {
 		setBackgroundColor(Color.WHITE);
 		emptyPaint = new Paint();
 
-		alertDialog = new AlertDialog.Builder(context).create();
-
 		timerRunner.postDelayed(updatePhysicsProc, 100);
 	}
 
@@ -268,8 +267,9 @@ public class GroupingElementsTaskView extends TaskView {
 		for (TaskElement elem : taskElements) {
 			elem.velocity.x = elem.velocity.y = 0.0f;
 		}
-		String msg=res?"Правильно!":"Неправильно!";
-		alertDialog.setMessage(msg);
+		
+		alertDialog = new AnswerCheckDialog(getContext());
+		alertDialog.setAnswer(res);
 		alertDialog.show();
 	}
 

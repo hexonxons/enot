@@ -9,7 +9,8 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
-import javax.xml.parsers.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -216,7 +217,6 @@ public class Markup {
 	{
 		private int pageNumber;
 		private ImageView mTaskImage = null;
-		final private int NUMBER_BUTTON_SIZE = 60;
 		
 		public PageView(int pageNumber)
 		{
@@ -234,14 +234,13 @@ public class Markup {
 				
 				mTaskImage = new ImageView(this.getContext());
 				// Makes it keep the ratio when size changed
+				
 				mTaskImage.setImageURI(resources[i]);
 				mTaskImage.setId(i + 1);
 				mTaskImage.setOnClickListener(taskLauncher);
 				mTaskImage.setAdjustViewBounds(true);
 				
-				LayoutParams params = new LayoutParams(NUMBER_BUTTON_SIZE, NUMBER_BUTTON_SIZE);
-				
-				params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				TaskElem.addView(mTaskImage, params);
 				
 				params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -251,12 +250,6 @@ public class Markup {
 				this.addView(separator, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			}
 		}	
-		
-		@Override
-		protected void onSizeChanged(int w, int h, int oldw, int oldh)
-		{
-			super.onSizeChanged(w, h, oldw, oldh);
-		}
 
 		private OnClickListener taskLauncher = new OnClickListener()
 		{

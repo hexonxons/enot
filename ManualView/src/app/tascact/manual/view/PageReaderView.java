@@ -153,6 +153,19 @@ public class PageReaderView extends HorizontalScrollView
 		int newRightCacheBorder = Math.min(pages.length, newActiveItem
 				+ CAСHE_SIZE - CACHE_OFFSET);	
 		
+		// Invalidating old cache
+		for (int i = leftCacheBorder; i < rightCacheBorder; ++i)
+		{
+			if (!(newLeftCacheBorder <= i && i < newRightCacheBorder))
+			{
+				if (pages[i] != null)
+				{
+					innerWrapper.removeView(pages[i]);
+					pages[i] = null;
+				}
+			}
+		}
+		
 		// Adding new cache
 		for (int i = newLeftCacheBorder; i < newRightCacheBorder; ++i)
 		{
@@ -166,19 +179,6 @@ public class PageReaderView extends HorizontalScrollView
 				// Adding page
 				pages[i] = markup.getPageView(i + 1);
 				innerWrapper.addView(pages[i], params);
-			}
-		}
-
-		// Invalidating old cache
-		for (int i = leftCacheBorder; i < rightCacheBorder; ++i)
-		{
-			if (!(newLeftCacheBorder <= i && i < newRightCacheBorder))
-			{
-				if (pages[i] != null)
-				{
-					innerWrapper.removeView(pages[i]);
-					pages[i] = null;
-				}
 			}
 		}
 
