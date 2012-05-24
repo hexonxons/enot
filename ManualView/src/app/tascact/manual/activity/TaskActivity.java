@@ -40,6 +40,7 @@ import app.tascact.manual.task.ConnectElementsSequenceTaskView;
 import app.tascact.manual.task.GroupingElementsTaskView;
 import app.tascact.manual.task.LabyrinthTaskView;
 import app.tascact.manual.task.CompleteTableTaskView;
+import app.tascact.manual.task.PlaceElements;
 import app.tascact.manual.utils.LogWriter;
 import app.tascact.manual.utils.XMLUtils;
 import app.tascact.manual.view.ControlView;
@@ -148,6 +149,12 @@ public class TaskActivity extends Activity
 						break;
 					}
 					
+					case 6: 
+					{
+						mTaskLayout = new PlaceElements(this, task, markup);
+						break;
+					}
+					
 					default:
 					{
 						break;
@@ -167,7 +174,7 @@ public class TaskActivity extends Activity
 				mBottomControl.setIconsFloat(ControlView.FLOAT_LEFT);
 				mBottomControl.setPanelOrientation(ControlView.ORIENTATION_BOTTOM);
 				
-				mBottomControl.addIcon(getResources().getDrawable(R.drawable.play), getResources().getDrawable(R.drawable.play_pressed), mRunReplayTouchListener);
+				//mBottomControl.addIcon(getResources().getDrawable(R.drawable.play), getResources().getDrawable(R.drawable.play_pressed), mRunReplayTouchListener);
 				mBottomControl.addIcon(getResources().getDrawable(R.drawable.button_check), getResources().getDrawable(R.drawable.button_check), mCheckTouchListener);
 				mBottomControl.addIcon(getResources().getDrawable(R.drawable.button_delete), getResources().getDrawable(R.drawable.button_delete), mRestartTouchListener);
 				mBottomControl.addIcon(getResources().getDrawable(R.drawable.button_type), getResources().getDrawable(R.drawable.button_type), mKeyboardStartListener);

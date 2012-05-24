@@ -1,11 +1,15 @@
 package app.tascact.manual.task;
 
+import java.io.File;
+
 import javax.xml.xpath.XPathConstants;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.widget.LinearLayout;
 import app.tascact.manual.Markup;
 import app.tascact.manual.task.NoteLayout.EditInput;
@@ -42,7 +46,6 @@ public class CompleteTableTaskView extends TaskView
 				NodeList Rows = (NodeList) XMLUtils.evalXpathExpr(table, "./Rows/Row", XPathConstants.NODESET);
 				NodeList Answers = (NodeList) XMLUtils.evalXpathExpr(table, "./Answers/Row", XPathConstants.NODESET);
 				
-				
 				TableInput expr = mMainLayout.new TableInput(context);
 				
 				if(TableDescription != null)
@@ -54,12 +57,15 @@ public class CompleteTableTaskView extends TaskView
 				
 				for(int j = 0; j < rowsNum; ++j)
 				{
-					expr.setRow(Rows.item(j).getTextContent(), j);
+					expr.setRow(Rows.item(j).getTextContent(), Answers.item(j).getTextContent(), j);
 				}
-				
-				for(int j = 0; j < rowsNum; ++j)
+
+				Node ImageResource = (Node)XMLUtils.evalXpathExpr(resource, "./ImageResource", XPathConstants.NODE);
+				if(ImageResource != null)
 				{
-					expr.setRowAnswer(Answers.item(j).getTextContent(), j);
+					String filePath = markup.getMarkupFileDirectory() + File.separator + "img" + File.separator + ImageResource.getTextContent() + ".png";
+					Bitmap TaskImage = BitmapFactory.decodeFile(filePath);
+					mMainLayout.setTaskImage(TaskImage);
 				}
 				
 				mMainLayout.addView(expr);
@@ -80,9 +86,16 @@ public class CompleteTableTaskView extends TaskView
 				
 				TableInput expr = mMainLayout.new TableInput(context);
 				expr.setParameters(columnsNum, rowsNum);
-				expr.setRow(Rows.item(i).getTextContent(), 0);
-				expr.setRowAnswer(Answers.item(i).getTextContent(), 0);
-								
+				expr.setRow(Rows.item(i).getTextContent(), Answers.item(i).getTextContent(), 0);
+							
+				Node ImageResource = (Node)XMLUtils.evalXpathExpr(resource, "./ImageResource", XPathConstants.NODE);
+				if(ImageResource != null)
+				{
+					String filePath = markup.getMarkupFileDirectory() + File.separator + "img" + File.separator + ImageResource.getTextContent() + ".png";
+					Bitmap TaskImage = BitmapFactory.decodeFile(filePath);
+					mMainLayout.setTaskImage(TaskImage);
+				}
+				
 				mMainLayout.addView(expr);
 			}
 		}
@@ -93,10 +106,19 @@ public class CompleteTableTaskView extends TaskView
 			Node Rows = (Node) XMLUtils.evalXpathExpr(resource, "./TaskResources/TaskResource", XPathConstants.NODE);
 			// Getting answer resources
 			Node Answers = (Node) XMLUtils.evalXpathExpr(resource, "./TaskAnswer/Answer", XPathConstants.NODE);
-			
-			int capacity = Rows.getTextContent().length() * 2;
+
+			int capacity = Rows.getTextContent().length() + 1;
 			EditInput expr = mMainLayout.new EditInput(context, capacity, 1, capacity);
-			expr.setRowAnswer(Answers.getTextContent());			
+			expr.setRowAnswer(Answers.getTextContent());		
+			
+			Node ImageResource = (Node)XMLUtils.evalXpathExpr(resource, "./ImageResource", XPathConstants.NODE);
+			if(ImageResource != null)
+			{
+				String filePath = markup.getMarkupFileDirectory() + File.separator + "img" + File.separator + ImageResource.getTextContent() + ".png";
+				Bitmap TaskImage = BitmapFactory.decodeFile(filePath);
+				mMainLayout.setTaskImage(TaskImage);
+			}
+			
 			mMainLayout.addView(expr);
 		}
 

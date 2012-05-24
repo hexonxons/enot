@@ -29,7 +29,7 @@ public class NoteLayout extends ViewGroup
 	private int mRowsNum = -1;	
 	
 	private int mTableColumnsNumber = 0;
-	private int mMaxRowsNum = 0;
+	private int mMaxRowsNum = 1;
 	
 	private LogWriter mWriter = null;
 	
@@ -38,6 +38,10 @@ public class NoteLayout extends ViewGroup
 	private PlayThread mThread = null;
 	
 	private NoteLayout thisLayout = this;
+
+	private Bitmap mTaskImage = null;
+	
+	private int mDataOffset = 0;
 	
 	public NoteLayout(Context context, LogWriter writer)
 	{
@@ -67,7 +71,7 @@ public class NoteLayout extends ViewGroup
 			}
 		});
 		LayoutParams params = new LayoutParams((expr.getWidthInCells()) * CELL_SIZE, (expr.getHeightInCells()) * CELL_SIZE);
-		mMaxRowsNum += 1 + expr.getHeightInCells();
+		mMaxRowsNum += expr.getHeightInCells();
 		mTableColumnsNumber = expr.getWidthInCells();
 		super.addView(child, params);
 	}
@@ -81,11 +85,12 @@ public class NoteLayout extends ViewGroup
 		mRowsNum = sizeHeight / CELL_SIZE;
 		mColumnsNum = sizeWidth / CELL_SIZE;
 		
+		
 		if(mColumnsNum / 2 > mTableColumnsNumber)
 		{
 			if(mMaxRowsNum / 2 > mRowsNum)
 			{
-				sizeHeight = (mMaxRowsNum  / 2) * CELL_SIZE > sizeHeight ? (mMaxRowsNum  / 2) * CELL_SIZE : sizeHeight;
+				sizeHeight = (mMaxRowsNum) * CELL_SIZE > sizeHeight ? (mMaxRowsNum) * CELL_SIZE : sizeHeight;
 			}
 			
 			if((mColumnsNum - 2 * mTableColumnsNumber) % 2 != 0)
@@ -98,7 +103,7 @@ public class NoteLayout extends ViewGroup
 		{
 			if(mMaxRowsNum > mRowsNum)
 			{
-				sizeHeight = mMaxRowsNum  * CELL_SIZE > sizeHeight ? mMaxRowsNum * CELL_SIZE : sizeHeight;
+				sizeHeight = mMaxRowsNum * CELL_SIZE > sizeHeight ? mMaxRowsNum * CELL_SIZE : sizeHeight;
 			}
 			
 			if((mColumnsNum - mTableColumnsNumber) % 2 != 0)
@@ -106,6 +111,13 @@ public class NoteLayout extends ViewGroup
 				mColumnsNum += 1;
 				CELL_SIZE = sizeWidth / mColumnsNum;
 			}
+		}
+		
+		// draw task image
+		if(mTaskImage != null)
+		{
+			mDataOffset = (mTaskImage.getHeight() / CELL_SIZE + 1) * CELL_SIZE;	
+			sizeHeight += (mTaskImage.getHeight() / CELL_SIZE + 1) * CELL_SIZE;		
 		}
 		
 		measureChildren(sizeWidth, sizeHeight);
@@ -123,7 +135,7 @@ public class NoteLayout extends ViewGroup
             if (child.getVisibility() != GONE)
             {
             	NoteLayout.LayoutParams st = (NoteLayout.LayoutParams) child.getLayoutParams();
-                child.layout(st.leftMargin, st.topMargin, st.leftMargin + st.width, st.topMargin + st.height);
+                child.layout(st.leftMargin, st.topMargin + mDataOffset, st.leftMargin + st.width, st.topMargin + st.height + mDataOffset);
             }
         }
 	}
@@ -146,9 +158,29 @@ public class NoteLayout extends ViewGroup
 					bgCanvas.drawBitmap(cellBg, i * CELL_SIZE, j * CELL_SIZE, null);
 				}
 			}
+			
+			
+			// draw task image
+			if(mTaskImage != null)
+			{
+				int imageWidth = mTaskImage.getWidth();
+			
+				if(imageWidth < w)
+					bgCanvas.drawBitmap(mTaskImage, (w - imageWidth) / 2, 5, null);
+				else
+				{
+					double factor = (double) w / mTaskImage.getWidth();
+					double scaleWidth = mTaskImage.getWidth() * factor;
+					double scaleHeight = mTaskImage.getHeight() * factor;
+					
+					BitmapDrawable TaskImageBitmap = new BitmapDrawable(Bitmap.createScaledBitmap(mTaskImage, (int)scaleWidth, (int)scaleHeight, true));
+					bgCanvas.drawBitmap(TaskImageBitmap.getBitmap(), (float) ((w - scaleWidth) / 2), 5, null);
+				}
+			}
+			
 		    bgCanvas.save();
 		    this.setBackgroundDrawable(new BitmapDrawable(bg));
-		}	
+		}
 		
 		for(int areaindex = 0; areaindex < this.getChildCount(); ++areaindex)
 		{
@@ -157,7 +189,7 @@ public class NoteLayout extends ViewGroup
 			int width = area.getWidthInCells();
 			int height = area.getHeightInCells();
 			
-			if(mColumnsNum / 2 > width)
+			if(mColumnsNum / 2 > width && this.getChildCount() != 1)
 			{
 				LayoutParams params = new LayoutParams(width * CELL_SIZE, height * CELL_SIZE);
 				int x = (mColumnsNum / 2 - width) / 2 * CELL_SIZE + 1 + (mColumnsNum / 2) * (areaindex % 2) * CELL_SIZE;
@@ -186,6 +218,11 @@ public class NoteLayout extends ViewGroup
 			mWriter.WriteEvent("KeyPress", label);
 			mActiveArea.setText(label);
 		}
+	}
+
+	public void setTaskImage(Bitmap taskImage) 
+	{
+		mTaskImage  = taskImage;
 	}
 	
 	public void CheckTask()
@@ -490,7 +527,6 @@ public class NoteLayout extends ViewGroup
 	
 	public class EditInput extends NoteView
 	{
-
 		private int mWidthCells = -1;
 		private int mHeightCells = -1;
 		
@@ -653,10 +689,11 @@ public class NoteLayout extends ViewGroup
 				mActiveCell.delSymb();
 		}
 		
-		public void setRow(String rowData, int index)
+		public void setRow(String rowData, String rowAnswer, int index)
 		{
 			LinearLayout tableRow = (LinearLayout) this.getChildAt(index + (mTableHeader == null ? 0 : 1));
 			String values[] = rowData.split("\\,");
+			mAnswers[index] = rowAnswer.split("\\,");
 			for(int i = 0; i < mWidthCells; ++i)
 			{
 				TableCell cell = (TableCell) tableRow.getChildAt(i);
@@ -775,11 +812,6 @@ public class NoteLayout extends ViewGroup
 				mActiveCells.get(i).setFocus(false);
 				mActiveCells.get(i).addText("");
 			}
-		}
-
-		public void setRowAnswer(String rowData, int index)
-		{
-			mAnswers[index] = rowData.split("\\,");
 		}
 
 		@Override

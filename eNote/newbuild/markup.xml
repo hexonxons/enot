@@ -543,6 +543,7 @@
             <PageResource>manual_1_2_pg32_3</PageResource>
             <PageResource>manual_1_2_pg32_4</PageResource>
             <PageResource>manual_1_2_pg33_5</PageResource>
+            <PageResource>manual_4_2_pg11_4</PageResource>
         </PageResources>
         <Tasks>
             <Task number="1" tasktype="2">
@@ -674,6 +675,21 @@
                         <TaskResource>manual_1_2_pg33_5_task_6</TaskResource>
                         <TaskResource>manual_1_2_pg33_5_task_7</TaskResource>
                     </Answer>
+                </TaskAnswer>
+            </Task>
+            <Task number="7" tasktype="2">
+                <Scrollable>true</Scrollable>
+                <Type>Operators</Type>
+                <TaskDescription>Какое число получится в результате?</TaskDescription>
+                <TaskResources>
+                    <TaskResource>600+400=,?,:2=,?,:2=,?,*3=,?,:5=,?,*6=,?</TaskResource>
+                    <TaskResource>270:30=,?,*100=,?,:2=,?,:5=,?,*70=,?,:3=,?</TaskResource>
+                    <TaskResource>900:3=,?,*6=,?,:2=,?,*5=,?,+500=,?,:2=,?</TaskResource>
+                </TaskResources>        
+                <TaskAnswer>
+                    <Answer>600+400=,1000,:2=,500,:2=,250,*3=,750,:5=,130,*6=,780</Answer>
+                    <Answer>270:30=,9,*100=,900,:2=,450,:5=,90,*70=,6300,:3=,2100</Answer>
+                    <Answer>900:3=,300,*6=,1800,:2=,900,*5=,4500,+500=,5000,:2=,2500</Answer>
                 </TaskAnswer>
             </Task>
        </Tasks>
