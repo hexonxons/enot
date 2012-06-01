@@ -6,6 +6,7 @@ package app.tascact.manual;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
@@ -20,12 +21,13 @@ import org.xml.sax.InputSource;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import app.tascact.manual.activity.TaskActivity;
 import app.tascact.manual.utils.XMLUtils;
 
@@ -213,44 +215,70 @@ public class Markup {
 	 * This class represents a page of the document.
 	 * @author losik
 	 */
-	private class PageView extends LinearLayout
+	public class PageView extends ViewGroup
 	{
 		private int pageNumber;
-		private ImageView mTaskImage = null;
+		private ImageView mTaskImage[] = null;
+		private int mHeight = 0;
+		private int mWidth = 0;
 		
 		public PageView(int pageNumber)
 		{
 			super(context);
-			setBackgroundColor(Color.WHITE);
-			setOrientation(LinearLayout.VERTICAL);
-			this.setGravity(Gravity.CENTER_HORIZONTAL);
+			
 			this.pageNumber = pageNumber;
 			Uri resources[] = getPageElementsUri(pageNumber);
-			
+
+			mTaskImage = new ImageView[resources.length];
 			for(int i = 0; i < resources.length; ++i)
 			{
-				LinearLayout TaskElem = new LinearLayout(getContext());
-				TaskElem.setGravity(Gravity.CENTER_VERTICAL);
-				
-				mTaskImage = new ImageView(this.getContext());
+				mTaskImage[i] = new ImageView(this.getContext());
+				Drawable bg = null;
+				try 
+				{
+					bg = Drawable.createFromStream(new FileInputStream(new File(resources[i].getPath())), null);
+					Bitmap bm = ((BitmapDrawable) bg).getBitmap();
+					mWidth = bm.getWidth();
+					mHeight += bm.getHeight();
+				} 
+				catch (FileNotFoundException e) 
+				{
+					e.printStackTrace();
+				}
 				// Makes it keep the ratio when size changed
-				
-				mTaskImage.setImageURI(resources[i]);
-				mTaskImage.setId(i + 1);
-				mTaskImage.setOnClickListener(taskLauncher);
-				mTaskImage.setAdjustViewBounds(true);
-				
-				LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				TaskElem.addView(mTaskImage, params);
-				
-				params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				this.addView(TaskElem, params);
+				mTaskImage[i].setImageDrawable(bg);
+				mTaskImage[i].setId(i + 1);
+				mTaskImage[i].setOnClickListener(taskLauncher);
+				mTaskImage[i].setAdjustViewBounds(true);
+
+				this.addView(mTaskImage[i]);
 				ImageView separator = new ImageView(getContext());
 				separator.setBackgroundResource(R.drawable.separator);
-				this.addView(separator, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+				this.addView(separator);
 			}
-		}	
-
+		}
+		
+		@Override
+		protected void onLayout(boolean changed, int l, int t, int r, int b)
+		{
+			double scaleFactor = Math.min(((double) (b - t) / mHeight), ((double) (r - l) / mWidth));
+			
+			int top = 0;
+			int bottom = 0;
+			
+			for(int i = 0; i < mTaskImage.length; ++i)
+			{
+				Bitmap bg = ((BitmapDrawable) mTaskImage[i].getDrawable()).getBitmap();
+				int imageWidth = (int) (bg.getWidth() * scaleFactor);
+				int imageHeight = (int) (bg.getHeight() * scaleFactor);
+				int offset = (r - l - imageWidth) / 2;
+				bottom += imageHeight;
+				
+				mTaskImage[i].layout(offset, top, imageWidth + offset, bottom);
+				top = bottom;
+			}
+		}
+		
 		private OnClickListener taskLauncher = new OnClickListener()
 		{
 			@Override

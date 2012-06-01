@@ -1,12 +1,17 @@
 package app.tascact.manual.utils;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,9 +45,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Xml;
 
@@ -57,6 +60,7 @@ public class LogWriter
 	private static final String XML_ACTION_NODE_NAME = "Action";
 	private static final String XML_OUTPUT_ENCODING = "UTF-8";
 	private static final String SERVER_URL = "http://bs.btty.su/~killgamesh/android/logger.php";
+	private static final String SAVE_LOG_FILENAME = "saved.log";
 	
 	private String mManualName = null;
 	private int mPageNumber;
@@ -64,6 +68,7 @@ public class LogWriter
 	
 	private File mLogFile = null;
 	private File mLastLogFile = null;
+	private File mSavedLogFile = null;
 
 	private Uri mLogFolderUri = null;
 	
@@ -76,7 +81,10 @@ public class LogWriter
 	private Document mLogDom = null;
 	private Document mLastLogDom = null;
 	
+	private ArrayDeque<String> mLogStack = null;
+	
 	private Context mContext = null;
+	private RequestTask mSender = null;
 	
 	public LogWriter(Context context, String manualName, int pageNumber, int taskNumber)
 	{
@@ -90,6 +98,12 @@ public class LogWriter
 		mManualName = manualName;
 		mPageNumber = pageNumber;
 		mTaskNumber = taskNumber;
+		
+		mSender = new RequestTask();
+		mSender.start();
+		mSender.setRunning(true);
+		
+		mLogStack = new ArrayDeque<String>();
 		
 		InitTaskLogStructure();
 		
@@ -121,6 +135,23 @@ public class LogWriter
 		
 		mLogFile = new File(LogFolder, LOG_FILENAME);
 		mLastLogFile = new File(LogFolder, LAST_LOG_FILENAME);
+		mSavedLogFile = new File(ENOTE_MANUALS_PATH + File.separator + SAVE_LOG_FILENAME);
+		
+		if(!mSavedLogFile.exists())
+		{
+			try
+			{
+				mSavedLogFile.createNewFile();
+			}
+			catch (IOException e)
+			{
+				Log.e("LogWriter", "IOException while creating mSavedLogFile.");
+				Log.e("InitTaskLogStructure", e.getMessage());
+				e.printStackTrace();
+				return false;
+			}
+			
+		}
 		
 		if(!mLogFile.exists())
 		{
@@ -178,6 +209,18 @@ public class LogWriter
 			// file streams for logs
 			FileInputStream LogFin = new FileInputStream(mLogFile);
 			FileInputStream LastLogFin = new FileInputStream(mLastLogFile);
+			FileInputStream SavedLogFin = new FileInputStream(mSavedLogFile);
+			
+			// reading saved logs
+			BufferedReader reader = new BufferedReader(new InputStreamReader(SavedLogFin));
+			if (SavedLogFin != null)
+			{							
+				String logString = null;
+				while ((logString = reader.readLine()) != null)
+				{	
+					mLogStack.addLast(logString);
+				}				
+			}		
 			
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
@@ -278,6 +321,31 @@ public class LogWriter
 			return false;
 		}
 		
+		try
+		{
+			mSender.setRunning(false);
+			mSavedLogFile.createNewFile();
+			
+			FileWriter fw = new FileWriter(mSavedLogFile);
+            BufferedWriter bout = new BufferedWriter(fw);
+            
+            String ev = null;
+            while(mLogStack.size() != 0)
+            {
+            	ev = mLogStack.pop();
+            	bout.write(ev + "\n");
+            }
+            bout.close();
+			
+		}
+		catch (IOException e)
+		{
+			Log.e("LogWriter", "IOException somewhere while creating saved log");
+			Log.e("CloseLog", e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -306,8 +374,6 @@ public class LogWriter
 		Element LocalTime = null;
 		Element Time = null;
 		Element EventNode = null;
-		
-		new RequestTask(EventToWrite.getPostArguments()).execute(SERVER_URL);
 		
 		TimeStamp = mLogDom.createElement("TimeStamp");
 		Event = mLogDom.createElement("Event");
@@ -376,22 +442,9 @@ public class LogWriter
 			Event = new BasicNameValuePair(eventName, EventValue);
 			LocalTime = new BasicNameValuePair("TimeStamp", DateFormat.getDateTimeInstance().format(new Date()));
 			Time = new BasicNameValuePair("Time", Long.toString(System.currentTimeMillis()));
-		}
-		
-		public String getString()
-		{
-			return Event.getName() + " - " + Event.getValue() + "\n" + 
-					LocalTime.getName() + " - " + LocalTime.getValue() + "\n" + 
-					Time.getName() + " - " + Time.getValue() + "\n";
-		}
-		
-		public List<NameValuePair> getPostArguments()
-		{
-			List<NameValuePair> arguments = new ArrayList<NameValuePair>();
-			arguments.add(Event);
-			arguments.add(LocalTime);
-			arguments.add(Time);
-			return arguments;
+			mLogStack.addLast(eventName + ";" + EventValue);
+			mLogStack.addLast("TimeStamp" + ";" + DateFormat.getDateTimeInstance().format(new Date()));
+			mLogStack.addLast("Time" + ";" + Long.toString(System.currentTimeMillis()));
 		}
 	}
 	
@@ -400,63 +453,77 @@ public class LogWriter
 	 * Class for sending logs to the server
 	 *
 	 */
-	class RequestTask extends AsyncTask<String, String, String>
+	class RequestTask extends Thread
 	{
-		private List<NameValuePair> mPostParams = null;
+		private List<NameValuePair> mPostParams = new ArrayList<NameValuePair>();
+		private boolean mRun = true;
 		
-		public RequestTask(List<NameValuePair> postParams)
+		//response
+		private String mResponseString = null;
+    	// client for connection
+        private final HttpClient mHttpClient = new DefaultHttpClient();
+        
+		public RequestTask()
 		{
-			mPostParams = postParams;
 		}
 		
-	    @Override
-	    protected String doInBackground(String... uri) 
-	    {
-	    	//response
-	    	String responseString = null;
-	    	// client for connection
-	        HttpClient client = new DefaultHttpClient();
-	        // checking for network avaliable
-	        NetworkInfo activeNetworkInfo = ((ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-	    
-	        // if network avaliable
-	        if(activeNetworkInfo != null)
-	        {       	
-	        	try 
+		public void setRunning(boolean run)
+		{
+			mRun = run;
+		}
+		
+		
+		@Override
+		public void run() 
+		{
+			while(mRun)
+			{
+				// if network avaliable
+		        if(((ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo() != null)
 		        {
-		        	// post data
-		    		HttpPost post = new HttpPost(uri[0]);
-		    		// setting data
-		    		post.setEntity(new UrlEncodedFormEntity(mPostParams));
-		    		
-		    		HttpResponse response = client.execute(post);
-		    		
-		            StatusLine statusLine = response.getStatusLine();
-		            if(statusLine.getStatusCode() == HttpStatus.SC_OK)
-		            {
-		                ByteArrayOutputStream out = new ByteArrayOutputStream();
-		                response.getEntity().writeTo(out);
-		                out.close();
-		                responseString = out.toString();
-		            } 
-		            else
-		            {
-		                //Closes the connection.
-		                response.getEntity().getContent().close();
-		                throw new IOException(statusLine.getReasonPhrase());
-		            }
-		        } 
-		        catch (ClientProtocolException e)
-		        {
-		            //TODO Handle problems..
-		        } 
-		        catch (IOException e) 
-		        {
-		            //TODO Handle problems..
+		        	try 
+		        	{
+		        		// send event string
+		        		String event = null;
+		        		if(mLogStack.size() != 0)
+		        		{
+		        			event = mLogStack.pop();
+		        			
+			        		// post data
+				    		HttpPost post = new HttpPost(SERVER_URL);			    		
+				    		// post params
+				    		BasicNameValuePair postEvent = new BasicNameValuePair(event.split(";")[0], event.split(";")[1]);
+				    		mPostParams.clear();
+				    		mPostParams.add(postEvent);
+				    		// setting data
+				    		post.setEntity(new UrlEncodedFormEntity(mPostParams));
+				    		HttpResponse response = mHttpClient.execute(post);
+				    		StatusLine statusLine = response.getStatusLine();
+				    		if(statusLine.getStatusCode() == HttpStatus.SC_OK)
+				            {
+				                ByteArrayOutputStream out = new ByteArrayOutputStream();
+				                response.getEntity().writeTo(out);
+				                out.close();
+				                mResponseString = out.toString();
+				            }
+				    		else
+				            {
+				                //Closes the connection.
+				                response.getEntity().getContent().close();
+				                throw new IOException(statusLine.getReasonPhrase());
+				            }
+		        		}
+					} 
+			        catch (ClientProtocolException e)
+			        {
+			            //TODO Handle problems..
+			        } 
+			        catch (IOException e) 
+			        {
+			            //TODO Handle problems..
+			        }
 		        }
-	        }
-
-	        return responseString;
-	    }
+			}
+		}
 	}
 }	

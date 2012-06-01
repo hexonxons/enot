@@ -9,17 +9,17 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import app.tascact.manual.Markup;
+import app.tascact.manual.Markup.PageView;
 
 public class PageReaderView extends HorizontalScrollView
 {
 	private static final int CAСHE_SIZE = 5;
 	private static final int CACHE_OFFSET = 2;
 
-	private View pages[];
+	private PageView pages[];
 	private Markup markup;
 	private FrameLayout innerWrapper;
 	private GestureDetector gestureDecoder;
@@ -59,9 +59,9 @@ public class PageReaderView extends HorizontalScrollView
 		innerWrapper = new FrameLayout(context);
 		
 		outerWrapper.addView(innerWrapper, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		addView(outerWrapper, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		this.addView(outerWrapper, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		this.setBackgroundColor(Color.WHITE);
-		pages = new View[markup.getPageNumber()];
+		pages = new PageView[markup.getPageNumber()];
 
 		setHorizontalScrollBarEnabled(false);
 		setVerticalScrollBarEnabled(false);
@@ -196,11 +196,10 @@ public class PageReaderView extends HorizontalScrollView
 
 		// Evaluating new page size
 		// If screen size is wider
-		if (w * markup.getHeight() >= h * markup.getWidth()) 
-		{
-			pageHeight = w * markup.getHeight() / markup.getWidth() ;
+		if (w * markup.getHeight() >= h * markup.getWidth()) {
+			pageHeight = h;
 			pageWidth = w;
-			displayXOffset = 0;
+			displayXOffset = -(w - pageWidth) / 2;
 			displayYOffset = 0;
 		}
 		// if screen size is thinner
