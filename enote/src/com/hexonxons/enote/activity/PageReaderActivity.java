@@ -10,7 +10,8 @@
 package com.hexonxons.enote.activity;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -44,7 +45,8 @@ public class PageReaderActivity extends Activity
 	private String mManualName;
 	// Time of precious touch event
 	private long mPrevTouchTime = 0;
-	public ProgressDialog mProgressDialog;
+	// Load progress dialog
+	public AlertDialog mProgressDialog;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -53,9 +55,10 @@ public class PageReaderActivity extends Activity
 		// No title display
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		// Get manual name
-		mProgressDialog = new ProgressDialog(this);
-		mProgressDialog.setMessage("Загрузка...");
+		mProgressDialog = new Builder(this).create();
+		mProgressDialog.setView(getLayoutInflater().inflate(R.layout.dialog_loading_layout, mMainLayout), 0, 0, 0, 0);
 		mProgressDialog.setCancelable(false);
+		mProgressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		mManualName = getIntent().getExtras().getString("bookName");
 		try
 		{

@@ -11,7 +11,7 @@
 
 package com.hexonxons.enote.view;
 
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -42,7 +42,7 @@ public class PageReaderView extends HorizontalScrollView
 	// Height of single page
 	private int mPageHeight = 0;
 	// "Loading" dialog
-	private ProgressDialog mDialog;
+	private AlertDialog mDialog;
 	// Left and right indexes of loaded pages
 	private int mLeftLoadedIndex = -1;
 	private int mRightLoadedIndex = -1;
@@ -51,7 +51,7 @@ public class PageReaderView extends HorizontalScrollView
 	// Flint detector
 	private GestureDetector mGestureDetctor = null;
 	
-	public PageReaderView(Context context, Markup markup, int pageToDisplay, ProgressDialog dialog)
+	public PageReaderView(Context context, Markup markup, int pageToDisplay, AlertDialog mProgressDialog)
 	{
 		super(context);
 		// Request no scrollbar
@@ -61,7 +61,7 @@ public class PageReaderView extends HorizontalScrollView
 		mWrapper = new LinearLayout(context);	
 		mActivePage = pageToDisplay - 1;
 		mMarkup = markup;        
-		mDialog = dialog;
+		mDialog = mProgressDialog;
 		mGestureDetctor = new GestureDetector(context, new SoftScrollOnGestureListener());
 		
 		this.addView(mWrapper);     

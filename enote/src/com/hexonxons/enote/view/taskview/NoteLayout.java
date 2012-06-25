@@ -445,7 +445,7 @@ public class NoteLayout extends ViewGroup
 				if(mAnswer == 0)
 				{
 					if(mSelect)
-						this.setBackgroundResource(R.drawable.cell_active_pushed);
+						this.setBackgroundResource(R.drawable.cell_active_pressed);
 					else
 						this.setBackgroundResource(R.drawable.cell_active);
 				}

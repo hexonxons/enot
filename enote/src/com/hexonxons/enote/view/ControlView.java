@@ -197,25 +197,25 @@ public class ControlView extends RelativeLayout
 			{
 				case ORIENTATION_TOP:
 				{
-					icon.setBackground(R.drawable.button_frame_top, R.drawable.button_frame_top_pushed);
+					icon.setBackground(R.drawable.button_frame_top, R.drawable.button_frame_top_pressed);
 					break;
 				}
 				
 				case ORIENTATION_BOTTOM:
 				{
-					icon.setBackground(R.drawable.button_frame_bottom, R.drawable.button_frame_bottom_pushed);
+					icon.setBackground(R.drawable.button_frame_bottom, R.drawable.button_frame_bottom_pressed);
 					break;
 				}
 				
 				case ORIENTATION_LEFT:
 				{
-					icon.setBackground(R.drawable.button_frame_left, R.drawable.button_frame_left_pushed);
+					icon.setBackground(R.drawable.button_frame_left, R.drawable.button_frame_left_pressed);
 					break;
 				}
 				
 				case ORIENTATION_RIGHT:
 				{
-					icon.setBackground(R.drawable.button_frame_right, R.drawable.button_frame_right_pushed);
+					icon.setBackground(R.drawable.button_frame_right, R.drawable.button_frame_right_pressed);
 					break;
 				}
 				default:

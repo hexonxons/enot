@@ -11,21 +11,21 @@
 
 package com.hexonxons.enote.loaders;
 
-import com.hexonxons.enote.view.PageView;
-
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.os.AsyncTask;
+
+import com.hexonxons.enote.view.PageView;
 
 public class PageLoaderTask extends AsyncTask<Void, Integer, Void>
 {
 	private final PageView mPage;
-	private ProgressDialog mProgressDialog;
+	private AlertDialog mProgressDialog;
 	private int mPageNumber = 0;
 	
-	public PageLoaderTask(PageView page, ProgressDialog dialog, int pageNumber)
+	public PageLoaderTask(PageView page, AlertDialog mDialog, int pageNumber)
 	{
 		mPage = page;
-		mProgressDialog = dialog;
+		mProgressDialog = mDialog;
 		mPageNumber = pageNumber;
 	}
 	
