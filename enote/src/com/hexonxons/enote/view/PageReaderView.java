@@ -12,6 +12,7 @@
 package com.hexonxons.enote.view;
 
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -42,7 +44,7 @@ public class PageReaderView extends HorizontalScrollView
 	// Height of single page
 	private int mPageHeight = 0;
 	// "Loading" dialog
-	private AlertDialog mDialog;
+	private AlertDialog mDialog = null;
 	// Left and right indexes of loaded pages
 	private int mLeftLoadedIndex = -1;
 	private int mRightLoadedIndex = -1;
@@ -50,23 +52,29 @@ public class PageReaderView extends HorizontalScrollView
 	private boolean mInit = true;
 	// Flint detector
 	private GestureDetector mGestureDetctor = null;
+	// contents dialog
+	private AlertDialog mContentDialog = null;
+	// contents view
+	private ContentView mContentView = null;
 	
 	public PageReaderView(Context context, Markup markup, int pageToDisplay, AlertDialog mProgressDialog)
 	{
 		super(context);
 		// Request no scrollbar
 		this.setHorizontalScrollBarEnabled(false);
-		
 		// Init parameters
 		mWrapper = new LinearLayout(context);	
 		mActivePage = pageToDisplay - 1;
 		mMarkup = markup;        
 		mDialog = mProgressDialog;
 		mGestureDetctor = new GestureDetector(context, new SoftScrollOnGestureListener());
+		mContentDialog = new Builder(context).create();
+		mContentDialog.setCanceledOnTouchOutside(true);
+		mContentView = new ContentView(getContext(), mMarkup.getPageNumber(), contentslistener);
 		
 		this.addView(mWrapper);     
 	}
-
+	
 	/**
 	 * Load page to display
 	 * 
@@ -114,6 +122,22 @@ public class PageReaderView extends HorizontalScrollView
 		savePreferences();
 	}
 	
+	OnClickListener contentslistener = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v)
+		{
+			LoadPage(v.getId());	
+			smoothScrollTo(mActivePage * mPageWidth, 0);
+			mContentDialog.dismiss();
+		}
+	};	
+
+	public void LoadPagePickerDialog() 
+	{
+		mContentDialog.show();
+	}
+	
 	/**
 	 * Save page number
 	 */
@@ -139,7 +163,7 @@ public class PageReaderView extends HorizontalScrollView
 	protected void onSizeChanged(int w, int h, int oldw, int oldh)
 	{		
 		mWrapper.setLayoutParams(new LayoutParams(w * mMarkup.getPageNumber(), h));
-		
+		mContentDialog.setView(mContentView, 0, 0, 0, 0);
 		for(int i = 0; i < mWrapper.getChildCount(); ++i)
 		{
 			mWrapper.getChildAt(i).setLayoutParams(new LinearLayout.LayoutParams(w, h));
@@ -165,13 +189,14 @@ public class PageReaderView extends HorizontalScrollView
 	/**
 	 * Delete all loaded pages content
 	 */
-	public void ClearPage()
+	public void ClearPages()
 	{
+		mContentDialog.dismiss();
+		mDialog.dismiss();
+		mWrapper.removeAllViews();
 		
 		for (int i = mLeftLoadedIndex; i <= mRightLoadedIndex; ++i)
 		{
-			mWrapper.removeAllViews();
-			
 			mPages[i].deletePageContent();
 			mPages[i] = null;
 		
@@ -182,7 +207,7 @@ public class PageReaderView extends HorizontalScrollView
 	/**
 	 * Create all empty page views
 	 */
-	public void LoadContent()
+	public void LoadPages()
 	{
 		mPages = new PageView[mMarkup.getPageNumber()];
 		for(int i = 0; i < mMarkup.getPageNumber(); ++i)
@@ -237,7 +262,7 @@ public class PageReaderView extends HorizontalScrollView
 	public boolean onTouchEvent(MotionEvent event)
 	{
 		super.onTouchEvent(event);
-		
+		mContentDialog.dismiss();
 		if (mGestureDetctor.onTouchEvent(event))
 		{
 			return true;

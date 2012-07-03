@@ -14,6 +14,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -144,9 +145,10 @@ public class PageReaderActivity extends Activity
 						case MotionEvent.ACTION_UP:
 						{
 							mPrevTouchTime = event.getEventTime();
-							Intent intent = new Intent(v.getContext(), ContentActivity.class);
-							intent.putExtra("PageCount", mMarkup.getPageNumber());
-							startActivityForResult(intent, 0);
+							//Intent intent = new Intent(v.getContext(), ContentActivity.class);
+							//intent.putExtra("PageCount", mMarkup.getPageNumber());
+							//startActivityForResult(intent, 0);
+							mReader.LoadPagePickerDialog();
 							break;
 						}
 	
@@ -207,7 +209,7 @@ public class PageReaderActivity extends Activity
 
 		// Displaying
 		setContentView(mMainLayout);
-		mReader.LoadContent();
+		mReader.LoadPages();
 	}
 	
 	@Override
@@ -222,6 +224,19 @@ public class PageReaderActivity extends Activity
 	}
 	
 	@Override
+	public void onConfigurationChanged(Configuration newConfig)
+	{
+	    super.onConfigurationChanged(newConfig);
+	    setContentView(mMainLayout);
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
 	protected void onResume()
 	{
 		super.onResume();
@@ -232,7 +247,8 @@ public class PageReaderActivity extends Activity
 	protected void onDestroy() 
 	{
 		super.onDestroy();
-		mReader.ClearPage();
+		mMainLayout.removeAllViews();
+		mReader.ClearPages();
 	}
 	
 	private void loadPreferences()
