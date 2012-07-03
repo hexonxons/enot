@@ -31,39 +31,59 @@ import android.widget.LinearLayout;
 public class PlaceElements extends TaskView
 {
 	private Element[] mTaskElements = null;
-	private Layout mMainLayout = null;
+	private FrameLayout mMainLayout = null;
 	private final Point mCurrentPosition = new Point();
 	private Element mTouchedElement = null;
-	private LinearLayout mPlaceLayout = null;
+	private LinearLayout mSymbolPlaceLayout = null;
+	private LinearLayout mExpressionPlaceLayout = null;
 	private String mAnswer = null;
 	private AnswerCheckDialog alertDialog;
+	private final Paint mFgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+	private Layout mDrawingLayout = null;
 	
 	public PlaceElements(Context context, Node resource, Markup markup)
 	{
 		super(context);
-		//this.setOrientation(LinearLayout.VERTICAL);
-		mMainLayout = new Layout(context);
+
+		setChildrenDrawingOrderEnabled(true);
+		// get resources
 		NodeList taskResources = XMLUtils.evalXpathExprAsNodeList(resource,"./TaskResources/TaskResource");
-		mPlaceLayout = new LinearLayout(context);
+		// layout for all alements
+		mMainLayout = new FrameLayout(context);
+		mMainLayout.setBackgroundColor(Color.WHITE);
+		// finish place for pictures
+		mSymbolPlaceLayout = new LinearLayout(context);
+		mExpressionPlaceLayout = new LinearLayout(context);
+		// pictures of task
 		mTaskElements = new Element[taskResources.getLength()];
-		
+		// answers
 		mAnswer = ((Node) XMLUtils.evalXpathExpr(resource, "./TaskAnswer/Answer", XPathConstants.NODE)).getTextContent();
+		// layout for drawing move events
+		mDrawingLayout = new Layout(context);
 		
 		for(int i = 0; i < taskResources.getLength(); ++i)
 		{
+			// get description of all task elements, such as picture, expression and symbol on the picture
 			Node taskElement = taskResources.item(i);
-			String value = ((Node) XMLUtils.evalXpathExpr(taskElement, "./ResourseValue", XPathConstants.NODE)).getTextContent();
+			String symbol = ((Node) XMLUtils.evalXpathExpr(taskElement, "./ResourseSymb", XPathConstants.NODE)).getTextContent();
+			String expression = ((Node) XMLUtils.evalXpathExpr(taskElement, "./ResourseValue", XPathConstants.NODE)).getTextContent();
 			Node imageResource = (Node)XMLUtils.evalXpathExpr(taskElement, "./ResourseName", XPathConstants.NODE);
+			// decoding the picture
 			String filePath = markup.getMarkupFileDirectory() + File.separator + "img" + File.separator + imageResource.getTextContent() + ".png";
 			Bitmap bg = BitmapFactory.decodeFile(filePath);
-			mTaskElements[i] = new Element(context, value);
+			// create task element
+			mTaskElements[i] = new Element(context, symbol, expression);
 			mTaskElements[i].setBackgroundDrawable(new BitmapDrawable(bg));
 			mMainLayout.addView(mTaskElements[i]);
-			mPlaceLayout.addView(new Place(context));
+			// for every picture we create 2 place: symbol as answer and expression
+			mSymbolPlaceLayout.addView(new Place(context));
+			mExpressionPlaceLayout.addView(new Place(context));
 		}
-		mMainLayout.setBackgroundColor(Color.WHITE);
-		mMainLayout.addView(mPlaceLayout);
-		this.addView(mMainLayout, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+		mMainLayout.addView(mSymbolPlaceLayout);
+		mMainLayout.addView(mExpressionPlaceLayout);
+		mMainLayout.addView(mDrawingLayout);
+		this.addView(mMainLayout);
 	}
 	
 	@Override
@@ -72,14 +92,18 @@ public class PlaceElements extends TaskView
 		int topMargin = 30;
 		int leftMargin = 4;
 		
-		int placeWidth = w / mPlaceLayout.getChildCount();
+		int placeWidth = w / mSymbolPlaceLayout.getChildCount();
+		int placeHeight = (int) (0.1 * h);
 		
-		int placeLayoutHeight = (int) (0.1 * h);
-		FrameLayout.LayoutParams placeParams = new FrameLayout.LayoutParams(w, placeLayoutHeight);
-		placeParams.topMargin = (int) (0.7 * h);
-		mPlaceLayout.setLayoutParams(placeParams);
+		FrameLayout.LayoutParams placeLayoutParams = new FrameLayout.LayoutParams(w, placeHeight);
+		placeLayoutParams.topMargin = (int) (0.7 * h);
+		mSymbolPlaceLayout.setLayoutParams(placeLayoutParams);
+		
+		placeLayoutParams = new FrameLayout.LayoutParams(w, placeHeight);
+		placeLayoutParams.topMargin = (int) (0.8 * h + 10);
+		mExpressionPlaceLayout.setLayoutParams(placeLayoutParams);
 				
-		for(int i = 0; i < mMainLayout.getChildCount() - 1; ++i)
+		for(int i = 0; i < mMainLayout.getChildCount() - 3; ++i)
 		{
 			View child = mMainLayout.getChildAt(i);
 			Bitmap bg = ((BitmapDrawable)child.getBackground()).getBitmap();
@@ -87,8 +111,8 @@ public class PlaceElements extends TaskView
 			
 			params.topMargin = topMargin;
 			params.leftMargin = leftMargin;
-			
 			leftMargin += params.width + 4;
+			
 			if(leftMargin >= w)
 			{
 				topMargin += 2 * params.height;
@@ -100,23 +124,26 @@ public class PlaceElements extends TaskView
 			
 			child.setLayoutParams(params);
 			
+			LayoutParams placeParams = new LayoutParams(placeWidth - 4, placeHeight);
+			placeParams.setMargins(2, 0, 2, 0);
 			
-			
-			View place = mPlaceLayout.getChildAt(i);
-			LayoutParams placeVParams = new LayoutParams(placeWidth - 4, (int) (0.1 * h));
-			placeVParams.setMargins(2, 0, 2, 0);
-			place.setLayoutParams(placeVParams);
+			mSymbolPlaceLayout.getChildAt(i).setLayoutParams(placeParams);
+			mExpressionPlaceLayout.getChildAt(i).setLayoutParams(placeParams);
 		}
+		
+		mDrawingLayout.setLayoutParams(new FrameLayout.LayoutParams(w, h));
+		
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
 
 	@Override
 	public void RestartTask()
 	{
-		for(int i = 0; i < mPlaceLayout.getChildCount(); ++i)
+		// clear all places
+		for(int i = 0; i < mSymbolPlaceLayout.getChildCount(); ++i)
         {
-        	Place child = (Place) mPlaceLayout.getChildAt(i);
-    		child.setText(null);
+        	((Place) mSymbolPlaceLayout.getChildAt(i)).setText(null);
+        	((Place) mExpressionPlaceLayout.getChildAt(i)).setText(null);
         }
 		invalidate();
 	}
@@ -126,10 +153,10 @@ public class PlaceElements extends TaskView
 	{
 		String answer = "";
 		boolean result = false;
-		for(int i = 0; i < mPlaceLayout.getChildCount(); ++i)
+		
+		for(int i = 0; i < mSymbolPlaceLayout.getChildCount(); ++i)
         {
-        	Place child = (Place) mPlaceLayout.getChildAt(i);
-        	answer += child.getText();
+        	answer += ((Place) mSymbolPlaceLayout.getChildAt(i)).getText();
         }
 		
 		if(answer.compareTo(mAnswer) == 0)
@@ -150,18 +177,18 @@ public class PlaceElements extends TaskView
             mCurrentPosition.x = (int)event.getX();
             mCurrentPosition.y = (int)event.getY();
             
-            for(int i = 0; i < mMainLayout.getChildCount() - 1; ++i)
+            for(int i = 0; i < mMainLayout.getChildCount() - 3; ++i)
             {
             	Element child = (Element) mMainLayout.getChildAt(i);
             	if(mCurrentPosition.x < child.getRight() && mCurrentPosition.x > child.getLeft() && 
-            			mCurrentPosition.y > child.getTop() && mCurrentPosition.y < child.getBottom())
+            		mCurrentPosition.y > child.getTop() && mCurrentPosition.y < child.getBottom())
         		{
         			mTouchedElement = child;
         			return true;
         		}
             }
-            mTouchedElement = null;        
             
+            mTouchedElement = null;        
             return true;
         }
 
@@ -171,27 +198,23 @@ public class PlaceElements extends TaskView
         		 return true;
         	mCurrentPosition.x = (int)event.getX();
         	mCurrentPosition.y = (int)event.getY();
-
-        	for(int i = 0; i < mPlaceLayout.getChildCount(); ++i)
+        	
+        	for(int i = 0; i < mSymbolPlaceLayout.getChildCount(); ++i)
             {
-            	Place child = (Place) mPlaceLayout.getChildAt(i);
-            	if(mCurrentPosition.x < child.getRight() && mCurrentPosition.x > child.getLeft() && 
-            			mCurrentPosition.y > mPlaceLayout.getTop() && mCurrentPosition.y < mPlaceLayout.getBottom())
+            	Place child = (Place) mSymbolPlaceLayout.getChildAt(i);
+            	if(mCurrentPosition.x < child.getRight() && mCurrentPosition.x > child.getLeft() &&
+            		mCurrentPosition.y > mSymbolPlaceLayout.getTop() && mCurrentPosition.y < mSymbolPlaceLayout.getBottom())
         		{
             		child.setOn(true);
-            		invalidate();
+            		mDrawingLayout.invalidate();
         			return true;
         		}
             }
         	
-        	for(int i = 0; i < mPlaceLayout.getChildCount(); ++i)
+        	for(int i = 0; i < mSymbolPlaceLayout.getChildCount(); ++i)
             {
-            	Place child = (Place) mPlaceLayout.getChildAt(i);
-        		child.setOn(false);
-            }
-
-        	invalidate();
-            return true;
+            	((Place) mSymbolPlaceLayout.getChildAt(i)).setOn(false);
+            }      	
         }
         
         if(event.getAction() == MotionEvent.ACTION_UP)
@@ -202,53 +225,72 @@ public class PlaceElements extends TaskView
         	mCurrentPosition.x = (int)event.getX();
         	mCurrentPosition.y = (int)event.getY();
 
-        	for(int i = 0; i < mPlaceLayout.getChildCount(); ++i)
+        	for(int i = 0; i < mSymbolPlaceLayout.getChildCount(); ++i)
             {
-            	Place child = (Place) mPlaceLayout.getChildAt(i);
+            	Place child = (Place) mSymbolPlaceLayout.getChildAt(i);
             	if(mCurrentPosition.x < child.getRight() && mCurrentPosition.x > child.getLeft() && 
-            			mCurrentPosition.y > mPlaceLayout.getTop() && mCurrentPosition.y < mPlaceLayout.getBottom())
+            			mCurrentPosition.y > mSymbolPlaceLayout.getTop() && mCurrentPosition.y < mSymbolPlaceLayout.getBottom())
         		{
-            		child.setText(mTouchedElement.getValue());
+            		child.setText(mTouchedElement.getSymbol());
+            		((Place) mExpressionPlaceLayout.getChildAt(i)).setText(mTouchedElement.getExpression());
+            		break;
         		}
             }
         	
-        	for(int i = 0; i < mPlaceLayout.getChildCount(); ++i)
+        	for(int i = 0; i < mSymbolPlaceLayout.getChildCount(); ++i)
             {
-            	Place child = (Place) mPlaceLayout.getChildAt(i);
-        		child.setOn(false);
+            	((Place) mSymbolPlaceLayout.getChildAt(i)).setOn(false);
             }
         	
-        	mCurrentPosition.x = -999;
-        	mCurrentPosition.y = -999;
-        	
-        	invalidate();
-
-            return true;
+        	mTouchedElement = null;
         }
         
+        mDrawingLayout.invalidate();
         return true;
     }
 	
+	/**
+	 * Class of task picture element
+	 * 
+	 * mSymbol - symbol associated with that picture
+	 * mExpression - math experssion associated with that picture
+	 * 
+	 * @author kds
+	 *
+	 */
 	private class Element extends ImageView
 	{
-		private String mValue;
+		private String mSymbol = null;
+		private String mExpression = null;
 		 
-		public Element(Context context, String value)
+		public Element(Context context, String value, String expression)
 		{
 			super(context);
-			mValue = value;
+			mSymbol = value;
+			mExpression = expression;
 		}
 		
-		public String getValue()
+		public String getSymbol()
 		{
-			return mValue;
-		}		
+			return mSymbol;
+		}	
+		
+		public String getExpression()
+		{
+			return mExpression;
+		}	
 	}
 	
+	/**
+	 * Class of final destination of task picture
+	 * 
+	 * @author kds
+	 *
+	 */
 	private class Place extends ImageView
 	{
-
 		private String mValue = null;
+		
 		public Place(Context context) 
 		{
 			super(context);
@@ -276,39 +318,42 @@ public class PlaceElements extends TaskView
 		@Override
 		protected void onDraw(Canvas canvas)
 		{
-			Paint fg = new Paint(Paint.ANTI_ALIAS_FLAG);
-			fg.setStyle(Style.FILL);
-			fg.setTextSize((float) (this.getHeight() * 0.6));
-			fg.setTextAlign(Paint.Align.CENTER);
+			// setting text style
+			mFgPaint.setStyle(Style.FILL);
+			mFgPaint.setTextSize((float) (this.getHeight() * 0.4));
+			mFgPaint.setTextAlign(Paint.Align.CENTER);
 			
-			FontMetrics fm = fg.getFontMetrics();
+			FontMetrics fm = mFgPaint.getFontMetrics();
 			
-			// координаты помещения
 			float textY = (this.getHeight()  - fm.ascent - fm.descent) / 2;
 			
 			if(mValue != null && mValue.length() != 0)
-				canvas.drawText(mValue, this.getWidth()  / 2, textY, fg);
+				canvas.drawText(mValue, this.getWidth()  / 2, textY, mFgPaint);
 			
 			super.onDraw(canvas);
 		}
 	}
 	
+	/**
+	 * Class for draw moving image in top of layouts
+	 * @author kds
+	 *
+	 */
 	private class Layout extends FrameLayout
 	{
-
 		public Layout(Context context)
 		{
 			super(context);
-			// TODO Auto-generated constructor stub
+			this.setBackgroundColor(Color.TRANSPARENT);
 		}
 		
 		@Override
 		protected void onDraw(Canvas canvas) 
 		{		
-			bringToFront();
 			if(mTouchedElement != null)
+			{
 				canvas.drawBitmap(((BitmapDrawable)mTouchedElement.getBackground()).getBitmap(), mCurrentPosition.x, mCurrentPosition.y, null);
-			super.onDraw(canvas);
+			}
 		}
 	}
 

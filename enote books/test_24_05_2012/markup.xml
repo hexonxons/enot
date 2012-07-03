@@ -343,31 +343,38 @@
                 <TaskResources>
                     <TaskResource>
                         <ResourseName>34_1</ResourseName>
-                        <ResourseValue>Р</ResourseValue>
+                        <ResourseValue>18:3</ResourseValue>
+                        <ResourseSymb>Р</ResourseSymb>
                     </TaskResource>
                     <TaskResource>
                         <ResourseName>34_2</ResourseName>
-                        <ResourseValue>Л</ResourseValue>
+                        <ResourseValue>9*3</ResourseValue>
+                        <ResourseSymb>Л</ResourseSymb>
                     </TaskResource>
                     <TaskResource>
                         <ResourseName>34_3</ResourseName>
-                        <ResourseValue>А</ResourseValue>
+                        <ResourseValue>14:2</ResourseValue>
+                        <ResourseSymb>А</ResourseSymb>
                     </TaskResource>
                     <TaskResource>
                         <ResourseName>34_4</ResourseName>
-                        <ResourseValue>Е</ResourseValue>
+                        <ResourseValue>3*6</ResourseValue>
+                        <ResourseSymb>Е</ResourseSymb>
                     </TaskResource>
                     <TaskResource>
                         <ResourseName>34_5</ResourseName>
-                        <ResourseValue>П</ResourseValue>
+                        <ResourseValue>2*4</ResourseValue>
+                        <ResourseSymb>П</ResourseSymb>
                     </TaskResource>
                     <TaskResource>
                         <ResourseName>34_6</ResourseName>
-                        <ResourseValue>Д</ResourseValue>
+                        <ResourseValue>12:4</ResourseValue>
+                        <ResourseSymb>Д</ResourseSymb>
                     </TaskResource>
                     <TaskResource>
                         <ResourseName>34_7</ResourseName>
-                        <ResourseValue>О</ResourseValue>
+                        <ResourseValue>27:3</ResourseValue>
+                        <ResourseSymb>О</ResourseSymb>
                     </TaskResource>
                 </TaskResources>  
                 <TaskAnswer>
