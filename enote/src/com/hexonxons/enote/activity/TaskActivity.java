@@ -47,6 +47,7 @@ import com.hexonxons.enote.view.taskview.ConnectElementsSequenceTaskView;
 import com.hexonxons.enote.view.taskview.GroupingElementsTaskView;
 import com.hexonxons.enote.view.taskview.LabyrinthTaskView;
 import com.hexonxons.enote.view.taskview.PlaceElements;
+import com.hexonxons.enote.view.taskview.SortElements;
 import com.hexonxons.enote.view.utils.KeyboardView;
 import com.hexonxons.enote.view.utils.KeyboardView.OnKeyboardKeyPressListener;
 
@@ -161,6 +162,12 @@ public class TaskActivity extends Activity
 					case 6: 
 					{
 						mTaskLayout = new PlaceElements(this, task, markup);
+						break;
+					}
+					
+					case 7: 
+					{
+						mTaskLayout = new SortElements(this, task, markup);
 						break;
 					}
 					

@@ -45,7 +45,6 @@ public class PlaceElements extends TaskView
 	{
 		super(context);
 
-		setChildrenDrawingOrderEnabled(true);
 		// get resources
 		NodeList taskResources = XMLUtils.evalXpathExprAsNodeList(resource,"./TaskResources/TaskResource");
 		// layout for all alements

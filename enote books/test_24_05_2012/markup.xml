@@ -337,7 +337,7 @@
                     <Answer>12</Answer>
                 </TaskAnswer>
             </Task>
-             <Task number="3" tasktype="6">
+            <Task number="3" tasktype="6">
                 <Scrollable>false</Scrollable>
                 <TaskDescription>Расположи элементы в порядке убывания и отгадай слово:</TaskDescription>  
                 <TaskResources>
@@ -387,6 +387,7 @@
         <PageResources>
             <PageResource>manual_1_1_pg25_2</PageResource>
             <PageResource>manual_1_1_pg9_3</PageResource>
+            <PageResource>task_sort</PageResource>
         </PageResources>
         <Tasks>
             <Task number="1" tasktype="3">
@@ -417,6 +418,30 @@
                     <Color row="1" column="4" R="255" G="255" B="0" />
                     <Color row="1" column="5" R="0" G="255" B="127" />
                 </Keyboard>
+            </Task>
+            <Task number="3" tasktype="7">
+                <Scrollable>false</Scrollable>
+                <TaskDescription>Расположи элементы в порядке убывания:</TaskDescription>  
+                <TaskResources>
+                    <TaskResource>0xad_1</TaskResource>
+                    <TaskResource>0xad_2</TaskResource>
+                    <TaskResource>0xad_3</TaskResource>
+                    <TaskResource>0xad_4</TaskResource>
+                    <TaskResource>0xad_5</TaskResource>
+                    <TaskResource>0xad_6</TaskResource>
+                    <TaskResource>0xad_7</TaskResource>
+                    <TaskResource>0xad_8</TaskResource>
+                </TaskResources>
+                <TaskAnswers>
+                    <Answer>0xad_7</Answer>
+                    <Answer>0xad_2</Answer>
+                    <Answer>0xad_4</Answer>
+                    <Answer>0xad_5</Answer>
+                    <Answer>0xad_1</Answer>
+                    <Answer>0xad_3</Answer>
+                    <Answer>0xad_8</Answer>
+                    <Answer>0xad_6</Answer>
+                </TaskAnswers>
             </Task>
         </Tasks>
     </page>
