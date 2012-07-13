@@ -20,6 +20,8 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
@@ -50,8 +52,12 @@ public class PageReaderView extends HorizontalScrollView
 	private int mRightLoadedIndex = -1;
 	// Is it is first time reader load?
 	private boolean mInit = true;
+	// Scale factor
+	private float mScaleFactor = 1;
 	// Flint detector
-	private GestureDetector mGestureDetctor = null;
+	private GestureDetector mGestureDetector = null;
+	// Scale detector
+	private ScaleGestureDetector mScaleDetector = null;
 	// contents dialog
 	private AlertDialog mContentDialog = null;
 	// contents view
@@ -67,7 +73,8 @@ public class PageReaderView extends HorizontalScrollView
 		mActivePage = pageToDisplay - 1;
 		mMarkup = markup;        
 		mDialog = mProgressDialog;
-		mGestureDetctor = new GestureDetector(context, new SoftScrollOnGestureListener());
+		mGestureDetector = new GestureDetector(context, new SoftScrollOnGestureListener());
+		mScaleDetector = new ScaleGestureDetector(context, new ScaleGestureListener());
 		mContentDialog = new Builder(context).create();
 		mContentDialog.setCanceledOnTouchOutside(true);
 		mContentView = new ContentView(getContext(), mMarkup.getPageNumber(), contentslistener);
@@ -152,11 +159,19 @@ public class PageReaderView extends HorizontalScrollView
 	@Override
 	protected void onDraw(Canvas canvas) 
 	{
+		super.onDraw(canvas);
+		
 		if(mInit)
 		{
 			scrollTo(mActivePage * mPageWidth, 0);
 			mInit = false;
 		}
+		
+		canvas.save();
+		
+		canvas.scale(mScaleFactor, mScaleFactor);
+		mPages[mActivePage].draw(canvas);
+		canvas.restore();
 	}
 
 	@Override
@@ -263,7 +278,14 @@ public class PageReaderView extends HorizontalScrollView
 	{
 		super.onTouchEvent(event);
 		mContentDialog.dismiss();
-		if (mGestureDetctor.onTouchEvent(event))
+		mScaleDetector.onTouchEvent(event);
+		//if (mScaleDetector.onTouchEvent(event))
+		//{
+		//	Log.d("mScaleDetector", "Detect");
+		//	return true;
+		//}
+		
+		if (mScaleFactor == 1.0f && mGestureDetector.onTouchEvent(event))
 		{
 			return true;
 		}
@@ -307,6 +329,20 @@ public class PageReaderView extends HorizontalScrollView
 				Log.e("Fling", "Error processing the Fling event", e);
 			}
 			return false;
+		}
+	}
+	
+	private class ScaleGestureListener extends SimpleOnScaleGestureListener
+	{
+		@Override
+		public boolean onScale(ScaleGestureDetector detector)
+		{
+			mScaleFactor *= detector.getScaleFactor();
+			mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, 10.0f));
+			mPages[mActivePage].setScale(mScaleFactor);
+			invalidate();
+			
+			return true;
 		}
 	}
 }

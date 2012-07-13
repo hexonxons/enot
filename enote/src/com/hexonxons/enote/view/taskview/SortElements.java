@@ -243,10 +243,7 @@ public class SortElements extends TaskView
 
 	private void ShuffleElements()
 	{
-		//long seed = System.currentTimeMillis();
-		//Collections.shuffle(Arrays.asList(mInitPositions), new Random(seed));
 		Collections.shuffle(Arrays.asList(mTaskElements));
-		TaskElement[] newArray = new TaskElement[mTaskElements.length];
 		
 		for(int i = 0; i < mTaskElements.length; ++i)
 		{

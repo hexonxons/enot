@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -26,7 +27,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.hexonxons.enote.activity.TaskActivity;
+import com.hexonxons.enote.activity.TaskReaderActivity;
 import com.hexonxons.enote.utils.Markup;
 
 public class PageView extends LinearLayout
@@ -38,6 +39,7 @@ public class PageView extends LinearLayout
 	private Markup mMarkup = null;
 	private Uri mResources[] = null;
 	private Bitmap mPageBitmaps[] = null;
+	private float mScaleFactor = 1.0f;
 	
 	/** 
 	 * Create empty page. Use LoadPageImages for load page content
@@ -52,6 +54,18 @@ public class PageView extends LinearLayout
 		this.setOrientation(LinearLayout.VERTICAL);
 		
 		mMarkup = markup;
+	}
+	
+	@Override
+	protected void onDraw(Canvas canvas)
+	{
+		super.onDraw(canvas);
+		
+		//if(mScaleFactor != 1.0f)
+		//	Log.d("onDraw",	"Scale with factor = " + Float.toString(mScaleFactor));
+		//canvas.save();
+		//canvas.scale(mScaleFactor, mScaleFactor);
+		//canvas.restore();
 	}
 	
 	/**
@@ -173,7 +187,6 @@ public class PageView extends LinearLayout
 				Log.e("onLayout", "NullPointerException while getting bitmap from mPageElements", e);
 				Log.e("onLayout", "Index: " + i);
 			}
-			
 		}
 	}
 	
@@ -185,7 +198,7 @@ public class PageView extends LinearLayout
 			// Indexes are 1-based
 			if(mMarkup.getTaskType(mPageNumber, v.getId()) != null)
 			{
-   				Intent intent = new Intent(v.getContext(), TaskActivity.class);
+   				Intent intent = new Intent(v.getContext(), TaskReaderActivity.class);
    				intent.putExtra("ManualName", mMarkup.getManualName());
 	   			intent.putExtra("PageNumber", mPageNumber);
 	   			intent.putExtra("TaskNumber", v.getId());
@@ -194,4 +207,13 @@ public class PageView extends LinearLayout
    			}
 		}
 	};
+
+	public void setScale(float scaleFactor)
+	{
+		mScaleFactor = scaleFactor;
+		for(int i = 0; i < mPageElements.length; ++i)
+		{
+			mPageElements[i].invalidate();
+		}
+	}
 }

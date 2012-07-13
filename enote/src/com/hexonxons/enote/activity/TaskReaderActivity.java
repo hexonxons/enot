@@ -48,10 +48,11 @@ import com.hexonxons.enote.view.taskview.GroupingElementsTaskView;
 import com.hexonxons.enote.view.taskview.LabyrinthTaskView;
 import com.hexonxons.enote.view.taskview.PlaceElements;
 import com.hexonxons.enote.view.taskview.SortElements;
+import com.hexonxons.enote.view.taskview.TangramTaskView;
 import com.hexonxons.enote.view.utils.KeyboardView;
 import com.hexonxons.enote.view.utils.KeyboardView.OnKeyboardKeyPressListener;
 
-public class TaskActivity extends Activity
+public class TaskReaderActivity extends Activity
 {
 	// View раскладки элементов
 	private MainLayout mMainLayout = null;
@@ -168,6 +169,12 @@ public class TaskActivity extends Activity
 					case 7: 
 					{
 						mTaskLayout = new SortElements(this, task, markup);
+						break;
+					}
+					
+					case 8:
+					{
+						mTaskLayout = new TangramTaskView(this, task, markup);
 						break;
 					}
 					

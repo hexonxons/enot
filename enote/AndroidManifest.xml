@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.HomeActivity"></activity>
-        <activity android:name=".activity.TaskActivity"></activity>
+        <activity android:name=".activity.TaskReaderActivity"></activity>
         <activity android:name=".activity.ContentActivity"></activity>
         <activity android:name=".activity.PageReaderActivity"></activity>
     </application>

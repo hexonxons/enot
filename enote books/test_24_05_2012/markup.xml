@@ -445,4 +445,34 @@
             </Task>
         </Tasks>
     </page>
+    <page>
+        <PageResources>
+            <PageResource>tangram_task</PageResource>
+            <PageResource>unt_task</PageResource>
+            <PageResource>tang3a_task</PageResource>
+        </PageResources>
+        <Tasks>
+            <Task number="1" tasktype="8">
+                <Scrollable>false</Scrollable>
+                <TaskDescription>Сложи фигуру:</TaskDescription>  
+                <ShapesNumber>5</ShapesNumber>
+                <TaskAnswer>tangram_answer</TaskAnswer>
+                <TaskHint>tangram_final</TaskHint>
+            </Task>
+            <Task number="2" tasktype="8">
+                <Scrollable>false</Scrollable>
+                <TaskDescription>Сложи фигуру:</TaskDescription>  
+                <ShapesNumber>5</ShapesNumber>
+                <TaskAnswer>Untitled</TaskAnswer>
+                <TaskHint>Untitled1</TaskHint>
+            </Task>
+            <Task number="3" tasktype="8">
+                <Scrollable>false</Scrollable>
+                <TaskDescription>Сложи фигуру:</TaskDescription>  
+                <ShapesNumber>4</ShapesNumber>
+                <TaskAnswer>tang3</TaskAnswer>
+                <TaskHint>tang3_hint</TaskHint>
+            </Task>
+        </Tasks>
+    </page>
 </book>
