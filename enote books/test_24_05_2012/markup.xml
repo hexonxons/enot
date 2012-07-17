@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--Нумерация задач с 1-->
-<!--
- 
-стр 43 "книга" ***
-стр 53 "книга" (кубики) - ***
-стр 34 "книга" ***
--->
 
 <book height="4" width="3">
     <page>
@@ -472,6 +466,55 @@
                 <ShapesNumber>4</ShapesNumber>
                 <TaskAnswer>tang3</TaskAnswer>
                 <TaskHint>tang3_hint</TaskHint>
+            </Task>
+        </Tasks>
+    </page>
+    <page>
+        <PageResources>
+            <PageResource>tt1</PageResource>
+            <PageResource>tt2</PageResource>
+            <PageResource>tt3</PageResource>
+        </PageResources>
+        <Tasks>
+            <Task number="1" tasktype="9">
+                <Scrollable>false</Scrollable>
+                <TaskDescription>Разрезать по сторонам клеток на 3 равные части:</TaskDescription>
+                <TaskShapes>
+                    <Shape>shape_cell</Shape>
+                </TaskShapes>
+                <Table rows="4" columns="6">
+                    <Row>null,null,shape_cell,shape_cell,shape_cell,null</Row>
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                </Table>
+            </Task>
+            <Task number="2" tasktype="9">
+                <Scrollable>false</Scrollable>
+                <TaskDescription>Разрезать по сторонам клеток на 3 равные части:</TaskDescription>
+                <TaskShapes>
+                    <Shape>shape_cell</Shape>
+                </TaskShapes>
+                <Table rows="4" columns="4">
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                    <Row>shape_cell,shape_cell,shape_cell,null</Row>
+                </Table>
+            </Task>
+            <Task number="3" tasktype="9">
+                <Scrollable>false</Scrollable>
+                <TaskDescription>Разрезать по сторонам клеток на 2 равные части так, чтобы в каждой части был кружок:</TaskDescription>
+                <TaskShapes>
+                    <Shape>shape_cell</Shape>
+                    <Shape>shape_cell_dot</Shape>
+                </TaskShapes>
+                <Table rows="4" columns="5">
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                    <Row>shape_cell,shape_cell,shape_cell_dot,shape_cell_dot,shape_cell</Row>
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                    <Row>shape_cell,shape_cell,shape_cell,shape_cell,shape_cell</Row>
+                </Table>
             </Task>
         </Tasks>
     </page>

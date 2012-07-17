@@ -47,6 +47,7 @@ import com.hexonxons.enote.view.taskview.ConnectElementsSequenceTaskView;
 import com.hexonxons.enote.view.taskview.GroupingElementsTaskView;
 import com.hexonxons.enote.view.taskview.LabyrinthTaskView;
 import com.hexonxons.enote.view.taskview.PlaceElements;
+import com.hexonxons.enote.view.taskview.ShapesCuttingTaskView;
 import com.hexonxons.enote.view.taskview.SortElements;
 import com.hexonxons.enote.view.taskview.TangramTaskView;
 import com.hexonxons.enote.view.utils.KeyboardView;
@@ -175,6 +176,12 @@ public class TaskReaderActivity extends Activity
 					case 8:
 					{
 						mTaskLayout = new TangramTaskView(this, task, markup);
+						break;
+					}
+					
+					case 9:
+					{
+						mTaskLayout = new ShapesCuttingTaskView(this, task, markup);
 						break;
 					}
 					

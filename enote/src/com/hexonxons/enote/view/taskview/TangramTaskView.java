@@ -10,6 +10,8 @@ import org.w3c.dom.Node;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BlurMaskFilter;
+import android.graphics.BlurMaskFilter.Blur;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -36,7 +38,7 @@ public class TangramTaskView extends TaskView
 	private boolean mIsShapesDecoded = false;
 	private ArrayList<TaskElement> mTaskElements = null;
 	private TaskElement[] mAnswerTaskElements = null;
-	private final Paint mPaint = new Paint();
+	private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 	private TaskElement mActiveElement = null;
 	private Point mLastTouchPoint = new Point();
 	private int mWidth = 0;
@@ -44,7 +46,7 @@ public class TangramTaskView extends TaskView
 	public TangramTaskView(Context context, Node resource, Markup markup) 
 	{
 		super(context);
-
+		
 		Node nTaskHint = XMLUtils.evalXpathExprAsNode(resource,"./TaskHint");
 		Node nShapesNumber = XMLUtils.evalXpathExprAsNode(resource,"./ShapesNumber");
 		Node nMainResource = XMLUtils.evalXpathExprAsNode(resource,"./TaskAnswer");
@@ -194,7 +196,7 @@ public class TangramTaskView extends TaskView
 					
 					if(Math.sqrt(redDiff * redDiff + blueDiff * blueDiff + greenDiff * greenDiff) < 100)
 					{
-						element.addPixel(j, i);
+						element.addPixel(j, i, pixel);
 					}
 				}
 			}
@@ -463,7 +465,7 @@ public class TangramTaskView extends TaskView
 		 * @param x
 		 * @param y
 		 */
-		public void addPixel(int x, int y)
+		public void addPixel(int x, int y, int color)
 		{
 			try 
 			{
@@ -472,7 +474,7 @@ public class TangramTaskView extends TaskView
 					isNodeSettled = true;
 					nodePoint = new Point(x - left, y - top);
 				}
-				src[(y - top) * width + x - left] = mColor;
+				src[(y - top) * width + x - left] = color;
 			} 
 			catch (ArrayIndexOutOfBoundsException e)
 			{
